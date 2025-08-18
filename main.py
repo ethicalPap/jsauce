@@ -69,6 +69,17 @@ def main():
 
     # Process each URL individually
     for url in urls:
+
+        # clear the output files before processing for appending (quick fix for now but later should deduplicate based on URL path)
+        try:
+            open(f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_found.txt", 'w').close()
+            open(f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json", 'w').close()
+            open(f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_for_db.json", 'w').close()
+            open(f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoint_stats.json", 'w').close()
+        except:
+            pass
+
+
         print(f"\n{'='*80}")
         print(f"PROCESSING: {url}")
         print(f"{'='*80}")
@@ -83,7 +94,7 @@ def main():
         domain = domain_handler.extract_domain(url)
         if not domain:
             print(f"Could not extract domain from {url}, skipping...")
-            continue
+            continue      
             
         print(f"Domain: {domain}")
         
