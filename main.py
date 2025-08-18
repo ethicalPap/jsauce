@@ -67,10 +67,12 @@ def main():
 
     print(f"\nProcessing {len(urls)} URLs...")
 
-    # Process each URL individually
+    # clear the output files before processing for appending (quick fix for now but later should deduplicate based on URL path)
     for url in urls:
-
-        # clear the output files before processing for appending (quick fix for now but later should deduplicate based on URL path)
+        domain = domain_handler.extract_domain(url)
+        if not domain:
+            print(f"Could not extract domain from {url}, skipping...")
+            continue
         try:
             open(f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_found.txt", 'w').close()
             open(f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json", 'w').close()
@@ -79,6 +81,8 @@ def main():
         except:
             pass
 
+    # now we can process each URL individually
+    for url in urls:
 
         print(f"\n{'='*80}")
         print(f"PROCESSING: {url}")
