@@ -10,6 +10,7 @@ from src.packages.DomainHandler import DomainHandler
 import sys
 from collections import defaultdict
 import os
+import json
 
 
 # Initialize processors
@@ -44,6 +45,8 @@ def get_input_from_argsys1(input_file):
         print(f"Error reading input file {input_file}: {e}")
         exit(1)
     return input_urls
+
+
 
 
 def main():
@@ -181,6 +184,56 @@ def main():
 
         del processor
         del jsprocessor
+
+
+
+# ===================gotta clean this section up later=========================
+    print(f"\n{'='*80}")
+    print(f"CLEANING UP JSON FILES TO AVOID OUTPUT ERRORS, PLEASE WAIT...")
+    for url in urls:
+        domain = domain_handler.extract_domain(url)
+        if not domain:
+            continue
+            
+        json_files = [
+            f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json",
+            f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_for_db.json", 
+            f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoint_stats.json"
+        ]
+        
+        for json_file in json_files:
+            if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
+                try:
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+                    
+                    if content:
+                        # Fix malformed JSON and ensure it's an array
+                        if content.startswith('['):
+                            # Already an array, just validate
+                            merged_data = json.loads(content)
+                        else:
+                            # Handle }{ pattern and convert to array
+                            content = content.replace('}{', '},{')
+                            if not content.startswith('['):
+                                content = '[' + content + ']'
+                            merged_data = json.loads(content)
+                        
+                        # Write back the clean merged JSON
+                        with open(json_file, 'w', encoding='utf-8') as f:
+                            json.dump(merged_data, f, indent=2)
+                        
+                        # print(f"Cleaned and merged: {json_file}")
+                        
+                except json.JSONDecodeError as e:
+                    print(f"Error cleaning {json_file}: {e}")
+                except Exception as e:
+                    print(f"Unexpected error with {json_file}: {e}")
+
+
+# ===================end of cleanup section=========================
+
+
 
     print(f"\n{'='*80}")
     print(f"ALL PROCESSING COMPLETED!")
