@@ -7,6 +7,7 @@ from src.packages.EndpointProcessor import EndpointProcessor
 from src.packages.WebRequests import WebRequests
 from src.packages.JsProcessor import JsProcessor
 from src.packages.DomainHandler import DomainHandler
+from src.packages.MermaidConverter import JSONToMermaidConverter  
 import sys
 from collections import defaultdict
 import os
@@ -16,6 +17,7 @@ import json
 # Initialize processors
 webrequests = WebRequests()
 domain_handler = DomainHandler()
+converter = JSONToMermaidConverter()
 
 # Global Vars
 input_urls = []
@@ -229,9 +231,48 @@ def main():
                     print(f"Error cleaning {json_file}: {e}")
                 except Exception as e:
                     print(f"Unexpected error with {json_file}: {e}")
+    
+    print(f"Cleanup completed for json files.")
+    print(f"\n{'='*80}")
 
 
 # ===================end of cleanup section=========================
+
+
+# ===================Begin Mermaid Conversion=========================
+
+    print(f"\n{'='*80}")
+    print(f"CONVERTING JSON DATA TO MERMAID flowchart FORMAT...") 
+    for url in urls:   
+        domain = domain_handler.extract_domain(url)
+        if not domain:
+            continue
+        
+        json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json"
+        
+        if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    json_data = json.load(f)
+                
+                # Convert to Mermaid flowchart format
+                mermaid_output = converter.convert_to_flowchart(json_data)
+                
+                # Save the Mermaid output
+                mermaid_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.mmd"
+                with open(mermaid_file, 'w', encoding='utf-8') as f:
+                    f.write(mermaid_output)
+                
+                print(f"Mermaid flowchart saved to: {mermaid_file}")
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON for {domain}: {e}")
+            except Exception as e:
+                print(f"Unexpected error for {domain}: {e}")
+        else:
+            print(f"No valid JSON data found for {domain}, skipping Mermaid conversion.")
+
+# ===================End Mermaid Conversion=========================
+
 
 
 
