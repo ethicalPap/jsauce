@@ -25,7 +25,7 @@ class WebRequests:
 
     # save url content to file
     def save_url_content(self, url, content):
-        filename = os.path.basename(urlparse(url).path) or "index.html"
+        filename = os.path.basename(urlparse(url).path) or f"un-named.html"
         os.makedirs("./data/url_content", exist_ok=True)
         with open(f"./data/url_content/{filename}", 'w', encoding='utf-8') as file:
             file.write(content) 

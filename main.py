@@ -9,6 +9,7 @@ from src.packages.JsProcessor import JsProcessor
 from src.packages.DomainHandler import DomainHandler
 import sys
 from collections import defaultdict
+import os
 
 
 # Initialize processors
@@ -131,81 +132,29 @@ def main():
         
         # Get all results for this URL
         all_endpoints_found = processor.get_all_endpoints_flat()
+
+        #create folders for each domain if not exists
+        os.makedirs(f"{config.OUTPUT_DIR}/{domain}", exist_ok=True)
         
         # Always save results, even if empty
         if all_endpoints_found:
-            processor.save_endpoints_to_txt(all_endpoints_found, f"{domain}_endpoints_found.txt")
+            processor.save_endpoints_to_txt(all_endpoints_found, f"{domain}/{domain}_endpoints_found.txt")
             print(f"All endpoints saved to: ./output/{domain}_endpoints_found.txt ({len(all_endpoints_found)} endpoints)")
         else:
             # Create empty file to indicate processing was attempted
-            processor.save_endpoints_to_txt([], f"{domain}_endpoints_found.txt")
+            processor.save_endpoints_to_txt([], f"{domain}/{domain}_endpoints_found.txt")
             print(f"No endpoints found - empty file saved to: ./output/{domain}_endpoints_found.txt")
         
         # Save detailed results if any were found
         if processor.categorized_results or processor.detailed_results:
-            endpoints_detailed = processor.save_detailed_results_to_json(f"{domain}_endpoints_detailed.json")
+            endpoints_detailed = processor.save_detailed_results_to_json(f"{domain}/{domain}_endpoints_detailed.json")
             print(f"Detailed endpoints saved to: ./output/{domain}_endpoints_detailed.json")
 
-            endpoints_flat = processor.save_flat_endpoints_for_db(f"{domain}_endpoints_for_db.json")
+            endpoints_flat = processor.save_flat_endpoints_for_db(f"{domain}/{domain}_endpoints_for_db.json")
             print(f"Flat endpoints for DB saved to: ./output/{domain}_endpoints_for_db.json")
 
-            stats = processor.save_summary_stats_json(f"{domain}_endpoint_stats.json")
+            stats = processor.save_summary_stats_json(f"{domain}/{domain}_endpoint_stats.json")
             print(f"Summary statistics saved to: ./output/{domain}_endpoint_stats.json")
-        # else:
-        #     # Save empty JSON files for consistency
-        #     import json
-        #     import os
-            
-        #     # Empty detailed results
-        #     empty_detailed = {
-        #         'metadata': {
-        #             'total_sources': 1,
-        #             'total_js_files': 0,
-        #             'total_endpoints': 0,
-        #             'extraction_date': processor._get_current_timestamp()
-        #         },
-        #         'endpoints_by_source': {url: {'source_url': url, 'js_files': {}}},
-        #         'endpoints_summary': {}
-        #     }
-            
-        #     os.makedirs(f"{config.OUTPUT_DIR}", exist_ok=True)
-        #     with open(f"{config.OUTPUT_DIR}{domain}_endpoints_detailed.json", 'w', encoding='utf-8') as file:
-        #         json.dump(empty_detailed, file, indent=2)
-        #     print(f"Empty detailed results saved to: ./output/{domain}_endpoints_detailed.json")
-            
-        #     # Empty flat results
-        #     empty_flat = {
-        #         'metadata': {
-        #             'total_records': 0,
-        #             'extraction_date': processor._get_current_timestamp(),
-        #             'schema_version': '1.0'
-        #         },
-        #         'endpoints': []
-        #     }
-            
-        #     with open(f"{config.OUTPUT_DIR}{domain}_endpoints_for_db.json", 'w', encoding='utf-8') as file:
-        #         json.dump(empty_flat, file, indent=2)
-        #     print(f"Empty flat results saved to: ./output/{domain}_endpoints_for_db.json")
-            
-        #     # Empty stats
-        #     empty_stats = {
-        #         'sources': {url: {'js_files_count': 0, 'total_endpoints': 0, 'categories': {}}},
-        #         'categories': {},
-        #         'overall': {
-        #             'total_sources': 1,
-        #             'total_js_files': 0,
-        #             'total_endpoints': 0,
-        #             'unique_endpoints': 0
-        #         },
-        #         'metadata': {
-        #             'extraction_date': processor._get_current_timestamp(),
-        #             'top_categories': []
-        #         }
-        #     }
-            
-        #     with open(f"{config.OUTPUT_DIR}{domain}_endpoint_stats.json", 'w', encoding='utf-8') as file:
-        #         json.dump(empty_stats, file, indent=2)
-        #     print(f"Empty stats saved to: ./output/{domain}_endpoint_stats.json")
 
         # Final statistics for this URL
         stats = processor.get_category_stats()

@@ -299,7 +299,7 @@ class EndpointProcessor:
     
     # output endpoints to txt
     def save_endpoints_to_txt(self, endpoints, output_file):
-        os.makedirs(f"{config.OUTPUT_DIR}", exist_ok=True)
+        # os.makedirs(f"{config.OUTPUT_DIR}", exist_ok=True)
         with open(f"{config.OUTPUT_DIR}{output_file}", 'w') as file:
             for endpoint in endpoints:
                 file.write(endpoint + '\n')
