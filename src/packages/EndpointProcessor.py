@@ -300,7 +300,7 @@ class EndpointProcessor:
     # output endpoints to txt
     def save_endpoints_to_txt(self, endpoints, output_file):
         # os.makedirs(f"{config.OUTPUT_DIR}", exist_ok=True)
-        with open(f"{config.OUTPUT_DIR}{output_file}", 'a+') as file:
+        with open(f"{config.OUTPUT_DIR}/{output_file}", 'a+') as file:
             for endpoint in endpoints:
                 file.write(endpoint + '\n')
     
@@ -348,7 +348,7 @@ class EndpointProcessor:
             'endpoints_summary': all_endpoints_by_category
         }
         
-        with open(f"{config.OUTPUT_DIR}{output_file}", 'a+', encoding='utf-8') as file:
+        with open(f"{config.OUTPUT_DIR}/{output_file}", 'a+', encoding='utf-8') as file:
             json.dump(json_data, file, indent=2)
         
         return json_data
@@ -386,7 +386,7 @@ class EndpointProcessor:
             'endpoints': flat_endpoints
         }
         
-        with open(f"{config.OUTPUT_DIR}{output_file}", 'a+', encoding='utf-8') as file:
+        with open(f"{config.OUTPUT_DIR}/{output_file}", 'a+', encoding='utf-8') as file:
             json.dump(db_data, file, indent=2)
         
         return db_data
@@ -451,7 +451,7 @@ class EndpointProcessor:
             'top_categories': sorted(category_totals.items(), key=lambda x: x[1], reverse=True)[:10]
         }
         
-        with open(f"{config.OUTPUT_DIR}{output_file}", 'a+', encoding='utf-8') as file:
+        with open(f"{config.OUTPUT_DIR}/{output_file}", 'a+', encoding='utf-8') as file:
             json.dump(stats, file, indent=2)
         
         return stats

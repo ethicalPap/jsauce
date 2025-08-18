@@ -4,10 +4,10 @@
 TEMPLATE_ENDPOINTS = "templates/endpoints.txt"
 
 # Output directory
-OUTPUT_DIR = "./output/"
+OUTPUT_DIR = "./output"
 
 # Data directory for storing intermediate files
-DATA_DIR = "./data/"
+DATA_DIR = "./data"
 
 # Timeout for web requests (seconds)
 REQUEST_TIMEOUT = 10

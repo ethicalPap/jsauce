@@ -8,6 +8,8 @@ from src.packages.WebRequests import WebRequests
 from src.packages.JsProcessor import JsProcessor
 from src.packages.DomainHandler import DomainHandler
 from src.packages.MermaidConverter import JSONToMermaidConverter  
+import time
+from src.packages.MermaidCLI import MermaidCLI
 import sys
 from collections import defaultdict
 import os
@@ -18,6 +20,7 @@ import json
 webrequests = WebRequests()
 domain_handler = DomainHandler()
 converter = JSONToMermaidConverter()
+mermaid_cli = MermaidCLI()
 
 # Global Vars
 input_urls = []
@@ -264,12 +267,24 @@ def main():
                     f.write(mermaid_output)
                 
                 print(f"Mermaid flowchart saved to: {mermaid_file}")
+                
             except json.JSONDecodeError as e:
                 print(f"Error parsing JSON for {domain}: {e}")
             except Exception as e:
                 print(f"Unexpected error for {domain}: {e}")
         else:
             print(f"No valid JSON data found for {domain}, skipping Mermaid conversion.")
+
+        time.sleep(1)  # Optional delay to allow time before mmdc cli subprocess on output
+
+        # Render the Mermaid file to SVG/PNG
+        svg_output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.svg"
+        png_output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.png"
+        mermaid_cli.render(mermaid_file, svg_output_file)
+        mermaid_cli.render(mermaid_file, png_output_file)
+        print(f"Mermaid flowchart rendered to: {svg_output_file}")
+        print(f"Mermaid flowchart rendered to: {png_output_file}")
+            
 
 # ===================End Mermaid Conversion=========================
 
