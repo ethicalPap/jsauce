@@ -8,10 +8,12 @@ from src.packages.WebRequests import WebRequests
 from src.packages.JsProcessor import JsProcessor
 from src.packages.DomainHandler import DomainHandler
 import sys
-
+from collections import defaultdict
 
 # Global Vars
 input_urls = []
+js_files = []
+input_url_domains = {}
 
 # read input from args
 def get_input_from_argsys1(input_file):
@@ -20,13 +22,16 @@ def get_input_from_argsys1(input_file):
         with open(input_file, 'r') as file:
             for line in file:
                 line = line.strip()
-                if line and not line.startswith('#'):
+                # skip line if ends in .js
+                if line and line.endswith('.js'):
+                    print(f"Skipping JS file: {line}")
+                    js_files.append(line)
+                elif line and not line.startswith('#'):
                     input_urls.append(line)
     except Exception as e:
         print(f"Error reading input file {input_file}: {e}")
         exit(1)
     return input_urls
-
 
 
 def main():
@@ -56,33 +61,36 @@ def main():
     all_js_links = []
     url_to_js_mapping = {}  # Track which JS files came from which URLs
 
-    print(f"\nProcessing {len(urls)} URLs...")
+    # map input URLs to domains
     for url in urls:
-        print(f"Processing URL: {url}")
-        html_content = webrequests.fetch_url_content(webrequests.add_protocol_if_missing(url))
-        if html_content:
-            webrequests.save_url_content(url, html_content)
-            js_links = jsprocessor.extract_js_links(html_content, url)  # Pass base URL
-            all_js_links.extend(js_links)
-            
-            # Map JS files to source URL
-            for js_link in js_links:
-                url_to_js_mapping[js_link] = url
-                
-            print(f"  Found {len(js_links)} JS links.")
-        else:
-            print(f"  Failed to fetch content from {url}")
+        domain = domain_handler.extract_domain(url)
+        if domain:
+            input_url_domains[url] = domain
+
+    print(f"\nProcessing {len(urls)} URLs...")
 
     # Save all js links to a file
     if all_js_links:
-        # Extract unique domains from all JS links
-        unique_domains = domain_handler.get_unique_domains(all_js_links)
-        
+        # group js links by domain
+        domain_to_js_links = defaultdict(list)
         for url in urls:
-            # If you want to save by domain instead of full URL
             domain = domain_handler.extract_domain(url)
             if domain:
-                jsprocessor.save_js_links(all_js_links, domain)  # Save using domain name
+                html_content = webrequests.fetch_url_content(webrequests.add_protocol_if_missing(url))
+                if html_content:
+                    webrequests.save_url_content(url, html_content)
+                    js_links = jsprocessor.extract_js_links(html_content, url)
+                    all_js_links.extend(js_links)
+                    js_files.extend(js_links)
+                    url_to_js_mapping.update({js_link: url for js_link in js_links})
+                    domain_to_js_links[domain].extend(js_links)
+                    print(f"  Found {len(js_links)} JS links.")
+                else:
+                    print(f"  Failed to fetch content from {url}")
+
+        # Save all js links to a file by input domain
+        for domain, js_links in domain_to_js_links.items():
+            jsprocessor.save_js_links(js_links, f"{domain}_js_links.txt")
                 
     # Read js links from file
     js_links = jsprocessor.read_js_links(domain)

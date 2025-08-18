@@ -49,6 +49,7 @@ class JsProcessor:
 
     # save js links to file
     def save_js_links(self, js_links, output_file):
+        # look it through until we reach the end
         os.makedirs("./data/js_files", exist_ok=True)
         with open(f"./data/js_files/{output_file}", 'w') as file:
             for link in js_links:
