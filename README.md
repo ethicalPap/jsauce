@@ -20,7 +20,7 @@ A Python tool for discovering and extracting API endpoints, authentication URLs,
 1. Clone or download this repository
 2. Install dependencies:
 ```bash
-python3 setup.py
+python3 -m pip install .
 ```
 
 3. Create necessary directories:

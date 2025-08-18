@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jsauce"
+version = "0.1.0"
+authors = [
+    {name = "Van Perry", email = "ethicalpap@gmail.com"},
+]
+description = "A Python tool for discovering and extracting API endpoints from JavaScript files found on websites"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Internet :: WWW/HTTP",
+]
+keywords = ["javascript", "endpoint", "extraction", "security", "web", "api", "pentesting"]
+dependencies = [
+    "requests>=2.25.0",
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/ethicalPap/jsauce"
+"Bug Reports" = "https://github.com/ethicalPap/jsauce/issues"
+"Source" = "https://github.com/ethicalPap/jsauce"
+"Documentation" = "https://github.com/ethicalPap/jsauce#readme"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=21.0",
+    "flake8>=3.8",
+]
+mermaid = [
+    "pillow>=8.0",
+]
+performance = [
+    "psutil>=5.8.0",
+]
+
+[project.scripts]
+jsauce = "main:main"
+
+[tool.setuptools]
+packages = ["src"]
+package-dir = {"" = "."}
+
+[tool.setuptools.package-data]
+"*" = ["templates/*.txt", "README.md", "LICENSE", "requirements.txt"]
+
+[tool.black]
+line-length = 88
+target-version = ['py36']
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
