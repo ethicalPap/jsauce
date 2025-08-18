@@ -69,37 +69,35 @@ def main():
 
     print(f"\nProcessing {len(urls)} URLs...")
 
-    # Save all js links to a file
-    if all_js_links:
-        # group js links by domain
-        domain_to_js_links = defaultdict(list)
-        for url in urls:
-            domain = domain_handler.extract_domain(url)
-            if domain:
-                html_content = webrequests.fetch_url_content(webrequests.add_protocol_if_missing(url))
-                if html_content:
-                    webrequests.save_url_content(url, html_content)
-                    js_links = jsprocessor.extract_js_links(html_content, url)
-                    all_js_links.extend(js_links)
-                    js_files.extend(js_links)
-                    url_to_js_mapping.update({js_link: url for js_link in js_links})
-                    domain_to_js_links[domain].extend(js_links)
-                    print(f"  Found {len(js_links)} JS links.")
-                else:
-                    print(f"  Failed to fetch content from {url}")
+    # Process each URL and collect JS links
+    domain_to_js_links = defaultdict(list)
+    for url in urls:
+        domain = domain_handler.extract_domain(url)
+        if domain:
+            print(f"Processing URL: {url}")
+            html_content = webrequests.fetch_url_content(webrequests.add_protocol_if_missing(url))
+            if html_content:
+                webrequests.save_url_content(url, html_content)
+                js_links = jsprocessor.extract_js_links(html_content, url)
+                all_js_links.extend(js_links)
+                js_files.extend(js_links)
+                url_to_js_mapping.update({js_link: url for js_link in js_links})
+                domain_to_js_links[domain].extend(js_links)
+                print(f"  Found {len(js_links)} JS links.")
+            else:
+                print(f"  Failed to fetch content from {url}")
 
-        # Save all js links to a file by input domain
-        for domain, js_links in domain_to_js_links.items():
+    # Save all js links to files by domain
+    for domain, js_links in domain_to_js_links.items():
+        if js_links:
             jsprocessor.save_js_links(js_links, f"{domain}_js_links.txt")
-                
-    # Read js links from file
-    js_links = jsprocessor.read_js_links(domain)
+            print(f"  Saved {len(js_links)} JS links for domain: {domain}")
     
-    if not js_links:
+    if not all_js_links:
         print("No JS links to process")
         return
     
-    print(f"Total JS links to process: {len(js_links)}")
+    print(f"Total JS links to process: {len(all_js_links)}")
     
     # Process each JS link using the new processor
     print("\nProcessing JS links...")
@@ -108,8 +106,8 @@ def main():
         return
 
     # Iterate through each JS link and search for findings
-    for i, js_link in enumerate(js_links, 1):
-        print(f"Processing JS Link {i}/{len(js_links)}: {js_link}")
+    for i, js_link in enumerate(all_js_links, 1):
+        print(f"Processing JS Link {i}/{len(all_js_links)}: {js_link}")
         js_content = webrequests.fetch_url_content(js_link)
         if js_content:
             # Get source URL for this JS file
@@ -130,37 +128,38 @@ def main():
     # Get all results
     all_endpoints_found = processor.get_all_endpoints_flat()
     
-    # Save and categorize endpoints
-    if all_endpoints_found or processor.categorized_results:
-        print(f"\n{'='*50}")
-        print("SAVING RESULTS...")
-        
-        # Save original flat list for backwards compatibility
-        if all_endpoints_found:
-            processor.save_endpoints_to_txt(all_endpoints_found, f"{domain}_endpoints_found.txt")
-            print(f"All endpoints saved to: ./output/{domain}endpoints_found.txt ({len(all_endpoints_found)} endpoints)")
-        
-        # Save categorized results to JS file
-        if processor.categorized_results:
-            endpoints_detailed = processor.save_detailed_results_to_json(f"{domain}_endpoints_detailed.json")
-            print(f"Categorized endpoints saved to: ./output/{domain}endpoints_by_category.js")
+    # Process results for each domain
+    for domain in domain_to_js_links.keys():
+        if domain_to_js_links[domain]:  # Only process domains that had JS links
+            # Save and categorize endpoints
+            if all_endpoints_found or processor.categorized_results:
+                print(f"\n{'='*50}")
+                print(f"SAVING RESULTS FOR {domain}...")
+                
+                # Save original flat list for backwards compatibility
+                if all_endpoints_found:
+                    processor.save_endpoints_to_txt(all_endpoints_found, f"{domain}_endpoints_found.txt")
+                    print(f"All endpoints saved to: ./output/{domain}_endpoints_found.txt ({len(all_endpoints_found)} endpoints)")
+                
+                # Save categorized results to JSON files
+                if processor.categorized_results:
+                    endpoints_detailed = processor.save_detailed_results_to_json(f"{domain}_endpoints_detailed.json")
+                    print(f"Detailed endpoints saved to: ./output/{domain}_endpoints_detailed.json")
 
-            endpoints_flat = processor.save_flat_endpoints_for_db(f"{domain}_endpoints_for_db.json")
-            print(f"Flat endpoints for DB saved to: ./output/{domain}endpoints_for_db.json")
+                    endpoints_flat = processor.save_flat_endpoints_for_db(f"{domain}_endpoints_for_db.json")
+                    print(f"Flat endpoints for DB saved to: ./output/{domain}_endpoints_for_db.json")
 
-            stats = processor.save_summary_stats_json(f"{domain}_endpoint_stats.json")
-            print(f"Summary statistics saved to: ./output/{domain}endpoint_stats.json")
+                    stats = processor.save_summary_stats_json(f"{domain}_endpoint_stats.json")
+                    print(f"Summary statistics saved to: ./output/{domain}_endpoint_stats.json")
 
-        
-        # Final statistics
-        stats = processor.get_category_stats()
-        print(f"\n{'='*50}")
-        print(f"Total Categories: {stats['total_categories']}")
-        print(f"Total Endpoints: {stats['total_endpoints']}")
-        print(f"Processing completed successfully!")
-        
-    else:
-        print("No endpoints found")
+                # Final statistics
+                stats = processor.get_category_stats()
+                print(f"\n{'='*50}")
+                print(f"Total Categories: {stats['total_categories']}")
+                print(f"Total Endpoints: {stats['total_endpoints']}")
+                print(f"Processing completed successfully for {domain}!")
+            else:
+                print(f"No endpoints found for {domain}")
 
 
 if __name__ == "__main__":
