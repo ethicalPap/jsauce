@@ -276,15 +276,6 @@ play\.google\.com
 appid=
 id=com\.
 
-#[broad_url_patterns]
-['"`](https?:\/\/[\w\d.\-]+\/api\/[\w\d\/\-_.?=&%]*)['"`]
-['"`](https?:\/\/api\.[\w\d.\-]+\/[\w\d\/\-_.?=&%]*)['"`]
-['"`](https?:\/\/[\w\d.\-]+\.com\/[\w\d\/\-_.?=&%]+)['"`]
-['"`](https?:\/\/[\w\d.\-]+\.org\/[\w\d\/\-_.?=&%]+)['"`]
-['"`](https?:\/\/[\w\d.\-]+\.net\/[\w\d\/\-_.?=&%]+)['"`]
-['"`](wss?:\/\/[\w\d.\-]+\/[\w\d\/\-_.?=&%]*)['"`]
-https?:\/\/[\w\d.\-]+\/[\w\d\/\-_.?=&%]{5,}
-
 #[http_methods]
 (GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+['"`](\/[\w\d\/\-_.?=&%]+)['"`]
 method:\s*['"`](GET|POST|PUT|DELETE|PATCH)['"`].*url:\s*['"`](\/[\w\d\/\-_.?=&%]+)['"`]
