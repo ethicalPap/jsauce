@@ -1,7 +1,10 @@
 import os
 import re
 from urllib.parse import urljoin
+import time
+from src.utils.Banner import Banner
 
+jsauce_banner = Banner()
 
 class JsProcessor:
     def __init__(self):
@@ -31,7 +34,7 @@ class JsProcessor:
             
             # Basic validation - skip if it looks malformed
             if '\\' in clean_link or clean_link.count('//') > 1:
-                print(f"Skipping malformed URL: {link}")
+                jsauce_banner.update_status(f"Skipping malformed URL: {link}")
                 continue
                 
             js_links.append(clean_link)
@@ -64,7 +67,7 @@ class JsProcessor:
                 js_links = [line.strip() for line in lines if line.strip()]
                 return js_links
         except FileNotFoundError:
-            print(f"File {file_path} not found")
+            jsauce_banner.update_status(f"File {file_path} not found")
             return []
         
 
@@ -84,6 +87,7 @@ class JsProcessor:
                 if matches:
                     results[template] = matches
             except re.error as e:
-                print(f"Invalid regex '{regex}': {e}")
+                jsauce_banner.update_status(f"Invalid regex '{regex}': {e}")
+                time.sleep(1)
                 continue
         return results  

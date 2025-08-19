@@ -3,6 +3,16 @@ import re
 from typing import List, Dict, Any
 from urllib.parse import urlparse
 from collections import defaultdict
+import os
+from src import config
+from src.handlers.DomainHandler import DomainHandler
+import time
+from src.packages.MermaidCLI import MermaidCLI
+from src.utils.Banner import Banner
+
+domain_handler = DomainHandler()
+mermaid_cli = MermaidCLI()
+jsauce_banner = Banner()
 
 class JSONToMermaidConverter:
     def __init__(self, max_edges=450, max_text_size=50000):
@@ -32,11 +42,38 @@ class JSONToMermaidConverter:
    
     def sanitize_text(self, text: str) -> str:
         """Sanitize text for Mermaid compatibility"""
-        # Replace special characters and spaces
         text = re.sub(r'[^\w\s-]', '_', text)
         text = re.sub(r'\s+', '_', text)
         return text
     
+    def clean_json_files(self, urls):
+        """Clean up malformed JSON files"""
+        jsauce_banner.update_status("CLEANING UP JSON FILES...")
+        for url in urls:
+            domain = domain_handler.extract_domain(url)
+            if not domain:
+                continue
+            
+            files = [f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json" 
+                    for suffix in ['endpoints_detailed', 'endpoints_for_db', 'endpoint_stats']]
+            
+            for json_file in files:
+                if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
+                    try:
+                        with open(json_file, 'r', encoding='utf-8') as f:
+                            content = f.read().strip()
+                        
+                        if content:
+                            if not content.startswith('['):
+                                content = '[' + content.replace('}{', '},{') + ']'
+                            
+                            with open(json_file, 'w', encoding='utf-8') as f:
+                                json.dump(json.loads(content), f, indent=2)
+                                
+                    except Exception as e:
+                        jsauce_banner.update_status(f"Error cleaning {json_file}: {e}")
+                        time.sleep(1)
+  
     def generate_unique_id(self, base_name: str) -> str:
         """Generate unique IDs to avoid conflicts"""
         clean_name = re.sub(r'[^\w]', '_', base_name)
@@ -66,9 +103,7 @@ class JSONToMermaidConverter:
             return "unknown_domain"
    
     def reorganize_data_by_hierarchy(self, data: Dict) -> Dict:
-        """
-        Reorganize data to Domain->Category->Endpoint - no evidence/JS links
-        """
+        """Reorganize data to Domain->Category->Endpoint - no evidence/JS links"""
         if not isinstance(data, dict) or 'endpoints_by_source' not in data:
             return {}
             
@@ -155,6 +190,7 @@ class JSONToMermaidConverter:
         ]
         
         def get_endpoint_priority(endpoint):
+            """Get priority score for an endpoint"""
             endpoint_lower = endpoint.lower()
             
             # Check high priority patterns
@@ -405,3 +441,39 @@ class JSONToMermaidConverter:
             data = json_data
        
         return self.create_flowchart(data)
+    
+    def generate_mermaid(self, urls):
+        """Generate Mermaid flowcharts"""
+        jsauce_banner.update_status("CONVERTING TO MERMAID FORMAT...")
+        for url in urls:
+            domain = domain_handler.extract_domain(url)
+            if not domain:
+                continue
+            
+            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json"
+            if not (os.path.exists(json_file) and os.path.getsize(json_file) > 0):
+                continue
+            
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    json_data = json.load(f)
+                
+                mermaid_output = self.convert_to_flowchart(json_data)
+                mermaid_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.mmd"
+                
+                with open(mermaid_file, 'w', encoding='utf-8') as f:
+                    f.write(mermaid_output)
+                
+                jsauce_banner.update_status(f"Mermaid saved: {mermaid_file}")
+                
+                time.sleep(1)
+                
+                # Render to SVG/PNG
+                for ext in ['svg', 'png']:
+                    output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.{ext}"
+                    mermaid_cli.render(mermaid_file, output_file)
+                    jsauce_banner.update_status(f"Rendered: {output_file}")
+                    
+            except Exception as e:
+                jsauce_banner.update_status(f"Mermaid error for {domain}: {e}")
+                time.sleep(1)

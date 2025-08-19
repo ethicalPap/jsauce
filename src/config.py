@@ -1,7 +1,7 @@
 # config vars
 
 # search regex filefor endpoints
-TEMPLATE_ENDPOINTS = "templates/endpoints.txt"
+DEFAULT_TEMPLATE = "templates/default_template.yaml"
 
 # Output directory
 OUTPUT_DIR = "./output"

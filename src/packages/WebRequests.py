@@ -1,7 +1,10 @@
 import requests
 import os
 from urllib.parse import urlparse
-import config
+from src import config
+from src.utils.Banner import Banner
+
+jsauce_banner = Banner()
 
 class WebRequests:
     def __init__(self):
@@ -13,7 +16,7 @@ class WebRequests:
             response.raise_for_status()  # Raise an error for bad responses
             return response.text
         except requests.RequestException as e:
-            print(f"Error fetching {url}: {e}")
+            jsauce_banner.update_status(f"Error fetching {url}: {e}")
             return None
         
     # add protocol if missing from url
