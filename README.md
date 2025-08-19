@@ -36,9 +36,6 @@ A Python tool for discovering and extracting API endpoints, authentication URLs,
 git clone https://github.com/ethicalPap/jsauce.git
 cd jsauce
 
-# Create necessary directories
-mkdir -p data/{js_files,url_content} output
-
 # Install Python dependencies
 pip install .
 
