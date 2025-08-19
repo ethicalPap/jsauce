@@ -48,7 +48,7 @@ class JSONToMermaidConverter:
     
     def clean_json_files(self, urls):
         """Clean up malformed JSON files"""
-        jsauce_banner.update_status("CLEANING UP JSON FILES...")
+        jsauce_banner.add_status("CLEANING UP JSON FILES...")
         for url in urls:
             domain = domain_handler.extract_domain(url)
             if not domain:
@@ -71,7 +71,7 @@ class JSONToMermaidConverter:
                                 json.dump(json.loads(content), f, indent=2)
                                 
                     except Exception as e:
-                        jsauce_banner.update_status(f"Error cleaning {json_file}: {e}")
+                        jsauce_banner.show_error(f"Error cleaning {json_file}: {e}")
                         time.sleep(1)
   
     def generate_unique_id(self, base_name: str) -> str:
@@ -444,6 +444,18 @@ class JSONToMermaidConverter:
     
     def generate_mermaid(self, urls):
         """Generate Mermaid flowcharts"""
+
+        jsauce_banner.add_status("CONVERTING TO MERMAID FORMAT...")
+        
+        # Check if Mermaid CLI is available first
+        if not mermaid_cli.is_available():
+            jsauce_banner.show_warning("Mermaid CLI not available - skipping diagram generation")
+            jsauce_banner.show_warning("Install with: npm install -g @mermaid-js/mermaid-cli")
+            return
+        
+        diagrams_created = 0
+        diagrams_failed = 0
+
         jsauce_banner.update_status("CONVERTING TO MERMAID FORMAT...")
         for url in urls:
             domain = domain_handler.extract_domain(url)
@@ -464,7 +476,7 @@ class JSONToMermaidConverter:
                 with open(mermaid_file, 'w', encoding='utf-8') as f:
                     f.write(mermaid_output)
                 
-                jsauce_banner.update_status(f"Mermaid saved: {mermaid_file}")
+                jsauce_banner.show_completion(f"Mermaid saved: {mermaid_file}")
                 
                 time.sleep(1)
                 
@@ -472,8 +484,14 @@ class JSONToMermaidConverter:
                 for ext in ['svg', 'png']:
                     output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.{ext}"
                     mermaid_cli.render(mermaid_file, output_file)
-                    jsauce_banner.update_status(f"Rendered: {output_file}")
+                    jsauce_banner.show_completion(f"Rendered: {output_file}")
                     
             except Exception as e:
-                jsauce_banner.update_status(f"Mermaid error for {domain}: {e}")
+                jsauce_banner.show_error(f"Mermaid error for {domain}: {e}")
                 time.sleep(1)
+
+        if diagrams_created > 0:
+            jsauce_banner.show_completion(f"Diagrams created for {diagrams_created} domains")
+        if diagrams_failed > 0:
+            jsauce_banner.show_completion(f" {diagrams_failed} diagrams failed to generate, is Mermaid CLI installed?")
+        time.sleep(3)

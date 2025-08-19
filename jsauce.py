@@ -21,6 +21,10 @@ input_file_handler = InputFileHandler()
 output_handler = OutFileHandler()
 jsauce_banner = Banner()
 
+# create necessary directories if they do not exist
+output_handler.create_directories()
+
+
 def main():
     # Banner for tool
     jsauce_banner.print_frozen_banner()
@@ -36,7 +40,7 @@ def main():
     templates, _ = load_template.load_patterns()
     
     if not templates:
-        jsauce_banner.update_status("ERROR: No patterns loaded. Cannot proceed.")
+        jsauce_banner.show_error("ERROR: No patterns loaded. Cannot proceed.")
         exit(1)
     
     # Group URLs by domain and clear files once per domain
@@ -56,12 +60,5 @@ def main():
     converter.clean_json_files(urls)
     converter.generate_mermaid(urls)
     
-    completion_details = [
-        "All URLs processed successfully",
-        "JSON files cleaned", 
-        "Mermaid diagrams generated"
-    ]
-    jsauce_banner.show_completion(len(urls), completion_details)
-
 if __name__ == "__main__":
     main()

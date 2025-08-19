@@ -14,3 +14,10 @@ class OutFileHandler:
                 open(f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}", 'w').close()
             except:
                 pass
+
+    def create_directories(self):
+        """Create necessary directories for output files"""
+        os.makedirs(config.OUTPUT_DIR, exist_ok=True)
+        os.makedirs(config.DATA_DIR, exist_ok=True)
+        os.makedirs(f"{config.JS_FILE_DIR}", exist_ok=True)
+        os.makedirs(f"{config.URL_CONTENT_DIR}", exist_ok=True)

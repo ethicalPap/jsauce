@@ -34,7 +34,7 @@ class JsProcessor:
             
             # Basic validation - skip if it looks malformed
             if '\\' in clean_link or clean_link.count('//') > 1:
-                jsauce_banner.update_status(f"Skipping malformed URL: {link}")
+                jsauce_banner.show_error(f"Skipping malformed URL: {link}")
                 continue
                 
             js_links.append(clean_link)
@@ -67,7 +67,7 @@ class JsProcessor:
                 js_links = [line.strip() for line in lines if line.strip()]
                 return js_links
         except FileNotFoundError:
-            jsauce_banner.update_status(f"File {file_path} not found")
+            jsauce_banner.show_error(f"File {file_path} not found")
             return []
         
 
@@ -87,7 +87,7 @@ class JsProcessor:
                 if matches:
                     results[template] = matches
             except re.error as e:
-                jsauce_banner.update_status(f"Invalid regex '{regex}': {e}")
+                jsauce_banner.show_error(f"Invalid regex '{regex}': {e}")
                 time.sleep(1)
                 continue
         return results  

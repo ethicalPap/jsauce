@@ -1,0 +1,418 @@
+xss_dom_sinks:
+  description: "DOM-based XSS sinks - dangerous innerHTML/outerHTML usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.innerHTML\\s*=\\s*[^;]+"
+    - "\\.outerHTML\\s*=\\s*[^;]+"
+    - "document\\.write\\s*\\([^)]*\\)"
+    - "document\\.writeln\\s*\\([^)]*\\)"
+    - "\\.insertAdjacentHTML\\s*\\([^)]*\\)"
+    - "eval\\s*\\([^)]*\\)"
+    - "setTimeout\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "setInterval\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "Function\\s*\\([^)]*\\)"
+    - "execScript\\s*\\([^)]*\\)"
+
+xss_jquery_sinks:
+  description: "jQuery XSS sinks - dangerous jQuery methods"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.append\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.prepend\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.after\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.before\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.replaceWith\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.wrap\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.wrapAll\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.wrapInner\\s*\\([^)]*\\)"
+    - "jQuery\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
+
+postmessage_sinks:
+  description: "PostMessage vulnerabilities - unsafe message handling"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.addEventListener\\s*\\(['\"`]message['\"`]"
+    - "addEventListener\\s*\\(['\"`]message['\"`]"
+    - "onmessage\\s*="
+    - "postMessage\\s*\\([^)]*\\)"
+    - "event\\.data"
+    - "e\\.data"
+    - "message\\.data"
+    - "\\*['\"`]\\s*\\)\\s*;\\s*//.*postMessage"
+
+open_redirect_sinks:
+  description: "Open redirect sinks - dangerous URL redirections"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.location\\s*=\\s*[^;]+"
+    - "window\\.location\\.href\\s*=\\s*[^;]+"
+    - "window\\.location\\.replace\\s*\\([^)]*\\)"
+    - "window\\.location\\.assign\\s*\\([^)]*\\)"
+    - "document\\.location\\s*=\\s*[^;]+"
+    - "document\\.location\\.href\\s*=\\s*[^;]+"
+    - "window\\.open\\s*\\([^)]*\\)"
+    - "location\\.href\\s*=\\s*[^;]+"
+    - "top\\.location\\s*=\\s*[^;]+"
+    - "parent\\.location\\s*=\\s*[^;]+"
+
+json_injection_sinks:
+  description: "JSON injection sinks - unsafe JSON parsing"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "JSON\\.parse\\s*\\([^)]*\\)"
+    - "\\$\\.parseJSON\\s*\\([^)]*\\)"
+    - "jQuery\\.parseJSON\\s*\\([^)]*\\)"
+    - "eval\\s*\\(['\"`]\\{[^'\"``]*\\}['\"`]\\)"
+    - "new\\s+Function\\s*\\(['\"`]return\\s+\\{[^'\"``]*\\}['\"`]\\)"
+
+prototype_pollution_sinks:
+  description: "Prototype pollution sinks - dangerous object manipulation"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "__proto__"
+    - "constructor\\.prototype"
+    - "Object\\.prototype"
+    - "\\[\\s*['\"`]__proto__['\"`]\\s*\\]"
+    - "\\[\\s*['\"`]constructor['\"`]\\s*\\]\\s*\\[\\s*['\"`]prototype['\"`]\\s*\\]"
+    - "Object\\.assign\\s*\\([^)]*\\)"
+    - "\\$\\.extend\\s*\\(true,"
+    - "jQuery\\.extend\\s*\\(true,"
+    - "lodash\\.merge\\s*\\("
+    - "_\\.merge\\s*\\("
+
+path_traversal_sinks:
+  description: "Path traversal sinks - unsafe file operations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "fs\\.readFile\\s*\\([^)]*\\)"
+    - "fs\\.writeFile\\s*\\([^)]*\\)"
+    - "fs\\.createReadStream\\s*\\([^)]*\\)"
+    - "fs\\.createWriteStream\\s*\\([^)]*\\)"
+    - "require\\s*\\([^)]*\\)"
+    - "import\\s*\\([^)]*\\)"
+    - "fetch\\s*\\(['\"`]\\.\\./[^'\"``]*['\"`]"
+    - "XMLHttpRequest.*\\.open\\s*\\([^,]*,\\s*['\"`]\\.\\./[^'\"``]*['\"`]"
+
+code_injection_sinks:
+  description: "Code injection sinks - dynamic code execution"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "eval\\s*\\([^)]*\\)"
+    - "Function\\s*\\([^)]*\\)"
+    - "setTimeout\\s*\\(['\"`][^'\"``]*['\"`]"
+    - "setInterval\\s*\\(['\"`][^'\"``]*['\"`]"
+    - "execScript\\s*\\([^)]*\\)"
+    - "msWriteProfilerMark\\s*\\([^)]*\\)"
+    - "crypto\\.generateCRMFRequest\\s*\\([^)]*\\)"
+
+sql_injection_sinks:
+  description: "SQL injection sinks - unsafe database queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.query\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "\\.execute\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "SELECT\\s+.*\\+.*FROM"
+    - "INSERT\\s+.*\\+.*INTO"
+    - "UPDATE\\s+.*\\+.*SET"
+    - "DELETE\\s+.*\\+.*FROM"
+    - "UNION\\s+.*\\+.*SELECT"
+    - "mysql\\.query\\s*\\([^)]*\\)"
+    - "pg\\.query\\s*\\([^)]*\\)"
+    - "sqlite3\\.run\\s*\\([^)]*\\)"
+
+nosql_injection_sinks:
+  description: "NoSQL injection sinks - unsafe NoSQL queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.find\\s*\\(\\{.*\\$.*\\}"
+    - "\\.findOne\\s*\\(\\{.*\\$.*\\}"
+    - "\\.update\\s*\\(\\{.*\\$.*\\}"
+    - "\\.remove\\s*\\(\\{.*\\$.*\\}"
+    - "\\.aggregate\\s*\\([^)]*\\$.*\\)"
+    - "\\$where\\s*:"
+    - "\\$regex\\s*:"
+    - "\\$ne\\s*:"
+    - "\\$gt\\s*:"
+    - "\\$lt\\s*:"
+
+command_injection_sinks:
+  description: "Command injection sinks - unsafe system commands"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "child_process\\.exec\\s*\\([^)]*\\)"
+    - "child_process\\.spawn\\s*\\([^)]*\\)"
+    - "child_process\\.execFile\\s*\\([^)]*\\)"
+    - "child_process\\.fork\\s*\\([^)]*\\)"
+    - "process\\.exec\\s*\\([^)]*\\)"
+    - "shell\\.exec\\s*\\([^)]*\\)"
+    - "system\\s*\\([^)]*\\)"
+    - "popen\\s*\\([^)]*\\)"
+
+ldap_injection_sinks:
+  description: "LDAP injection sinks - unsafe LDAP queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "ldap\\.search\\s*\\([^)]*\\)"
+    - "ldap\\.compare\\s*\\([^)]*\\)"
+    - "ldap\\.modify\\s*\\([^)]*\\)"
+    - "ldap\\.add\\s*\\([^)]*\\)"
+    - "ldap\\.del\\s*\\([^)]*\\)"
+    - "searchFilter\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+
+xxe_sinks:
+  description: "XXE (XML External Entity) sinks - unsafe XML parsing"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "DOMParser\\s*\\(\\)\\.parseFromString\\s*\\([^)]*\\)"
+    - "XMLHttpRequest.*\\.responseXML"
+    - "parseXML\\s*\\([^)]*\\)"
+    - "\\$\\.parseXML\\s*\\([^)]*\\)"
+    - "libxmljs\\.parseXml\\s*\\([^)]*\\)"
+    - "xml2js\\.parseString\\s*\\([^)]*\\)"
+    - "xpath\\.select\\s*\\([^)]*\\)"
+
+ssrf_sinks:
+  description: "SSRF (Server-Side Request Forgery) sinks - unsafe HTTP requests"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "fetch\\s*\\([^)]*\\)"
+    - "XMLHttpRequest.*\\.open\\s*\\([^)]*\\)"
+    - "\\$\\.ajax\\s*\\([^)]*url\\s*:[^}]*\\)"
+    - "\\$\\.get\\s*\\([^)]*\\)"
+    - "\\$\\.post\\s*\\([^)]*\\)"
+    - "axios\\.(get|post|put|delete|patch)\\s*\\([^)]*\\)"
+    - "request\\s*\\([^)]*\\)"
+    - "http\\.get\\s*\\([^)]*\\)"
+    - "https\\.get\\s*\\([^)]*\\)"
+    - "superagent\\.get\\s*\\([^)]*\\)"
+
+unsafe_deserialization_sinks:
+  description: "Unsafe deserialization sinks - dangerous object deserialization"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "JSON\\.parse\\s*\\([^)]*\\)"
+    - "pickle\\.loads\\s*\\([^)]*\\)"
+    - "yaml\\.load\\s*\\([^)]*\\)"
+    - "serialize\\.unserialize\\s*\\([^)]*\\)"
+    - "node-serialize\\.unserialize\\s*\\([^)]*\\)"
+    - "serialize-javascript\\s*\\([^)]*\\)"
+
+regex_redos_sinks:
+  description: "ReDoS (Regular Expression Denial of Service) sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "new\\s+RegExp\\s*\\([^)]*\\)"
+    - "\\.match\\s*\\([^)]*\\)"
+    - "\\.replace\\s*\\([^)]*\\)"
+    - "\\.search\\s*\\([^)]*\\)"
+    - "\\.split\\s*\\([^)]*\\)"
+    - "\\.test\\s*\\([^)]*\\)"
+    - "RegExp\\.prototype\\.test\\s*\\([^)]*\\)"
+
+csrf_sinks:
+  description: "CSRF vulnerability sinks - missing CSRF protection"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$\\.post\\s*\\([^)]*\\)"
+    - "\\$\\.ajax\\s*\\([^)]*type\\s*:\\s*['\"`]POST['\"`]"
+    - "fetch\\s*\\([^)]*method\\s*:\\s*['\"`]POST['\"`]"
+    - "XMLHttpRequest.*\\.open\\s*\\(['\"`]POST['\"`]"
+    - "axios\\.post\\s*\\([^)]*\\)"
+    - "form\\.submit\\s*\\(\\)"
+    - "document\\.forms\\[.*\\]\\.submit\\s*\\(\\)"
+
+clickjacking_sinks:
+  description: "Clickjacking vulnerability sinks - unsafe iframe usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.createElement\\s*\\(['\"`]iframe['\"`]\\)"
+    - "\\<iframe[^>]*\\>"
+    - "window\\.frames"
+    - "parent\\.frames"
+    - "top\\.frames"
+    - "frameElement"
+    - "contentWindow"
+    - "contentDocument"
+
+information_disclosure_sinks:
+  description: "Information disclosure sinks - sensitive data exposure"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "console\\.log\\s*\\([^)]*\\)"
+    - "console\\.error\\s*\\([^)]*\\)"
+    - "console\\.warn\\s*\\([^)]*\\)"
+    - "console\\.info\\s*\\([^)]*\\)"
+    - "console\\.debug\\s*\\([^)]*\\)"
+    - "alert\\s*\\([^)]*\\)"
+    - "confirm\\s*\\([^)]*\\)"
+    - "prompt\\s*\\([^)]*\\)"
+    - "document\\.title\\s*="
+
+storage_sinks:
+  description: "Client-side storage sinks - sensitive data in storage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "localStorage\\.setItem\\s*\\([^)]*\\)"
+    - "sessionStorage\\.setItem\\s*\\([^)]*\\)"
+    - "localStorage\\[.*\\]\\s*="
+    - "sessionStorage\\[.*\\]\\s*="
+    - "document\\.cookie\\s*="
+    - "\\$\\.cookie\\s*\\([^)]*\\)"
+    - "Cookies\\.set\\s*\\([^)]*\\)"
+
+web_crypto_sinks:
+  description: "Weak cryptography sinks - insecure crypto usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Math\\.random\\s*\\(\\)"
+    - "crypto\\.getRandomValues\\s*\\([^)]*\\)"
+    - "md5\\s*\\([^)]*\\)"
+    - "sha1\\s*\\([^)]*\\)"
+    - "CryptoJS\\.MD5\\s*\\([^)]*\\)"
+    - "CryptoJS\\.SHA1\\s*\\([^)]*\\)"
+    - "btoa\\s*\\([^)]*\\)"
+    - "atob\\s*\\([^)]*\\)"
+
+websocket_sinks:
+  description: "WebSocket security sinks - unsafe WebSocket usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "new\\s+WebSocket\\s*\\([^)]*\\)"
+    - "websocket\\.send\\s*\\([^)]*\\)"
+    - "ws\\.send\\s*\\([^)]*\\)"
+    - "socket\\.emit\\s*\\([^)]*\\)"
+    - "io\\.emit\\s*\\([^)]*\\)"
+    - "socket\\.on\\s*\\(['\"`]message['\"`]"
+
+file_upload_sinks:
+  description: "File upload sinks - unsafe file handling"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "FileReader\\s*\\(\\)"
+    - "readAsText\\s*\\([^)]*\\)"
+    - "readAsDataURL\\s*\\([^)]*\\)"
+    - "readAsBinaryString\\s*\\([^)]*\\)"
+    - "readAsArrayBuffer\\s*\\([^)]*\\)"
+    - "FormData\\s*\\(\\)"
+    - "files\\[\\d+\\]"
+    - "input\\[type=['\"`]file['\"`]\\]"
+
+geolocation_sinks:
+  description: "Geolocation privacy sinks - location data exposure"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "navigator\\.geolocation\\.getCurrentPosition\\s*\\([^)]*\\)"
+    - "navigator\\.geolocation\\.watchPosition\\s*\\([^)]*\\)"
+    - "position\\.coords\\.latitude"
+    - "position\\.coords\\.longitude"
+    - "coords\\.accuracy"
+
+device_api_sinks:
+  description: "Device API sinks - sensitive device information"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "navigator\\.userAgent"
+    - "navigator\\.platform"
+    - "navigator\\.appVersion"
+    - "navigator\\.language"
+    - "navigator\\.languages"
+    - "navigator\\.cookieEnabled"
+    - "navigator\\.onLine"
+    - "screen\\.width"
+    - "screen\\.height"
+    - "navigator\\.hardwareConcurrency"
+
+timing_attack_sinks:
+  description: "Timing attack sinks - operations vulnerable to timing analysis"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "performance\\.now\\s*\\(\\)"
+    - "Date\\.now\\s*\\(\\)"
+    - "new\\s+Date\\s*\\(\\)\\.getTime\\s*\\(\\)"
+    - "console\\.time\\s*\\([^)]*\\)"
+    - "console\\.timeEnd\\s*\\([^)]*\\)"
+    - "setTimeout\\s*\\([^)]*\\)"
+    - "setInterval\\s*\\([^)]*\\)"
+
+cors_sinks:
+  description: "CORS misconfiguration sinks - unsafe cross-origin requests"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Access-Control-Allow-Origin.*\\*"
+    - "Access-Control-Allow-Credentials.*true"
+    - "XMLHttpRequest.*withCredentials\\s*=\\s*true"
+    - "fetch\\s*\\([^)]*credentials\\s*:\\s*['\"`]include['\"`]"
+    - "\\$\\.ajax\\s*\\([^)]*xhrFields\\s*:\\s*\\{[^}]*withCredentials\\s*:\\s*true"
+
+angular_sinks:
+  description: "Angular-specific security sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$sce\\.trustAsHtml\\s*\\([^)]*\\)"
+    - "\\$sce\\.trustAsUrl\\s*\\([^)]*\\)"
+    - "\\$sce\\.trustAsResourceUrl\\s*\\([^)]*\\)"
+    - "\\$sce\\.trustAsJs\\s*\\([^)]*\\)"
+    - "bypassSecurityTrustHtml\\s*\\([^)]*\\)"
+    - "bypassSecurityTrustUrl\\s*\\([^)]*\\)"
+    - "bypassSecurityTrustResourceUrl\\s*\\([^)]*\\)"
+
+react_sinks:
+  description: "React-specific security sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "dangerouslySetInnerHTML\\s*:\\s*\\{"
+    - "React\\.createElement\\s*\\(['\"`]script['\"`]"
+    - "ReactDOM\\.render\\s*\\([^)]*\\)"
+    - "ref\\s*=\\s*\\{[^}]*\\}"
+
+vue_sinks:
+  description: "Vue.js-specific security sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "v-html\\s*="
+    - "\\$refs\\."
+    - "\\$el\\.innerHTML"
+    - "Vue\\.compile\\s*\\([^)]*\\)"
+
+template_injection_sinks:
+  description: "Client-side template injection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Handlebars\\.compile\\s*\\([^)]*\\)"
+    - "Mustache\\.render\\s*\\([^)]*\\)"
+    - "\\{\\{.*\\}\\}"
+    - "<%.*%>"
+    - "\\$\\{.*\\}"
+    - "template\\s*:\\s*['\"`][^'\"``]*\\{\\{[^'\"``]*\\}\\}[^'\"``]*['\"`]"
