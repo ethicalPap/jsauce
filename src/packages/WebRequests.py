@@ -16,7 +16,7 @@ class WebRequests:
             response.raise_for_status()  # Raise an error for bad responses
             return response.text
         except requests.RequestException as e:
-            jsauce_banner.update_status(f"Error fetching {url}: {e}")
+            jsauce_banner.show_error(f"Error fetching {url}: {e}")
             return None
         
     # add protocol if missing from url
@@ -29,6 +29,5 @@ class WebRequests:
     # save url content to file
     def save_url_content(self, url, content):
         filename = os.path.basename(urlparse(url).path) or f"un-named.html"
-        os.makedirs("./data/url_content", exist_ok=True)
-        with open(f"./data/url_content/{filename}", 'w', encoding='utf-8') as file:
+        with open(f"{config.URL_CONTENT_DIR}/{filename}", 'w', encoding='utf-8') as file:
             file.write(content) 

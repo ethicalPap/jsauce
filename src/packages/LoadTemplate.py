@@ -26,7 +26,7 @@ class LoadTemplate:
         yaml_path = config.DEFAULT_TEMPLATE.replace('.txt', '.yaml')
         
         if os.path.exists(yaml_path):
-            jsauce_banner.update_status(f"Loading YAML: {yaml_path}")
+            jsauce_banner.add_status(f"Loading YAML: {yaml_path}")
             templates = processor.load_patterns_from_yaml(yaml_path)
             if templates:
                 return templates, processor

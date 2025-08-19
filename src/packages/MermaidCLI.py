@@ -17,5 +17,12 @@ class MermaidCLI:
                 shell=True if platform.system() == 'Windows' else False
             )
         except subprocess.CalledProcessError as e:
-            jsauce_banner.update_status(f"Error rendering Mermaid file: {e}")
+            jsauce_banner.show_error(f"Error rendering Mermaid file: {e}")
             raise
+
+    def is_available(self):
+        try:
+            subprocess.run(['mmdc', '--version'], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True if platform.system() == 'Windows' else False)
+            return True
+        except:
+            return False

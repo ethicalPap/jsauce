@@ -23,7 +23,7 @@ class EndpointProcessor:
                 data = yaml.safe_load(f)
             
             if not data or not isinstance(data, dict):
-                jsauce_banner.update_status(f"Warning: Invalid YAML file {yaml_file_path}")
+                jsauce_banner.show_error(f"Warning: Invalid YAML file {yaml_file_path}")
                 time.sleep(2)
                 return {}
             
@@ -33,11 +33,11 @@ class EndpointProcessor:
                     templates[category] = {p: p for p in cat_data['patterns']}
             
             self.templates_by_category = templates
-            jsauce_banner.update_status(f"Total categories: {len(templates)}")
+            jsauce_banner.add_status(f"Total categories: {len(templates)}")
             return templates
             
         except Exception as e:
-            jsauce_banner.update_status(f"Error loading YAML: {e}")
+            jsauce_banner.show_error(f"Error loading YAML: {e}")
             time.sleep(2)
             return {}
     

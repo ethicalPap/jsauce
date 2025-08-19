@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="src/utils/image.png" alt="JSauce Banner" width="600"/>
+</div>
+
+
 # JSauce - JavaScript Endpoint Grabber
 
 A Python tool for discovering and extracting API endpoints, authentication URLs, and security-sensitive patterns from JavaScript files found on websites. JSauce is designed for security researchers, penetration testers, and developers who need to comprehensively map web application attack surfaces.
@@ -26,7 +31,7 @@ A Python tool for discovering and extracting API endpoints, authentication URLs,
 ## Installation
 
 ### Quick Setup
-```bash
+```
 # Clone the repository
 git clone https://github.com/ethicalPap/jsauce.git
 cd jsauce
@@ -34,18 +39,21 @@ cd jsauce
 # Create necessary directories
 mkdir -p data/{js_files,url_content} output
 
-# Install
+# Install Python dependencies
 pip install .
 
-# Run directly
-jsauce input_file.txt
+# Install Mermaid CLI for diagram generation (optional but recommended)
+npm install -g @mermaid-js/mermaid-cli
+
+# Verify Mermaid installation
+mmdc --version
 ```
 
 ## Usage
 
 ### Basic Usage
 ```bash
-python jsauce.py input_file.txt
+python3 jsauce.py input_file.txt
 ```
 
 ### Input File Format

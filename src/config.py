@@ -8,6 +8,8 @@ OUTPUT_DIR = "./output"
 
 # Data directory for storing intermediate files
 DATA_DIR = "./data"
+JS_FILE_DIR = f"{DATA_DIR}/js_files"
+URL_CONTENT_DIR = f"{DATA_DIR}/url_content"
 
 # Timeout for web requests (seconds)
 REQUEST_TIMEOUT = 10

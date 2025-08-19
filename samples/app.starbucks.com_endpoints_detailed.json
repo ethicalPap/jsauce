@@ -1,0 +1,183 @@
+[
+  {
+    "metadata": {
+      "total_sources": 1,
+      "total_js_files": 11,
+      "total_endpoints": 28,
+      "extraction_date": "2025-08-19T10:30:18.091810"
+    },
+    "endpoints_by_source": {
+      "https://app.starbucks.com": {
+        "source_url": "https://app.starbucks.com",
+        "js_files": {
+          "https://app.starbucks.com/vendor/static/vendor2.js": {
+            "js_url": "https://app.starbucks.com/vendor/static/vendor2.js",
+            "categories": {}
+          },
+          "https://app.starbucks.com/manifest.json": {
+            "js_url": "https://app.starbucks.com/manifest.json",
+            "categories": {}
+          },
+          "https://prod.accdab.net/cdn/cs/F3YqEeKYX8DMWEu7kxZT1ymCLP4.js": {
+            "js_url": "https://prod.accdab.net/cdn/cs/F3YqEeKYX8DMWEu7kxZT1ymCLP4.js",
+            "categories": {}
+          },
+          "https://app.starbucks.com/app-assets/manifest.5feea9fab83ee0e4ed96.js": {
+            "js_url": "https://app.starbucks.com/app-assets/manifest.5feea9fab83ee0e4ed96.js",
+            "categories": {}
+          },
+          "https://app.starbucks.com/app-assets/vendor.b4208de9e8b0b62276f7.js": {
+            "js_url": "https://app.starbucks.com/app-assets/vendor.b4208de9e8b0b62276f7.js",
+            "categories": {
+              "api_endpoints": [
+                "/v2/track"
+              ],
+              "version_endpoints": [
+                "/v2/track"
+              ],
+              "mobile_apps": [
+                "appId="
+              ],
+              "error_debug_files": [
+                ".env"
+              ]
+            }
+          },
+          "https://app.starbucks.com/app-assets/react.d4b3f5691c140d523afe.js": {
+            "js_url": "https://app.starbucks.com/app-assets/react.d4b3f5691c140d523afe.js",
+            "categories": {}
+          },
+          "https://app.starbucks.com/app-assets/optimizely.507d5439e692d6c853a6.js": {
+            "js_url": "https://app.starbucks.com/app-assets/optimizely.507d5439e692d6c853a6.js",
+            "categories": {
+              "api_endpoints": [
+                "/v3/graphql"
+              ],
+              "version_endpoints": [
+                "/v3/graphql"
+              ],
+              "error_debug_files": [
+                ".env"
+              ]
+            }
+          },
+          "https://app.starbucks.com/app-assets/patternLib.1c9ec90f9648a31ac166.js": {
+            "js_url": "https://app.starbucks.com/app-assets/patternLib.1c9ec90f9648a31ac166.js",
+            "categories": {}
+          },
+          "https://app.starbucks.com/app-assets/shared.96f751177f25d4cbdab6.js": {
+            "js_url": "https://app.starbucks.com/app-assets/shared.96f751177f25d4cbdab6.js",
+            "categories": {
+              "http_api_calls": [
+                "/apiproxy/v1/account/signin"
+              ],
+              "user_management": [
+                "/account/cards/add",
+                "/account/settings/privacy",
+                "/account/rewards",
+                "/account/create",
+                "/account/signin",
+                "/account/history/egift",
+                "/account/history",
+                "/account/settings"
+              ],
+              "admin_settings": [
+                "account/settings"
+              ]
+            }
+          },
+          "https://app.starbucks.com/app-assets/lodash.eacb23d544c2dbd16fc4.js": {
+            "js_url": "https://app.starbucks.com/app-assets/lodash.eacb23d544c2dbd16fc4.js",
+            "categories": {}
+          },
+          "https://app.starbucks.com/app-assets/coreApp.970fa533e41d1eb2b002.js": {
+            "js_url": "https://app.starbucks.com/app-assets/coreApp.970fa533e41d1eb2b002.js",
+            "categories": {
+              "http_methods_with_urls": [
+                "POST"
+              ],
+              "authentication_endpoints": [
+                "/oauth/authorize"
+              ],
+              "user_management": [
+                "/account/cards",
+                "/account/create",
+                "/account/signin",
+                "/account/signin/sso/:token",
+                "/account/signout",
+                "/account/cards/add",
+                "/account/cards/:cardId",
+                "/account/history",
+                "/account/history/egift",
+                "/account/personal/partner",
+                "/account/personal",
+                "/account/profile",
+                "/account/rewards",
+                "/account/settings/mfa",
+                "/account/settings/password",
+                "/account/settings/privacy",
+                "/account/settings"
+              ],
+              "admin_settings": [
+                "account/settings"
+              ],
+              "http_methods": [
+                "POST"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "endpoints_summary": {
+      "api_endpoints": [
+        "/v2/track",
+        "/v3/graphql"
+      ],
+      "version_endpoints": [
+        "/v2/track",
+        "/v3/graphql"
+      ],
+      "mobile_apps": [
+        "appId="
+      ],
+      "error_debug_files": [
+        ".env"
+      ],
+      "http_api_calls": [
+        "/apiproxy/v1/account/signin"
+      ],
+      "user_management": [
+        "/account/signin/sso/:token",
+        "/account/personal/partner",
+        "/account/profile",
+        "/account/cards/add",
+        "/account/history/egift",
+        "/account/rewards",
+        "/account/history",
+        "/account/signout",
+        "/account/signin",
+        "/account/cards/:cardId",
+        "/account/settings",
+        "/account/settings/privacy",
+        "/account/create",
+        "/account/settings/mfa",
+        "/account/cards",
+        "/account/settings/password",
+        "/account/personal"
+      ],
+      "admin_settings": [
+        "account/settings"
+      ],
+      "http_methods_with_urls": [
+        "POST"
+      ],
+      "authentication_endpoints": [
+        "/oauth/authorize"
+      ],
+      "http_methods": [
+        "POST"
+      ]
+    }
+  }
+]
