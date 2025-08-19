@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="image.png" alt="JSauce Banner" width="600"/>
+</div>
+
+
 # JSauce - JavaScript Endpoint Grabber
 
 A Python tool for discovering and extracting API endpoints, authentication URLs, and security-sensitive patterns from JavaScript files found on websites. JSauce is designed for security researchers, penetration testers, and developers who need to comprehensively map web application attack surfaces.
