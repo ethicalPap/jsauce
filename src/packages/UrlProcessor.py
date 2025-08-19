@@ -1,4 +1,4 @@
-from src.packages.EndpointProcessor import EndpointProcessor
+from src.packages.CategoryProcessor import CategoryProcessor
 from src.packages.JsProcessor import JsProcessor
 from src.handlers.DomainHandler import DomainHandler
 from src.packages.WebRequests import WebRequests
@@ -21,7 +21,7 @@ class URLProcessor:
             return False  # Return False to indicate no processing occurred
         
         # Initialize processors
-        processor = EndpointProcessor()
+        processor = CategoryProcessor()
         jsprocessor = JsProcessor()
         processor.templates_by_category = templates
         
@@ -37,7 +37,7 @@ class URLProcessor:
         jsauce_banner.add_status(f"Found {len(js_links)} JavaScript files in {domain}")
         
         # Track if we actually found any endpoints
-        total_endpoints_found = 0
+        total_content_found = 0
         has_any_findings = False
         
         if js_links:
@@ -46,7 +46,7 @@ class URLProcessor:
                 jsauce_banner.add_status(f"Analyzing JS file {i}/{len(js_links)} from {domain}") # this might have to be add_status if it causes issues
                 js_content = webrequests.fetch_url_content(js_link)
                 if js_content:
-                    findings = processor.search_js_content_by_category_with_context(
+                    findings = jsprocessor.search_js_content_by_category(
                         js_content, js_link, url, templates
                     )
                     if findings:
@@ -57,25 +57,25 @@ class URLProcessor:
                     jsauce_banner.show_warning(f"Failed to fetch JS content from {js_link}")
         
         # Get final endpoint count
-        all_endpoints = processor.get_all_endpoints_flat()
-        total_endpoints_found = len(all_endpoints)
+        all_endpoints = processor.get_all_content_flat()
+        total_content_found = len(all_endpoints)
         
         # Only create output directory and files if we have actual findings
-        if total_endpoints_found > 0 or has_any_findings:
+        if total_content_found > 0 or has_any_findings:
             jsauce_banner.add_status(f"Creating output files for {domain}...")
             
             # NOW create the output directory (only when we have data)
             self._ensure_output_directory(domain)
             
             # Save all the results
-            processor.save_endpoints_to_txt(all_endpoints, f"{domain}/{domain}_endpoints_found.txt")
-            jsauce_banner.add_status(f"Saved {total_endpoints_found} endpoints for {domain}", "success")
+            processor.save_content_to_txt(all_endpoints, f"{domain}/{domain}_content_found.txt")
+            jsauce_banner.add_status(f"Saved {total_content_found} endpoints for {domain}", "success")
             
             # Save detailed results
             if processor.categorized_results or processor.detailed_results:
-                processor.save_detailed_results_to_json(f"{domain}/{domain}_endpoints_detailed.json")
-                processor.save_flat_endpoints_for_db(f"{domain}/{domain}_endpoints_for_db.json")
-                processor.save_summary_stats_json(f"{domain}/{domain}_endpoint_stats.json")
+                processor.save_detailed_results_to_json(f"{domain}/{domain}_content_detailed.json")
+                processor.save_flat_content_for_db(f"{domain}/{domain}_content_for_db.json")
+                processor.save_summary_stats_json(f"{domain}/{domain}_content_stats.json")
                 jsauce_banner.add_status(f"Analysis files saved for {domain}", "success")
             
             # Save JS links if we had any

@@ -47,7 +47,7 @@ class JSONToMermaidConverter:
         return text
     
     def clean_json_files(self, urls):
-        """Clean up malformed JSON files"""
+        """Clean up malformed JSON files and ensure proper array format"""
         jsauce_banner.add_status("CLEANING UP JSON FILES...")
         for url in urls:
             domain = domain_handler.extract_domain(url)
@@ -55,7 +55,7 @@ class JSONToMermaidConverter:
                 continue
             
             files = [f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json" 
-                    for suffix in ['endpoints_detailed', 'endpoints_for_db', 'endpoint_stats']]
+                    for suffix in ['contents_detailed', 'contents_for_db', 'content_stats']]
             
             for json_file in files:
                 if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
@@ -64,15 +64,56 @@ class JSONToMermaidConverter:
                             content = f.read().strip()
                         
                         if content:
-                            if not content.startswith('['):
-                                content = '[' + content.replace('}{', '},{') + ']'
-                            
-                            with open(json_file, 'w', encoding='utf-8') as f:
-                                json.dump(json.loads(content), f, indent=2)
+                            # Handle concatenated JSON objects like {}{}{} 
+                            if content.count('}{') > 0:
+                                # Split by }{ and reconstruct as array
+                                json_parts = content.split('}{')
+                                json_array = []
                                 
+                                for i, part in enumerate(json_parts):
+                                    if i == 0:
+                                        # First part - add closing brace
+                                        json_str = part + '}'
+                                    elif i == len(json_parts) - 1:
+                                        # Last part - add opening brace  
+                                        json_str = '{' + part
+                                    else:
+                                        # Middle parts - add both braces
+                                        json_str = '{' + part + '}'
+                                    
+                                    try:
+                                        json_obj = json.loads(json_str)
+                                        json_array.append(json_obj)
+                                    except json.JSONDecodeError:
+                                        continue
+                                
+                                # Write as proper array
+                                if json_array:
+                                    with open(json_file, 'w', encoding='utf-8') as f:
+                                        json.dump(json_array, f, indent=2)
+                                    jsauce_banner.add_status(f"Fixed concatenated JSON in {json_file}", "success")
+                            else:
+                                # Single JSON object - validate and potentially convert to array
+                                try:
+                                    parsed_json = json.loads(content)
+                                    
+                                    # If it's a single object, convert to array for consistency
+                                    if isinstance(parsed_json, dict):
+                                        parsed_json = [parsed_json]
+                                    
+                                    with open(json_file, 'w', encoding='utf-8') as f:
+                                        json.dump(parsed_json, f, indent=2)
+                                    jsauce_banner.add_status(f"Validated JSON file: {json_file}", "success")
+                                    
+                                except json.JSONDecodeError as e:
+                                    jsauce_banner.add_status(f"Invalid JSON in {json_file}: {e}", "error")
+                                    # Create empty array
+                                    with open(json_file, 'w', encoding='utf-8') as f:
+                                        json.dump([], f, indent=2)
+                                    
                     except Exception as e:
-                        jsauce_banner.show_error(f"Error cleaning {json_file}: {e}")
-                        time.sleep(1)
+                        jsauce_banner.add_status(f"Error cleaning {json_file}: {e}", "error")
+
   
     def generate_unique_id(self, base_name: str) -> str:
         """Generate unique IDs to avoid conflicts"""
@@ -103,14 +144,14 @@ class JSONToMermaidConverter:
             return "unknown_domain"
    
     def reorganize_data_by_hierarchy(self, data: Dict) -> Dict:
-        """Reorganize data to Domain->Category->Endpoint - no evidence/JS links"""
-        if not isinstance(data, dict) or 'endpoints_by_source' not in data:
+        """Reorganize data to Domain->Category->Category - no evidence/JS links"""
+        if not isinstance(data, dict) or 'contents_by_source' not in data:
             return {}
             
         reorganized = {}
-        endpoints_by_source = data.get('endpoints_by_source', {})
+        contents_by_source = data.get('contents_by_source', {})
         
-        for source_url, source_data in endpoints_by_source.items():
+        for source_url, source_data in contents_by_source.items():
             domain = self.extract_domain(source_url)
             
             if domain not in reorganized:
@@ -189,28 +230,28 @@ class JSONToMermaidConverter:
             r'/user', r'/profile', r'/settings', r'/config'
         ]
         
-        def get_endpoint_priority(endpoint):
+        def get_content_priority(endpoint):
             """Get priority score for an endpoint"""
-            endpoint_lower = endpoint.lower()
+            content_lower = endpoint.lower()
             
             # Check high priority patterns
             for pattern in high_priority_patterns:
-                if re.search(pattern, endpoint_lower):
+                if re.search(pattern, content_lower):
                     return 1
             
             # Check medium priority patterns  
             for pattern in medium_priority_patterns:
-                if re.search(pattern, endpoint_lower):
+                if re.search(pattern, content_lower):
                     return 2
             
             return 3
         
         # Sort by priority, then limit
-        prioritized = sorted(endpoints, key=get_endpoint_priority)
+        prioritized = sorted(endpoints, key=get_content_priority)
         return prioritized[:max_endpoints]
 
     def create_flowchart_with_proper_hierarchy(self, data: Any) -> str:
-        """Create prioritized left-to-right flowchart with Domain -> Category -> Endpoint hierarchy"""
+        """Create prioritized left-to-right flowchart with Domain -> Category -> Category hierarchy"""
         self.used_ids = set()
         self.edge_count = 0
         self.text_size = 0
@@ -241,7 +282,7 @@ class JSONToMermaidConverter:
         
         domain_nodes = []
         category_nodes = []
-        endpoint_nodes = []
+        content_nodes = []
         high_priority_nodes = []
         
         for domain, domain_data in reorganized_data.items():
@@ -281,34 +322,34 @@ class JSONToMermaidConverter:
                 category_nodes.append(cat_id)
                 
                 # Prioritize and limit endpoints
-                max_endpoints_per_category = 8 if self.get_category_priority(category) == 1 else 5
+                max_content_per_category = 8 if self.get_category_priority(category) == 1 else 5
                 if self.text_size > self.max_text_size * 0.5:
-                    max_endpoints_per_category = 3
+                    max_content_per_category = 3
                 
-                prioritized_endpoints = self.prioritize_endpoints(endpoints, max_endpoints_per_category)
+                prioritized_endpoints = self.prioritize_endpoints(endpoints, max_content_per_category)
                 
                 for endpoint in prioritized_endpoints:
                     if not endpoint:
                         continue
                         
                     # Create endpoint node
-                    endpoint_id = self.generate_unique_id(f"ep_{category}_{domain}")
+                    content_id = self.generate_unique_id(f"ep_{category}_{domain}")
                     
                     # Truncate very long endpoints for text size
-                    endpoint_clean = str(endpoint).replace('[', '').replace(']', '').replace('"', "'")
-                    if len(endpoint_clean) > 50:
-                        endpoint_clean = endpoint_clean[:47] + "..."
+                    content_clean = str(endpoint).replace('[', '').replace(']', '').replace('"', "'")
+                    if len(content_clean) > 50:
+                        content_clean = content_clean[:47] + "..."
                     
-                    if not self.add_node(mermaid_lines, f'    {endpoint_id}["{endpoint_clean}"]'):
+                    if not self.add_node(mermaid_lines, f'    {content_id}["{content_clean}"]'):
                         break
-                    if not self.add_edge(mermaid_lines, f'    {cat_id} --> {endpoint_id}'):
+                    if not self.add_edge(mermaid_lines, f'    {cat_id} --> {content_id}'):
                         break
                     
                     # Mark high priority endpoints
                     if self.get_category_priority(category) == 1:
-                        high_priority_nodes.append(endpoint_id)
+                        high_priority_nodes.append(content_id)
                     else:
-                        endpoint_nodes.append(endpoint_id)
+                        content_nodes.append(content_id)
                     
                     if self.edge_count >= self.max_edges or self.text_size >= self.max_text_size:
                         break
@@ -353,8 +394,8 @@ class JSONToMermaidConverter:
             self.add_node(mermaid_lines, f'    class {",".join(domain_nodes)} domainStyle')
         if category_nodes:
             self.add_node(mermaid_lines, f'    class {",".join(category_nodes)} categoryStyle')
-        if endpoint_nodes:
-            self.add_node(mermaid_lines, f'    class {",".join(endpoint_nodes)} endpointStyle')
+        if content_nodes:
+            self.add_node(mermaid_lines, f'    class {",".join(content_nodes)} endpointStyle')
         if high_priority_nodes:
             self.add_node(mermaid_lines, f'    class {",".join(high_priority_nodes)} highPriority')
         
@@ -364,18 +405,18 @@ class JSONToMermaidConverter:
         """Create a flowchart showing the structure with proper hierarchy"""
         self.used_ids = set()  # Reset IDs for each conversion
         
-        # Handle your tool's detailed JSON format (endpoints_detailed.json)
-        if isinstance(data, dict) and 'endpoints_by_source' in data:
+        # Handle your tool's detailed JSON format (contents_detailed.json)
+        if isinstance(data, dict) and 'contents_by_source' in data:
             return self.create_flowchart_with_proper_hierarchy(data)
         
-        # Handle your tool's stats format (endpoint_stats.json) - keep existing logic
+        # Handle your tool's stats format (content_stats.json) - keep existing logic
         elif isinstance(data, dict) and 'categories' in data:
             return self.create_simple_stats_flowchart(data)
         
         # Handle list format
         elif isinstance(data, list) and len(data) > 0:
             first_item = data[0]
-            if 'endpoints_by_source' in first_item:
+            if 'contents_by_source' in first_item:
                 return self.create_flowchart_with_proper_hierarchy(first_item)
             else:
                 return self.create_simple_list_flowchart(data)
@@ -462,7 +503,7 @@ class JSONToMermaidConverter:
             if not domain:
                 continue
             
-            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json"
+            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_content_detailed.json"
             if not (os.path.exists(json_file) and os.path.getsize(json_file) > 0):
                 continue
             
@@ -476,7 +517,7 @@ class JSONToMermaidConverter:
                 with open(mermaid_file, 'w', encoding='utf-8') as f:
                     f.write(mermaid_output)
                 
-                jsauce_banner.show_completion(f"Mermaid saved: {mermaid_file}")
+                jsauce_banner.add_status(f"Mermaid saved: {mermaid_file}")
                 
                 time.sleep(1)
                 
@@ -487,7 +528,7 @@ class JSONToMermaidConverter:
                     jsauce_banner.show_completion(f"Rendered: {output_file}")
                     
             except Exception as e:
-                jsauce_banner.show_error(f"Mermaid error for {domain}: {e}")
+                jsauce_banner.add_status(f"Mermaid error for {domain}: {e}")
                 time.sleep(1)
 
         if diagrams_created > 0:

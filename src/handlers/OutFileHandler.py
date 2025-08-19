@@ -12,7 +12,7 @@ class OutFileHandler:
         
         # Only clear if directory already exists (from previous runs)
         if os.path.exists(domain_path):
-            for suffix in ['endpoints_found.txt', 'endpoints_detailed.json', 'endpoints_for_db.json', 'endpoint_stats.json']:
+            for suffix in ['contents_found.txt', 'contents_detailed.json', 'contents_for_db.json', 'content_stats.json']:
                 file_path = f"{domain_path}/{domain}_{suffix}"
                 try:
                     if os.path.exists(file_path):

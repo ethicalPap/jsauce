@@ -8,7 +8,7 @@ from src.packages.WebRequests import WebRequests
 from src.handlers.InputFileHandler import InputFileHandler
 from src.handlers.OutFileHandler import OutFileHandler
 from src.utils.Banner import Banner
-import sys
+from src.handlers.ArgumentHandler import ArgumentHandler
 
 # Initialize processors
 webrequests = WebRequests()
@@ -16,45 +16,48 @@ domain_handler = DomainHandler()
 converter = JSONToMermaidConverter()
 mermaid_cli = MermaidCLI()
 url_processor = URLProcessor()
-load_template = LoadTemplate(config.DEFAULT_TEMPLATE)
 input_file_handler = InputFileHandler()
 output_handler = OutFileHandler()
 jsauce_banner = Banner()
-
+argument_handler = ArgumentHandler()
 
 def main():
     try:
+        # parse command line args here
+        args = argument_handler.parse_arguments()
+
+        # load template arg
+        template_file = argument_handler.get_templates(args)
+        load_template = LoadTemplate(template_file)
+
         # Initialize banner with persistent display
         jsauce_banner.initialize_persistent_display()
         
-        if len(sys.argv) != 2:
-            jsauce_banner.show_error("Usage: python main.py <input_file>")
-            exit(1)
-        
         # Ensure base directories exist
         output_handler.ensure_base_directories()
+
+        # Track processing statistics
+        successful_domains = []
+        skipped_domains = []
+        processed_domains = set()  # Track domains we've seen to avoid duplicate clearing
         
         # Load URLs and patterns
         jsauce_banner.update_progress(0, 4, "Initializing")
         jsauce_banner.add_status("Loading input URLs...")
-        urls = input_file_handler.get_input_urls(sys.argv[1])
+        urls = input_file_handler.get_input_urls(args.input)
         jsauce_banner.add_status(f"Loaded {len(urls)} URLs for processing", "success")
+
 
         # load templates
         jsauce_banner.update_progress(1, 4, "Loading templates")
         jsauce_banner.add_status("Loading endpoint templates...")
-        templates, _ = load_template.load_patterns()
+        templates, _ = load_template.load_patterns(template_file)
         
         if not templates:
             jsauce_banner.show_error("No patterns loaded. Cannot proceed.")
             exit(1)
         
         jsauce_banner.add_status(f"Loaded {len(templates)} template categories", "success")
-        
-        # Track processing statistics
-        successful_domains = []
-        skipped_domains = []
-        processed_domains = set()  # Track domains we've seen to avoid duplicate clearing
         
         # Process each URL with progress tracking
         jsauce_banner.update_progress(2, 4, "Processing URLs")
@@ -94,7 +97,7 @@ def main():
         
         # Verify what was actually created
         jsauce_banner.update_progress(4, 4, "Finalizing")
-        
+
     except KeyboardInterrupt:
         jsauce_banner.add_status("Process interrupted by user", "warning")
     except Exception as e:
@@ -107,4 +110,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

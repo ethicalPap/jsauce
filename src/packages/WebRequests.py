@@ -74,7 +74,6 @@ class WebRequests:
             return 'https://' + url
         return url
 
-
     # save url content to file
     def save_url_content(self, url, content):
         filename = os.path.basename(urlparse(url).path) or f"un-named.html"
