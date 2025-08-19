@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="image.png" alt="JSauce Banner" width="600"/>
+  <img src="src/utils/image.png" alt="JSauce Banner" width="600"/>
 </div>
 
 
