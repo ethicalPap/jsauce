@@ -1,7 +1,8 @@
 # config vars
 
 # search regex filefor endpoints
-DEFAULT_TEMPLATE = "templates/default_template.yaml"
+DEFAULT_TEMPLATE = "templates/default_template.yaml" # Default template file for endpoint patterns
+SECURITY_SINKS_TEMPLATE = "templates/security_sinks.yaml" # Template for security sinks
 
 # Output directory
 OUTPUT_DIR = "./output"
