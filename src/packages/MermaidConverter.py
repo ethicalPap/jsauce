@@ -47,72 +47,88 @@ class JSONToMermaidConverter:
         return text
     
     def clean_json_files(self, urls):
-        """Clean up malformed JSON files and ensure proper array format"""
-        jsauce_banner.add_status("CLEANING UP JSON FILES...")
-        for url in urls:
-            domain = domain_handler.extract_domain(url)
-            if not domain:
-                continue
+            """Clean up malformed JSON files and ensure proper array format"""
+            jsauce_banner.add_status("CLEANING UP JSON FILES...")
             
-            files = [f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json" 
-                    for suffix in ['contents_detailed', 'contents_for_db', 'content_stats']]
-            
-            for json_file in files:
-                if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
-                    try:
-                        with open(json_file, 'r', encoding='utf-8') as f:
-                            content = f.read().strip()
-                        
-                        if content:
-                            # Handle concatenated JSON objects like {}{}{} 
-                            if content.count('}{') > 0:
-                                # Split by }{ and reconstruct as array
-                                json_parts = content.split('}{')
-                                json_array = []
-                                
-                                for i, part in enumerate(json_parts):
-                                    if i == 0:
-                                        # First part - add closing brace
-                                        json_str = part + '}'
-                                    elif i == len(json_parts) - 1:
-                                        # Last part - add opening brace  
-                                        json_str = '{' + part
+            for url in urls:
+                domain = domain_handler.extract_domain(url)
+                if not domain:
+                    continue
+                
+                files = [
+                    f"{config.OUTPUT_DIR}/{domain}/{domain}_content_detailed.json",
+                    f"{config.OUTPUT_DIR}/{domain}/{domain}_content_for_db.json", 
+                    f"{config.OUTPUT_DIR}/{domain}/{domain}_content_stats.json"
+                ]
+                
+                for json_file in files:
+                    if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
+                        try:
+                            with open(json_file, 'r', encoding='utf-8') as f:
+                                content = f.read().strip()
+                            
+                            if content:
+                                # Check if we have concatenated JSON objects like {}{}{} 
+                                if content.count('}{') > 0:
+                                    jsauce_banner.add_status(f"Found concatenated JSON in {json_file} - fixing...")
+                                    
+                                    # Split by }{ and reconstruct as array
+                                    # Use regex to find JSON object boundaries more reliably
+                                    json_objects = []
+                                    
+                                    # Try to split on "}{"
+                                    parts = content.split('}{')
+                                    
+                                    for i, part in enumerate(parts):
+                                        if i == 0:
+                                            # First part - add closing brace if needed
+                                            json_str = part + ('}' if not part.endswith('}') else '')
+                                        elif i == len(parts) - 1:
+                                            # Last part - add opening brace if needed
+                                            json_str = ('{' if not part.startswith('{') else '') + part
+                                        else:
+                                            # Middle parts - add both braces
+                                            json_str = '{' + part + '}'
+                                        
+                                        try:
+                                            json_obj = json.loads(json_str)
+                                            json_objects.append(json_obj)
+                                            jsauce_banner.add_status(f"Successfully parsed JSON object {i+1}", "success")
+                                        except json.JSONDecodeError as e:
+                                            jsauce_banner.add_status(f"Failed to parse JSON part {i+1}: {e}", "warning")
+                                            continue
+                                    
+                                    # Write as proper array if we got any valid objects
+                                    if json_objects:
+                                        with open(json_file, 'w', encoding='utf-8') as f:
+                                            json.dump(json_objects, f, indent=2)
+                                        jsauce_banner.add_status(f"Fixed {len(json_objects)} JSON objects in {json_file}", "success")
                                     else:
-                                        # Middle parts - add both braces
-                                        json_str = '{' + part + '}'
-                                    
+                                        jsauce_banner.add_status(f"No valid JSON objects found in {json_file}", "warning")
+                                        # Create empty array
+                                        with open(json_file, 'w', encoding='utf-8') as f:
+                                            json.dump([], f, indent=2)
+                                            
+                                else:
+                                    # Single JSON object - validate and potentially convert to array
                                     try:
-                                        json_obj = json.loads(json_str)
-                                        json_array.append(json_obj)
-                                    except json.JSONDecodeError:
-                                        continue
-                                
-                                # Write as proper array
-                                if json_array:
-                                    with open(json_file, 'w', encoding='utf-8') as f:
-                                        json.dump(json_array, f, indent=2)
-                                    jsauce_banner.add_status(f"Fixed concatenated JSON in {json_file}", "success")
-                            else:
-                                # Single JSON object - validate and potentially convert to array
-                                try:
-                                    parsed_json = json.loads(content)
-                                    
-                                    # If it's a single object, convert to array for consistency
-                                    if isinstance(parsed_json, dict):
-                                        parsed_json = [parsed_json]
-                                    
-                                    with open(json_file, 'w', encoding='utf-8') as f:
-                                        json.dump(parsed_json, f, indent=2)
-                                    jsauce_banner.add_status(f"Validated JSON file: {json_file}", "success")
-                                    
-                                except json.JSONDecodeError as e:
-                                    jsauce_banner.add_status(f"Invalid JSON in {json_file}: {e}", "error")
-                                    # Create empty array
-                                    with open(json_file, 'w', encoding='utf-8') as f:
-                                        json.dump([], f, indent=2)
-                                    
-                    except Exception as e:
-                        jsauce_banner.add_status(f"Error cleaning {json_file}: {e}", "error")
+                                        parsed_json = json.loads(content)
+                                        
+                                        # If it's a single object, convert to array for consistency
+                                        if isinstance(parsed_json, dict):
+                                            parsed_json = [parsed_json]
+                                            jsauce_banner.add_status(f"Converted single object to array in {json_file}", "success")
+                                        
+                                        with open(json_file, 'w', encoding='utf-8') as f:
+                                            json.dump(parsed_json, f, indent=2)
+                                        jsauce_banner.add_status(f"Validated JSON file: {json_file}", "success")
+                                        
+                                    except json.JSONDecodeError as e:
+                                        jsauce_banner.add_status(f"Invalid JSON in {json_file}: {e}", "error")
+                                        
+                        except Exception as e:
+                            jsauce_banner.add_status(f"Error cleaning {json_file}: {e}", "error")
+
 
   
     def generate_unique_id(self, base_name: str) -> str:

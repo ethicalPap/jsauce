@@ -63,7 +63,7 @@ class ArgumentHandler:
         # else handle other cases
         elif args.template.lower().rstrip('/') == 'security':
             return config.SECURITY_TEMPLATES
-        elif args.template.lower().rstrip('/') == 'endpoint':
+        elif args.template.lower().rstrip('/') == 'endpoints':
             return config.ENDPOINTS_TEMPLATES
         elif args.template.lower().rstrip('/') == 'custom':
             return config.template # need to add logic for scanning a folder for templates
