@@ -93,6 +93,10 @@ class Banner:
             color = self.CYAN
             prefix = "•"
         
+        # Truncate very long error messages to prevent display corruption
+        if len(message) > 120:
+            message = message[:117] + "..."
+        
         formatted_message = f"{color}[{timestamp}] {prefix} {message}{self.RESET}"
         self.status_log.append(formatted_message)
         
@@ -118,12 +122,14 @@ class Banner:
         return f"|{bar}|"
     
     def _refresh_display(self):
-        """Refresh the entire display without clearing"""
-        # Move cursor to position after banner and separator
-        print("\033[13;1H", end="")  # Move to line 13, column 1
+        """Refresh the entire display by completely redrawing"""
+        # Instead of cursor positioning, just clear and redraw everything
+        self.clear_screen()
         
-        # Clear from cursor to end of screen
-        print("\033[J", end="")
+        # Print banner at top
+        print(self.RED + self.banner + self.RESET)
+        print(self.CYAN + self.tagline + self.RESET)
+        print("=" * 80)
         
         # Print current progress if available
         if self.current_progress:
@@ -166,6 +172,9 @@ class Banner:
         if not self.is_initialized:
             self.initialize_persistent_display()
         
+        # Set final progress state
+        self.current_progress = f"{self.GREEN}✓ COMPLETED - Processed {total_processed} items{self.RESET}"
+        
         # Add completion status to log
         self.add_status("=" * 50, "info")
         self.add_status(f"PROCESSING COMPLETED!", "success")
@@ -182,8 +191,7 @@ class Banner:
         
         self.add_status("=" * 50, "info")
         
-        # Clear progress since we're done
-        self.current_progress = None
+        # Refresh display with final progress
         self._refresh_display()
     
     def show_error(self, error_message):
