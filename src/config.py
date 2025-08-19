@@ -1,13 +1,13 @@
 # config vars
 
 # search regex filefor endpoints
-TEMPLATE_ENDPOINTS = "templates/endpoints.txt"
+DEFAULT_TEMPLATE = "templates/default_template.yaml"
 
 # Output directory
-OUTPUT_DIR = "./output/"
+OUTPUT_DIR = "./output"
 
 # Data directory for storing intermediate files
-DATA_DIR = "./data/"
+DATA_DIR = "./data"
 
 # Timeout for web requests (seconds)
 REQUEST_TIMEOUT = 10
