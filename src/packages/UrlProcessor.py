@@ -25,8 +25,13 @@ class URLProcessor:
         self.banner.add_status(f"Fetching content from {domain}...")
         html_content = self.webrequests.fetch_url_content(self.webrequests.add_protocol_if_missing(url))
         if not html_content:
-            self.banner.show_warning(f"Failed to fetch content from {url} - skipping")
-            return False
+            self.banner.show_warning(f"Failed to fetch content from {url} trying again without user-agents")
+            html_content = self.webrequests.fetch_url_content(self.webrequests.add_protocol_if_missing(url), user_agent=None)
+            # if still nothing, then skip
+            if not html_content:
+                self.banner(f"Failed to fetch content from {url} - skipping")
+                return False
+           
         
         # Extract JS links
         js_links = self.jsprocessor.extract_js_links(html_content, url)

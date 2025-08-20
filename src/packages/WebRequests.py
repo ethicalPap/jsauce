@@ -15,10 +15,9 @@ class WebRequests:
         # Set session timeout
         self.session.timeout = config.REQUEST_TIMEOUT
         
-    def fetch_url_content(self, url, timeout=config.REQUEST_TIMEOUT):
+    def fetch_url_content(self, url, timeout=config.REQUEST_TIMEOUT, user_agent = random.choice(config.USER_AGENTS)):
         try:
             # Try with random user agent first
-            user_agent = random.choice(config.USER_AGENTS)
             headers = {'User-Agent': user_agent}
             response = self.session.get(url, headers=headers, timeout=timeout)
             response.raise_for_status()

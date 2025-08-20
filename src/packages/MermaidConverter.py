@@ -6,6 +6,7 @@ from collections import defaultdict
 import os
 from src import config
 import time
+import shutil
 
 class JSONToMermaidConverter:
     def __init__(self, domain_handler, banner, mermaid_cli, max_edges=450, max_text_size=50000):
@@ -69,7 +70,6 @@ class JSONToMermaidConverter:
                 try:
                     # Create backup before processing
                     backup_file = f"{json_file}.backup"
-                    import shutil
                     shutil.copy2(json_file, backup_file)
                     
                     with open(json_file, 'r', encoding='utf-8') as f:
@@ -77,17 +77,25 @@ class JSONToMermaidConverter:
                     
                     if not content:
                         self.banner.add_status(f"Skipping {json_file} - no content after strip")
+                        if backup_file and os.path.exists(backup_file):
+                            os.remove(backup_file)
                         continue
-                    
+                        
                     # Check if it's already valid JSON
                     try:
-                        json.loads(content)
-                        self.banner.add_status(f"✓ {json_file} already valid JSON")
-                        # Remove backup since original is good
-                        os.remove(backup_file)
-                        continue
-                    except json.JSONDecodeError:
-                        pass  # Need to fix it
+                        parsed_data = json.loads(content)
+                        self.banner.add_status(f"{json_file} already valid JSON")
+
+                        with open(json_file, 'w', encoding='utf-8') as f:
+                            json.dump(parsed_data, f, indent=2, ensure_ascii=False)
+                        
+                        if backup_file and os.path.exists(backup_file):
+                            # Remove backup since original is good
+                            os.remove(backup_file)
+                            continue
+
+                    except json.JSONDecodeError as e:
+                        print(e)  # Need to fix it
                     
                     # Fix the JSON structure
                     fixed_content = self._fix_malformed_json(content, json_file)
@@ -95,17 +103,16 @@ class JSONToMermaidConverter:
                     if fixed_content:
                         # Validate the fixed content before writing
                         try:
-                            json.loads(fixed_content)
+                            parsed_data = json.loads(fixed_content)
                             
                             # Write the fixed content
                             with open(json_file, 'w', encoding='utf-8') as f:
                                 # Pretty print the JSON
-                                parsed = json.loads(fixed_content)
-                                json.dump(parsed, f, indent=2, ensure_ascii=False)
+                                json.dump(parsed_data, f, indent=2, ensure_ascii=False)
                             
-                            self.banner.add_status(f"✓ Fixed {json_file}")
-                            # Remove backup since fix was successful
-                            os.remove(backup_file)
+                            self.banner.add_status(f"Fixed {json_file}")        
+                            if backup_file and os.path.exists(backup_file):
+                                os.remove(backup_file)
                             
                         except json.JSONDecodeError as e:
                             self.banner.show_error(f"Failed to validate fixed JSON for {json_file}: {e}")
