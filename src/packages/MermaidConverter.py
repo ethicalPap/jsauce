@@ -5,22 +5,18 @@ from urllib.parse import urlparse
 from collections import defaultdict
 import os
 from src import config
-from src.handlers.DomainHandler import DomainHandler
 import time
-from src.packages.MermaidCLI import MermaidCLI
-from src.utils.Banner import Banner
-
-domain_handler = DomainHandler()
-mermaid_cli = MermaidCLI()
-jsauce_banner = Banner()
 
 class JSONToMermaidConverter:
-    def __init__(self, max_edges=450, max_text_size=50000):
+    def __init__(self, domain_handler, banner, mermaid_cli, max_edges=450, max_text_size=50000):
         self.used_ids = set()
         self.max_edges = max_edges
         self.max_text_size = max_text_size
         self.edge_count = 0
         self.text_size = 0
+        self.domain_handler = domain_handler
+        self.banner = banner
+        self.mermaid_cli = mermaid_cli
         
         # Priority categories (most important for security)
         self.high_priority_categories = {
@@ -47,87 +43,32 @@ class JSONToMermaidConverter:
         return text
     
     def clean_json_files(self, urls):
-            """Clean up malformed JSON files and ensure proper array format"""
-            jsauce_banner.add_status("CLEANING UP JSON FILES...")
+        """Clean up malformed JSON files"""
+        self.banner.add_status("CLEANING UP JSON FILES...")
+        for url in urls:
+            domain = self.domain_handler.extract_domain(url)
+            if not domain:
+                continue
             
-            for url in urls:
-                domain = domain_handler.extract_domain(url)
-                if not domain:
-                    continue
-                
-                files = [
-                    f"{config.OUTPUT_DIR}/{domain}/{domain}_content_detailed.json",
-                    f"{config.OUTPUT_DIR}/{domain}/{domain}_content_for_db.json", 
-                    f"{config.OUTPUT_DIR}/{domain}/{domain}_content_stats.json"
-                ]
-                
-                for json_file in files:
-                    if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
-                        try:
-                            with open(json_file, 'r', encoding='utf-8') as f:
-                                content = f.read().strip()
+            files = [f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json" 
+                    for suffix in ['content_detailed', 'content_for_db', 'content_stats']]
+            
+            for json_file in files:
+                if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
+                    try:
+                        with open(json_file, 'r', encoding='utf-8') as f:
+                            content = f.read().strip()
+                        
+                        if content:
+                            if not content.startswith('['):
+                                content = '[' + content.replace('}{', '},{') + ']'
                             
-                            if content:
-                                # Check if we have concatenated JSON objects like {}{}{} 
-                                if content.count('}{') > 0:
-                                    jsauce_banner.add_status(f"Found concatenated JSON in {json_file} - fixing...")
-                                    
-                                    # Split by }{ and reconstruct as array
-                                    # Use regex to find JSON object boundaries more reliably
-                                    json_objects = []
-                                    
-                                    # Try to split on "}{"
-                                    parts = content.split('}{')
-                                    
-                                    for i, part in enumerate(parts):
-                                        if i == 0:
-                                            # First part - add closing brace if needed
-                                            json_str = part + ('}' if not part.endswith('}') else '')
-                                        elif i == len(parts) - 1:
-                                            # Last part - add opening brace if needed
-                                            json_str = ('{' if not part.startswith('{') else '') + part
-                                        else:
-                                            # Middle parts - add both braces
-                                            json_str = '{' + part + '}'
-                                        
-                                        try:
-                                            json_obj = json.loads(json_str)
-                                            json_objects.append(json_obj)
-                                            jsauce_banner.add_status(f"Successfully parsed JSON object {i+1}", "success")
-                                        except json.JSONDecodeError as e:
-                                            jsauce_banner.add_status(f"Failed to parse JSON part {i+1}: {e}", "warning")
-                                            continue
-                                    
-                                    # Write as proper array if we got any valid objects
-                                    if json_objects:
-                                        with open(json_file, 'w', encoding='utf-8') as f:
-                                            json.dump(json_objects, f, indent=2)
-                                        jsauce_banner.add_status(f"Fixed {len(json_objects)} JSON objects in {json_file}", "success")
-                                    else:
-                                        jsauce_banner.add_status(f"No valid JSON objects found in {json_file}", "warning")
-                                        # Create empty array
-                                        with open(json_file, 'w', encoding='utf-8') as f:
-                                            json.dump([], f, indent=2)
-                                            
-                                else:
-                                    # Single JSON object - validate and potentially convert to array
-                                    try:
-                                        parsed_json = json.loads(content)
-                                        
-                                        # If it's a single object, convert to array for consistency
-                                        if isinstance(parsed_json, dict):
-                                            parsed_json = [parsed_json]
-                                            jsauce_banner.add_status(f"Converted single object to array in {json_file}", "success")
-                                        
-                                        with open(json_file, 'w', encoding='utf-8') as f:
-                                            json.dump(parsed_json, f, indent=2)
-                                        jsauce_banner.add_status(f"Validated JSON file: {json_file}", "success")
-                                        
-                                    except json.JSONDecodeError as e:
-                                        jsauce_banner.add_status(f"Invalid JSON in {json_file}: {e}", "error")
-                                        
-                        except Exception as e:
-                            jsauce_banner.add_status(f"Error cleaning {json_file}: {e}", "error")
+                            with open(json_file, 'w', encoding='utf-8') as f:
+                                json.dump(json.loads(content), f, indent=2)
+                                
+                    except Exception as e:
+                        self.banner.show_error(f"Error cleaning {json_file}: {e}")
+                        time.sleep(1)
 
 
   
@@ -502,20 +443,20 @@ class JSONToMermaidConverter:
     def generate_mermaid(self, urls):
         """Generate Mermaid flowcharts"""
 
-        jsauce_banner.add_status("CONVERTING TO MERMAID FORMAT...")
+        self.banner.add_status("CONVERTING TO MERMAID FORMAT...")
         
         # Check if Mermaid CLI is available first
-        if not mermaid_cli.is_available():
-            jsauce_banner.show_warning("Mermaid CLI not available - skipping diagram generation")
-            jsauce_banner.show_warning("Install with: npm install -g @mermaid-js/mermaid-cli")
+        if not self.mermaid_cli.is_available():
+            self.banner.show_warning("Mermaid CLI not available - skipping diagram generation")
+            self.banner.show_warning("Install with: npm install -g @mermaid-js/mermaid-cli")
             return
         
         diagrams_created = 0
         diagrams_failed = 0
 
-        jsauce_banner.update_status("CONVERTING TO MERMAID FORMAT...")
+        self.banner.update_status("CONVERTING TO MERMAID FORMAT...")
         for url in urls:
-            domain = domain_handler.extract_domain(url)
+            domain = self.domain_handler.extract_domain(url)
             if not domain:
                 continue
             
@@ -533,22 +474,22 @@ class JSONToMermaidConverter:
                 with open(mermaid_file, 'w', encoding='utf-8') as f:
                     f.write(mermaid_output)
                 
-                jsauce_banner.add_status(f"Mermaid saved: {mermaid_file}")
+                self.banner.add_status(f"Mermaid saved: {mermaid_file}")
                 
                 time.sleep(1)
                 
                 # Render to SVG/PNG
                 for ext in ['svg', 'png']:
                     output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.{ext}"
-                    mermaid_cli.render(mermaid_file, output_file)
-                    jsauce_banner.show_completion(f"Rendered: {output_file}")
+                    self.mermaid_cli.render(mermaid_file, output_file)
+                    self.banner.show_completion(f"Rendered: {output_file}")
                     
             except Exception as e:
-                jsauce_banner.add_status(f"Mermaid error for {domain}: {e}")
+                self.banner.add_status(f"Mermaid error for {domain}: {e}")
                 time.sleep(1)
 
         if diagrams_created > 0:
-            jsauce_banner.show_completion(f"Diagrams created for {diagrams_created} domains")
+            self.banner.show_completion(f"Diagrams created for {diagrams_created} domains")
         if diagrams_failed > 0:
-            jsauce_banner.show_completion(f" {diagrams_failed} diagrams failed to generate, is Mermaid CLI installed?")
+            self.banner.show_completion(f" {diagrams_failed} diagrams failed to generate, is Mermaid CLI installed?")
         time.sleep(3)

@@ -3,7 +3,7 @@
 # search regex filefor endpoints
 ENDPOINTS_TEMPLATES = "templates/endpoints/Endpoints.yaml" # Default template file for endpoint patterns
 SECURITY_TEMPLATES = "templates/security/Sinks.yaml" # Template for security sinks
-
+CUSTOM_TEMPLATES = "" # reserved for custom templates
 
 # Default tempate, will be changeable in arghandler.
 DEFAULT_TEMPLATE = ENDPOINTS_TEMPLATES

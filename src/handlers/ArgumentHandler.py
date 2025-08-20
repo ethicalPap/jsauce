@@ -1,10 +1,10 @@
 import argparse
 from src import config
 
-
 class ArgumentHandler:
     def __init__(self):
-        pass
+        self.parser = None
+        self.args = None
 
     """
     arg brainstorm
@@ -31,7 +31,7 @@ class ArgumentHandler:
         Usage:
             python3 jsauce.py -i <inputfile>.txt -t <template> 
         Examples:
-            python3 jsauce.py -i url_list.txt -t default-template
+            python3 jsauce.py -i url_list.txt -t endpoints
             ''' # syntax maybe -i for input file and -t for template
         )
 
@@ -48,24 +48,26 @@ class ArgumentHandler:
         )
 
         parser.add_argument(
-            '-tf', '--template-file',
+            '-tf', '--templatefile',
             help='Path to custom YAML Template file'
         )
 
-        return parser.parse_args()
+        self.parser = parser
+        self.args = parser.parse_args()
+        return self.args
 
     # get specified templates based on args
     def get_templates(self, args):
         # if -tf is specified, return the exact file specified after that
-        if args.template_file:
-            return args.template_file
+        if self.args.templatefile:
+            return args.templatefile
         
         # else handle other cases
-        elif args.template.lower().rstrip('/') == 'security':
+        elif self.args.template.lower().rstrip('/') == 'security':
             return config.SECURITY_TEMPLATES
-        elif args.template.lower().rstrip('/') == 'endpoints':
+        elif self.args.template.lower().rstrip('/') == 'endpoints':
             return config.ENDPOINTS_TEMPLATES
-        elif args.template.lower().rstrip('/') == 'custom':
-            return config.template # need to add logic for scanning a folder for templates
+        elif self.args.template.lower().rstrip('/') == 'custom':
+            return config.CUSTOM_TEMPLATES # need to add logic for scanning a folder for templates
         else:
             return config.ENDPOINTS_TEMPLATES # if nothing specified, default to Endpoint Template

@@ -1,22 +1,17 @@
 # src/packages/CategoryProcessor.py
-import re
 import json
 import os
-import yaml
 from src import config
 from datetime import datetime
-from src.utils.Banner import Banner
-from src.handlers.DomainHandler import DomainHandler
-import time
 
-jsauce_banner = Banner()
-domain_handler = DomainHandler()
 
 class CategoryProcessor:
-    def __init__(self):
+    def __init__(self, banner, domain_handler):
         self.templates_by_category = {}
         self.categorized_results = {}
         self.detailed_results = {}
+        self.banner = banner
+        self.domain_handler = domain_handler
       
     def _is_false_positive(self, match, category):
         """Check if match is a false positive"""
@@ -88,45 +83,49 @@ class CategoryProcessor:
     
     def save_detailed_results_to_json(self, output_file):
         """Save detailed results to JSON"""
-        file_path = f"{config.OUTPUT_DIR}/{output_file}"
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        
-        results_by_source = {}
-        all_content_by_category = {}
-        
-        for js_url, details in self.detailed_results.items():
-            source_url = details['source_url']
+        try:
+            file_path = f"{config.OUTPUT_DIR}/{output_file}"
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             
-            if source_url not in results_by_source:
-                results_by_source[source_url] = {'source_url': source_url, 'js_files': {}}
+            results_by_source = {}
+            all_content_by_category = {}
             
-            results_by_source[source_url]['js_files'][js_url] = {
-                'js_url': js_url, 'categories': details['categories']
+            for js_url, details in self.detailed_results.items():
+                source_url = details['source_url']
+                
+                if source_url not in results_by_source:
+                    results_by_source[source_url] = {'source_url': source_url, 'js_files': {}}
+                
+                results_by_source[source_url]['js_files'][js_url] = {
+                    'js_url': js_url, 'categories': details['categories']
+                }
+                
+                for category, endpoints in details['categories'].items():
+                    if category not in all_content_by_category:
+                        all_content_by_category[category] = set()
+                    all_content_by_category[category].update(endpoints)
+            
+            for category in all_content_by_category:
+                all_content_by_category[category] = list(all_content_by_category[category])
+            
+            json_data = {
+                'metadata': {
+                    'total_sources': len(results_by_source),
+                    'total_js_files': sum(len(source['js_files']) for source in results_by_source.values()),
+                    'total_endpoints': sum(len(endpoints) for endpoints in all_content_by_category.values()),
+                    'extraction_date': datetime.now().isoformat()
+                },
+                'contents_by_source': results_by_source,
+                'contents_summary': all_content_by_category
             }
             
-            for category, endpoints in details['categories'].items():
-                if category not in all_content_by_category:
-                    all_content_by_category[category] = set()
-                all_content_by_category[category].update(endpoints)
+            with open(file_path, 'a+', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2)
         
-        for category in all_content_by_category:
-            all_content_by_category[category] = list(all_content_by_category[category])
+            return json_data
         
-        json_data = {
-            'metadata': {
-                'total_sources': len(results_by_source),
-                'total_js_files': sum(len(source['js_files']) for source in results_by_source.values()),
-                'total_endpoints': sum(len(endpoints) for endpoints in all_content_by_category.values()),
-                'extraction_date': datetime.now().isoformat()
-            },
-            'contents_by_source': results_by_source,
-            'contents_summary': all_content_by_category
-        }
-        
-        with open(file_path, 'a+', encoding='utf-8') as f:
-            json.dump(json_data, f, indent=2)
-        
-        return json_data
+        except Exception as e:
+            print(e)
     
     def save_flat_content_for_db(self, output_file):
         """Save flat endpoints for database"""

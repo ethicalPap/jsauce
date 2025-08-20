@@ -1,12 +1,9 @@
 import subprocess
 import platform
-from src.utils.Banner import Banner
-
-jsauce_banner = Banner()
 
 class MermaidCLI:
-    def __init__(self):
-        pass
+    def __init__(self, banner):
+        self.banner = banner
     
     def render(self, input_file, output_file):
         try:
@@ -17,7 +14,7 @@ class MermaidCLI:
                 shell=True if platform.system() == 'Windows' else False
             )
         except subprocess.CalledProcessError as e:
-            jsauce_banner.show_error(f"Error rendering Mermaid file: {e}")
+            self.banner.show_error(f"Error rendering Mermaid file: {e}")
             raise
 
     def is_available(self):

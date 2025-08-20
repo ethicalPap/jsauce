@@ -1,19 +1,16 @@
 # Load template files that are used as search strings (regex)
 
-from src import config
 import os
-from src.packages.CategoryProcessor import CategoryProcessor
-from src.utils.Banner import Banner
 import yaml
 import time
 
-jsauce_banner = Banner()
-
 class LoadTemplate:
-    def __init__(self, file_path):
+    def __init__(self, file_path, banner, category_processor):
         self.file_path = file_path
         self.lines = []
         self.read_file()
+        self.banner = banner
+        self.category_processor = category_processor
 
     def read_file(self):
         with open(self.file_path, 'r') as file:
@@ -22,20 +19,19 @@ class LoadTemplate:
     def get_lines(self):
         return self.lines
     
-    def load_patterns(self, template_file):
+    def load_patterns(self):
         """Load patterns from YAML or text format"""
-        processor = CategoryProcessor()
-        yaml_path = template_file.replace('.txt', '.yaml')
+        yaml_path = self.file_path.replace('.txt', '.yaml')
         
         if os.path.exists(yaml_path):
-            jsauce_banner.add_status(f"Loading YAML: {yaml_path}")
+            self.banner.add_status(f"Loading YAML: {yaml_path}")
             templates = self.load_patterns_from_yaml(yaml_path)
             if templates:
-                return templates, processor
+                return templates, self.category_processor
         
-        loader = LoadTemplate(template_file)
-        templates = processor.parse_templates_by_category(loader.get_lines())
-        return templates, processor
+        loader = LoadTemplate(self.file_path)
+        templates = self.category_processor.parse_templates_by_category(loader.get_lines())
+        return templates, self.category_processor
     
     def load_patterns_from_yaml(self, yaml_file_path):
         """Load regex patterns from YAML file"""
@@ -44,7 +40,7 @@ class LoadTemplate:
                 data = yaml.safe_load(f)
             
             if not data or not isinstance(data, dict):
-                jsauce_banner.show_error(f"Warning: Invalid YAML file {yaml_file_path}")
+                self.banner.show_error(f"Warning: Invalid YAML file {yaml_file_path}")
                 time.sleep(2)
                 return {}
             
@@ -54,11 +50,11 @@ class LoadTemplate:
                     templates[category] = {p: p for p in cat_data['patterns']}
             
             self.templates_by_category = templates
-            jsauce_banner.add_status(f"Total categories: {len(templates)}")
+            self.banner.add_status(f"Total categories: {len(templates)}")
             return templates
             
         except Exception as e:
-            jsauce_banner.show_error(f"Error loading YAML: {e}")
+            self.banner.show_error(f"Error loading YAML: {e}")
             time.sleep(2)
             return {}
     
