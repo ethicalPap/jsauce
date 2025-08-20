@@ -15,8 +15,10 @@ class URLProcessor:
         domain = self.domain_handler.extract_domain(url)
         if not domain:
             self.banner.show_warning(f"Could not extract domain from {url}")
-            return False  # Return False to indicate no processing occurred
+            return False
 
+        # IMPORTANT: Reset CategoryProcessor for this URL
+        self.category_processor.reset_for_new_url()
         self.category_processor.templates_by_category = templates
         
         # Fetch and process HTML
@@ -24,7 +26,7 @@ class URLProcessor:
         html_content = self.webrequests.fetch_url_content(self.webrequests.add_protocol_if_missing(url))
         if not html_content:
             self.banner.show_warning(f"Failed to fetch content from {url} - skipping")
-            return False  # Return False - no content means no processing
+            return False
         
         # Extract JS links
         js_links = self.jsprocessor.extract_js_links(html_content, url)
@@ -37,7 +39,7 @@ class URLProcessor:
         if js_links:
             # Process each JS file
             for i, js_link in enumerate(js_links, 1):
-                self.banner.add_status(f"Analyzing JS file {i}/{len(js_links)} from {domain}") # this might have to be add_status if it causes issues
+                self.banner.add_status(f"Analyzing JS file {i}/{len(js_links)} from {domain}")
                 js_content = self.webrequests.fetch_url_content(js_link)
                 if js_content:
                     findings = self.jsprocessor.search_js_content_by_category_with_context(
@@ -50,7 +52,7 @@ class URLProcessor:
                 else:
                     self.banner.show_warning(f"Failed to fetch JS content from {js_link}")
         
-        # Get final endpoint count
+        # Get final endpoint count from CURRENT processing only
         all_endpoints = self.category_processor.get_all_content_flat()
         total_content_found = len(all_endpoints)
         
@@ -58,14 +60,14 @@ class URLProcessor:
         if total_content_found > 0 or has_any_findings:
             self.banner.add_status(f"Creating output files for {domain}...")
             
-            # NOW create the output directory (only when we have data)
+            # Create the output directory (only when we have data)
             self._ensure_output_directory(domain)
             
-            # Save all the results
+            # Save all the results for THIS URL only
             self.category_processor.save_content_to_txt(all_endpoints, f"{domain}/{domain}_content_found.txt")
             self.banner.add_status(f"Saved {total_content_found} endpoints for {domain}", "success")
             
-            # Save detailed results
+            # Save detailed results for THIS URL only
             if self.category_processor.categorized_results or self.category_processor.detailed_results:
                 self.category_processor.save_detailed_results_to_json(f"{domain}/{domain}_content_detailed.json")
                 self.category_processor.save_flat_content_for_db(f"{domain}/{domain}_content_for_db.json")

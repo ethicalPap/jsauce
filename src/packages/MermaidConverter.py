@@ -42,33 +42,185 @@ class JSONToMermaidConverter:
         text = re.sub(r'\s+', '_', text)
         return text
     
+    # clean json files after append
     def clean_json_files(self, urls):
-        """Clean up malformed JSON files"""
+        """Clean up malformed JSON files - improved version"""
         self.banner.add_status("CLEANING UP JSON FILES...")
+        
         for url in urls:
             domain = self.domain_handler.extract_domain(url)
             if not domain:
                 continue
             
-            files = [f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json" 
-                    for suffix in ['content_detailed', 'content_for_db', 'content_stats']]
+            # Define the files that need cleaning
+            json_suffixes = ['content_detailed', 'content_for_db', 'content_stats']
             
-            for json_file in files:
-                if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
+            for suffix in json_suffixes:
+                json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json"
+                
+                if not os.path.exists(json_file):
+                    self.banner.add_status(f"Skipping {json_file} - file doesn't exist")
+                    continue
+                    
+                if os.path.getsize(json_file) == 0:
+                    self.banner.add_status(f"Skipping {json_file} - file is empty")
+                    continue
+                
+                try:
+                    # Create backup before processing
+                    backup_file = f"{json_file}.backup"
+                    import shutil
+                    shutil.copy2(json_file, backup_file)
+                    
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+                    
+                    if not content:
+                        self.banner.add_status(f"Skipping {json_file} - no content after strip")
+                        continue
+                    
+                    # Check if it's already valid JSON
                     try:
-                        with open(json_file, 'r', encoding='utf-8') as f:
-                            content = f.read().strip()
-                        
-                        if content:
-                            if not content.startswith('['):
-                                content = '[' + content.replace('}{', '},{') + ']'
+                        json.loads(content)
+                        self.banner.add_status(f"✓ {json_file} already valid JSON")
+                        # Remove backup since original is good
+                        os.remove(backup_file)
+                        continue
+                    except json.JSONDecodeError:
+                        pass  # Need to fix it
+                    
+                    # Fix the JSON structure
+                    fixed_content = self._fix_malformed_json(content, json_file)
+                    
+                    if fixed_content:
+                        # Validate the fixed content before writing
+                        try:
+                            json.loads(fixed_content)
                             
+                            # Write the fixed content
                             with open(json_file, 'w', encoding='utf-8') as f:
-                                json.dump(json.loads(content), f, indent=2)
-                                
-                    except Exception as e:
-                        self.banner.show_error(f"Error cleaning {json_file}: {e}")
-                        time.sleep(1)
+                                # Pretty print the JSON
+                                parsed = json.loads(fixed_content)
+                                json.dump(parsed, f, indent=2, ensure_ascii=False)
+                            
+                            self.banner.add_status(f"✓ Fixed {json_file}")
+                            # Remove backup since fix was successful
+                            os.remove(backup_file)
+                            
+                        except json.JSONDecodeError as e:
+                            self.banner.show_error(f"Failed to validate fixed JSON for {json_file}: {e}")
+                            # Restore from backup
+                            shutil.move(backup_file, json_file)
+                            
+                    else:
+                        self.banner.show_error(f"Could not fix malformed JSON: {json_file}")
+                        # Keep backup, mark original as problematic
+                        os.rename(json_file, f"{json_file}.corrupted")
+                        shutil.move(backup_file, json_file)
+                        
+                except Exception as e:
+                    self.banner.show_error(f"Error processing {json_file}: {e}")
+                    # Restore backup if it exists
+                    backup_file = f"{json_file}.backup"
+                    if os.path.exists(backup_file):
+                        try:
+                            shutil.move(backup_file, json_file)
+                        except:
+                            pass
+
+    def _fix_malformed_json(self, content, filename):
+        """Fix malformed JSON content from append operations"""
+        try:
+            # Remove any trailing commas or incomplete structures
+            content = content.rstrip().rstrip(',')
+            
+            # Handle case where content starts with valid JSON array
+            if content.startswith('[') and content.endswith(']'):
+                return content
+            
+            # Handle multiple JSON objects appended together
+            if content.startswith('{'):
+                # This is the main case - multiple JSON objects like: {}{}{}
+                
+                # Method 1: Try simple replacement
+                if '}{' in content:
+                    fixed = '[' + content.replace('}{', '},{') + ']'
+                    # Quick validation
+                    try:
+                        json.loads(fixed)
+                        return fixed
+                    except:
+                        pass
+                
+                # Method 2: More robust parsing for complex cases
+                fixed = self._parse_concatenated_json_objects(content)
+                if fixed:
+                    return fixed
+            
+            # Handle case where content is a single object
+            if content.startswith('{') and content.endswith('}'):
+                return '[' + content + ']'
+            
+            # If all else fails, try to salvage what we can
+            self.banner.show_warning(f"Complex JSON structure in {filename}, attempting recovery...")
+            return self._attempt_json_recovery(content)
+            
+        except Exception as e:
+            self.banner.show_error(f"Error in _fix_malformed_json: {e}")
+            return None
+
+    def _parse_concatenated_json_objects(self, content):
+        """Parse concatenated JSON objects more robustly"""
+        try:
+            objects = []
+            decoder = json.JSONDecoder()
+            idx = 0
+            
+            while idx < len(content):
+                content_remaining = content[idx:].lstrip()
+                if not content_remaining:
+                    break
+                    
+                try:
+                    obj, end_idx = decoder.raw_decode(content_remaining)
+                    objects.append(obj)
+                    idx += len(content[idx:]) - len(content_remaining) + end_idx
+                except json.JSONDecodeError:
+                    break
+            
+            if objects:
+                return json.dumps(objects)
+            
+        except Exception as e:
+            self.banner.show_error(f"Error parsing concatenated objects: {e}")
+        
+        return None
+
+    def _attempt_json_recovery(self, content):
+        """Last resort JSON recovery"""
+        try:
+            # Try to find complete JSON objects using regex
+            import re
+            
+            # Find JSON object patterns
+            json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+            matches = re.findall(json_pattern, content)
+            
+            valid_objects = []
+            for match in matches:
+                try:
+                    obj = json.loads(match)
+                    valid_objects.append(obj)
+                except:
+                    continue
+            
+            if valid_objects:
+                return json.dumps(valid_objects)
+                
+        except Exception as e:
+            self.banner.show_error(f"JSON recovery failed: {e}")
+        
+        return None
 
 
   
