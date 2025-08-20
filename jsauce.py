@@ -11,6 +11,7 @@ from src.handlers.ArgumentHandler import ArgumentHandler
 from src.packages.JsProcessor import JsProcessor
 from src.packages.CategoryProcessor import CategoryProcessor
 import os
+from src import config
 
 
 # All dependendencies should initialize here and used in other dependencies, so that they dont re-initialize and break things.
@@ -30,12 +31,60 @@ class JSauceApp:
         self.category_processor = CategoryProcessor(self.banner, self.domain_handler)
         self.jsprocessor = JsProcessor(self.banner, self.category_processor)
 
+    def _scan_template_folders(self):
+        """Scan template folders and then map outfile names to template names (pre-req for -all flag)"""
+        name_mappings = {}
+        template_base_dir = config.TEMPLATES
+
+        if not os.path.exists(template_base_dir):
+            return {'default': 'default'}
+        
+        # scan each subdirectory in templates/
+        for folder_name in os.listdir(template_base_dir):
+            folder_path = os.path.join(template_base_dir, folder_name)
+
+        # scan for yaml files in each specified folder
+            if os.path.isdir(folder_path):
+                template_files = []
+                for file_name in os.listdir(folder_path):
+                    if file_name.endswith(('.yaml', '.yml')):
+                        template_files.append(file_name)
+
+                        # extract clean name from file names
+                        base_name = os.path.splitext(file_name)[0].lower()
+                        clean_name = base_name.replace(' ', '_').replace('-', '_')
+
+                        # map template files to folder names for reference
+                        name_mappings[clean_name] = folder_name
+
+                name_mappings[clean_name] = folder_name
+
+                if template_files:
+                    self.banner.add_status(f"Found {len(template_files)} templates in {folder_name}/: {', '.join(template_files)}")
+
+        # Add some common fallbacks ---> may be able to remove later but just for fallback for now
+        fallback_mappings = {
+            'sinks': 'security',
+            'default_template': 'endpoints',
+            'endpoint': 'endpoints',
+        }
+
+        for key, value in fallback_mappings.items():
+            if key not in name_mappings:
+                name_mappings[key] = value
+
+        self.banner.add_status(f"Template name mappings: {name_mappings}")
+
+        return name_mappings
+
     # get the template name for output files
     def _extract_template_name(self, template_file_path):
         """Extract a clean template name from the file path for use in filenames"""
         if not template_file_path:
             return "default"
         
+        name_mappings = self._scan_template_folders()
+
         # Get the filename without extension
         filename = os.path.basename(template_file_path)
         template_name = os.path.splitext(filename)[0]
@@ -43,16 +92,11 @@ class JSauceApp:
         # Clean up the name for use in filenames
         clean_name = template_name.lower().replace(' ', '_').replace('-', '_')
         
-        # Map common template files to shorter names
-        name_mappings = {
-            'endpoints': 'endpoints',
-            'sinks': 'security', 
-            'security': 'security',
-            'default_template': 'default',
-            'custom': 'custom'
-        }
+        if clean_name in name_mappings:
+            folder_name = name_mappings[clean_name]
+            return clean_name
         
-        return name_mappings.get(clean_name, clean_name)
+        return clean_name
     
     def run(self):
         """Main execution method"""

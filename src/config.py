@@ -11,6 +11,10 @@ DEFAULT_TEMPLATE = ENDPOINTS_TEMPLATES
 # Output directory
 OUTPUT_DIR = "./output"
 
+#template directory
+TEMPLATES = "./templates"
+
+
 # Data directory for storing intermediate files
 DATA_DIR = "./data"
 JS_FILE_DIR = f"{DATA_DIR}/js_files"
