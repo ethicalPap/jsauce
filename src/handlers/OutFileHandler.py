@@ -3,8 +3,9 @@ import os
 import time
 
 class OutFileHandler:
-    def __init__(self):
+    def __init__(self, template):
         self.cleared_domains = set()  # Track which domains we've already cleared
+        self.template = template
 
     def clear_domain_files(self, domain):
         """Clear output files for a domain - but only once per session"""
@@ -17,10 +18,10 @@ class OutFileHandler:
         # Only clear if directory already exists (from previous runs)
         if os.path.exists(domain_path):
             file_suffixes = [
-                'content_found.txt', 
-                'content_detailed.json', 
-                'content_for_db.json', 
-                'content_stats.json'
+                f'{self.template}_found.txt', 
+                f'{self.template}_detailed.json', 
+                f'{self.template}_for_db.json', 
+                f'{self.template}_stats.json'
             ]
             
             for suffix in file_suffixes:

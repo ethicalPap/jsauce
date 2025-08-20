@@ -10,6 +10,7 @@ from src.utils.Banner import Banner
 from src.handlers.ArgumentHandler import ArgumentHandler
 from src.packages.JsProcessor import JsProcessor
 from src.packages.CategoryProcessor import CategoryProcessor
+import os
 
 
 # All dependendencies should initialize here and used in other dependencies, so that they dont re-initialize and break things.
@@ -21,7 +22,6 @@ class JSauceApp:
         self.banner = Banner()
         self.web_requests = WebRequests()
         self.domain_handler = DomainHandler()
-        self.output_handler = OutFileHandler()
         self.argument_handler = ArgumentHandler()
         
         # Initialize dependencies that depend on basic ones
@@ -29,21 +29,30 @@ class JSauceApp:
         self.mermaid_cli = MermaidCLI(self.banner)
         self.category_processor = CategoryProcessor(self.banner, self.domain_handler)
         self.jsprocessor = JsProcessor(self.banner, self.category_processor)
-        
-        # Initialize complex dependencies last
-        self.url_processor = URLProcessor(
-            self.web_requests, 
-            self.domain_handler, 
-            self.banner,
-            self.jsprocessor, 
-            self.category_processor
-        )
-        self.converter = JSONToMermaidConverter(
-            self.domain_handler, 
-            self.banner,
-            self.mermaid_cli
-        )
 
+    # get the template name for output files
+    def _extract_template_name(self, template_file_path):
+        """Extract a clean template name from the file path for use in filenames"""
+        if not template_file_path:
+            return "default"
+        
+        # Get the filename without extension
+        filename = os.path.basename(template_file_path)
+        template_name = os.path.splitext(filename)[0]
+        
+        # Clean up the name for use in filenames
+        clean_name = template_name.lower().replace(' ', '_').replace('-', '_')
+        
+        # Map common template files to shorter names
+        name_mappings = {
+            'endpoints': 'endpoints',
+            'sinks': 'security', 
+            'security': 'security',
+            'default_template': 'default',
+            'custom': 'custom'
+        }
+        
+        return name_mappings.get(clean_name, clean_name)
     
     def run(self):
         """Main execution method"""
@@ -55,12 +64,37 @@ class JSauceApp:
             template_file = self.argument_handler.get_templates(args.template)
             load_template = LoadTemplate(template_file, self.banner, self.category_processor)
 
+            # grab template name
+            template_name = self._extract_template_name(template_file)
+
             # Initialize banner with persistent display
             self.banner.initialize_persistent_display()
 
             if not args.input:
                 self.banner.show_error("No input file specified. Use -i <input_file>")
                 return False
+            
+            # add args to self.converter
+            self.converter = JSONToMermaidConverter(
+                self.domain_handler, 
+                self.banner,
+                self.mermaid_cli,
+                template_name
+            )
+
+            # add args to self.url_processor
+            self.url_processor = URLProcessor(
+                self.web_requests, 
+                self.domain_handler, 
+                self.banner,
+                self.jsprocessor, 
+                self.category_processor,
+                template_name
+            )
+
+            # add args to outfileHandler
+            self.output_handler = OutFileHandler(template_name)
+
             
             # Ensure base directories exist
             self.output_handler.ensure_base_directories()

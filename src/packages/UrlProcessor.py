@@ -2,12 +2,13 @@ import os
 from src import config
 
 class URLProcessor:
-    def __init__(self, webrequests, domain_handler, banner, jsprocessor, category_processor):
+    def __init__(self, webrequests, domain_handler, banner, jsprocessor, category_processor, template_name):
         self.webrequests = webrequests
         self.domain_handler = domain_handler
         self.banner = banner
         self.jsprocessor = jsprocessor
         self.category_processor = category_processor
+        self.template = template_name
 
 
     def process_url(self, url, templates):
@@ -69,14 +70,14 @@ class URLProcessor:
             self._ensure_output_directory(domain)
             
             # Save all the results for THIS URL only
-            self.category_processor.save_content_to_txt(all_endpoints, f"{domain}/{domain}_content_found.txt")
+            self.category_processor.save_content_to_txt(all_endpoints, f"{domain}/{domain}_{self.template}_found.txt")
             self.banner.add_status(f"Saved {total_content_found} endpoints for {domain}", "success")
             
             # Save detailed results for THIS URL only
             if self.category_processor.categorized_results or self.category_processor.detailed_results:
-                self.category_processor.save_detailed_results_to_json(f"{domain}/{domain}_content_detailed.json")
-                self.category_processor.save_flat_content_for_db(f"{domain}/{domain}_content_for_db.json")
-                self.category_processor.save_summary_stats_json(f"{domain}/{domain}_content_stats.json")
+                self.category_processor.save_detailed_results_to_json(f"{domain}/{domain}_{self.template}_detailed.json")
+                self.category_processor.save_flat_content_for_db(f"{domain}/{domain}_{self.template}_for_db.json")
+                self.category_processor.save_summary_stats_json(f"{domain}/{domain}_{self.template}_stats.json")
                 self.banner.add_status(f"Analysis files saved for {domain}", "success")
             
             # Save JS links if we had any
@@ -103,9 +104,9 @@ class URLProcessor:
         
     #     # Check if it contains any of the expected output files
     #     expected_files = [
-    #         f"{domain}_content_found.txt",
-    #         f"{domain}_content_detailed.json", 
-    #         f"{domain}_content_stats.json"
+    #         f"{domain}_{self.template}_found.txt",
+    #         f"{domain}_{self.template}_detailed.json", 
+    #         f"{domain}_{self.template}_stats.json"
     #     ]
         
     #     for filename in expected_files:

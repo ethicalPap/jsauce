@@ -9,7 +9,7 @@ import time
 import shutil
 
 class JSONToMermaidConverter:
-    def __init__(self, domain_handler, banner, mermaid_cli, max_edges=450, max_text_size=50000):
+    def __init__(self, domain_handler, banner, mermaid_cli, template, max_edges=450, max_text_size=50000):
         self.used_ids = set()
         self.max_edges = max_edges
         self.max_text_size = max_text_size
@@ -18,6 +18,7 @@ class JSONToMermaidConverter:
         self.domain_handler = domain_handler
         self.banner = banner
         self.mermaid_cli = mermaid_cli
+        self.template = template
         
         # Priority categories (most important for security)
         self.high_priority_categories = {
@@ -54,7 +55,7 @@ class JSONToMermaidConverter:
                 continue
             
             # Define the files that need cleaning
-            json_suffixes = ['content_detailed', 'content_for_db', 'content_stats']
+            json_suffixes = [f'{self.template}_detailed', f'{self.template}_content_for_db', f'{self.template}_content_stats']
             
             for suffix in json_suffixes:
                 json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json"
@@ -619,7 +620,7 @@ class JSONToMermaidConverter:
             if not domain:
                 continue
             
-            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_content_detailed.json"
+            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template}_detailed.json"
             if not (os.path.exists(json_file) and os.path.getsize(json_file) > 0):
                 continue
             
@@ -628,7 +629,7 @@ class JSONToMermaidConverter:
                     json_data = json.load(f)
                 
                 mermaid_output = self.convert_to_flowchart(json_data)
-                mermaid_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.mmd"
+                mermaid_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template}_flowchart.mmd"
                 
                 with open(mermaid_file, 'w', encoding='utf-8') as f:
                     f.write(mermaid_output)
@@ -639,7 +640,7 @@ class JSONToMermaidConverter:
                 
                 # Render to SVG/PNG
                 for ext in ['svg', 'png']:
-                    output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.{ext}"
+                    output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template}_flowchart.{ext}"
                     self.mermaid_cli.render(mermaid_file, output_file)
                     self.banner.show_completion(f"Rendered: {output_file}")
                     
