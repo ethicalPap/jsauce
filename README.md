@@ -50,7 +50,7 @@ mmdc --version
 
 ### Basic Usage
 ```bash
-python3 jsauce.py input_file.txt
+python3 jsauce.py -i input_file.txt 
 ```
 
 ### Input File Format
@@ -69,7 +69,9 @@ facebook.com
 echo -e "https://facebook.com\nhttps://walmart.com" > targets.txt
 
 # Run JSauce
-python jsauce.py targets.txt
+python jsauce.py -i targets.txt -t endpoints
+pyhton jsauce.py -i targets.txt -t security
+python jsauce.py -i targets.txt
 
 # View results
 ls output/facebook.com/
