@@ -5,22 +5,20 @@ from urllib.parse import urlparse
 from collections import defaultdict
 import os
 from src import config
-from src.handlers.DomainHandler import DomainHandler
 import time
-from src.packages.MermaidCLI import MermaidCLI
-from src.utils.Banner import Banner
-
-domain_handler = DomainHandler()
-mermaid_cli = MermaidCLI()
-jsauce_banner = Banner()
+import shutil
 
 class JSONToMermaidConverter:
-    def __init__(self, max_edges=450, max_text_size=50000):
+    def __init__(self, domain_handler, banner, mermaid_cli, template, max_edges=450, max_text_size=50000):
         self.used_ids = set()
         self.max_edges = max_edges
         self.max_text_size = max_text_size
         self.edge_count = 0
         self.text_size = 0
+        self.domain_handler = domain_handler
+        self.banner = banner
+        self.mermaid_cli = mermaid_cli
+        self.template = template
         
         # Priority categories (most important for security)
         self.high_priority_categories = {
@@ -46,33 +44,193 @@ class JSONToMermaidConverter:
         text = re.sub(r'\s+', '_', text)
         return text
     
+    # clean json files after append
     def clean_json_files(self, urls):
-        """Clean up malformed JSON files"""
-        jsauce_banner.add_status("CLEANING UP JSON FILES...")
+        """Clean up malformed JSON files - improved version"""
+        self.banner.add_status("CLEANING UP JSON FILES...")
+        
         for url in urls:
-            domain = domain_handler.extract_domain(url)
+            domain = self.domain_handler.extract_domain(url)
             if not domain:
                 continue
             
-            files = [f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json" 
-                    for suffix in ['endpoints_detailed', 'endpoints_for_db', 'endpoint_stats']]
+            # Define the files that need cleaning
+            json_suffixes = [f'{self.template}_detailed', f'{self.template}_content_for_db', f'{self.template}_content_stats']
             
-            for json_file in files:
-                if os.path.exists(json_file) and os.path.getsize(json_file) > 0:
-                    try:
-                        with open(json_file, 'r', encoding='utf-8') as f:
-                            content = f.read().strip()
+            for suffix in json_suffixes:
+                json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{suffix}.json"
+                
+                if not os.path.exists(json_file):
+                    self.banner.add_status(f"Skipping {json_file} - file doesn't exist")
+                    continue
+                    
+                if os.path.getsize(json_file) == 0:
+                    self.banner.add_status(f"Skipping {json_file} - file is empty")
+                    continue
+                
+                try:
+                    # Create backup before processing
+                    backup_file = f"{json_file}.backup"
+                    shutil.copy2(json_file, backup_file)
+                    
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+                    
+                    if not content:
+                        self.banner.add_status(f"Skipping {json_file} - no content after strip")
+                        if backup_file and os.path.exists(backup_file):
+                            os.remove(backup_file)
+                        continue
                         
-                        if content:
-                            if not content.startswith('['):
-                                content = '[' + content.replace('}{', '},{') + ']'
+                    # Check if it's already valid JSON
+                    try:
+                        parsed_data = json.loads(content)
+                        self.banner.add_status(f"{json_file} already valid JSON")
+
+                        with open(json_file, 'w', encoding='utf-8') as f:
+                            json.dump(parsed_data, f, indent=2, ensure_ascii=False)
+                        
+                        if backup_file and os.path.exists(backup_file):
+                            # Remove backup since original is good
+                            os.remove(backup_file)
+                            continue
+
+                    except json.JSONDecodeError as e:
+                        print(e)  # Need to fix it
+                    
+                    # Fix the JSON structure
+                    fixed_content = self._fix_malformed_json(content, json_file)
+                    
+                    if fixed_content:
+                        # Validate the fixed content before writing
+                        try:
+                            parsed_data = json.loads(fixed_content)
                             
+                            # Write the fixed content
                             with open(json_file, 'w', encoding='utf-8') as f:
-                                json.dump(json.loads(content), f, indent=2)
-                                
-                    except Exception as e:
-                        jsauce_banner.show_error(f"Error cleaning {json_file}: {e}")
-                        time.sleep(1)
+                                # Pretty print the JSON
+                                json.dump(parsed_data, f, indent=2, ensure_ascii=False)
+                            
+                            self.banner.add_status(f"Fixed {json_file}")        
+                            if backup_file and os.path.exists(backup_file):
+                                os.remove(backup_file)
+                            
+                        except json.JSONDecodeError as e:
+                            self.banner.show_error(f"Failed to validate fixed JSON for {json_file}: {e}")
+                            # Restore from backup
+                            shutil.move(backup_file, json_file)
+                            
+                    else:
+                        self.banner.show_error(f"Could not fix malformed JSON: {json_file}")
+                        # Keep backup, mark original as problematic
+                        os.rename(json_file, f"{json_file}.corrupted")
+                        shutil.move(backup_file, json_file)
+                        
+                except Exception as e:
+                    self.banner.show_error(f"Error processing {json_file}: {e}")
+                    # Restore backup if it exists
+                    backup_file = f"{json_file}.backup"
+                    if os.path.exists(backup_file):
+                        try:
+                            shutil.move(backup_file, json_file)
+                        except:
+                            pass
+
+    def _fix_malformed_json(self, content, filename):
+        """Fix malformed JSON content from append operations"""
+        try:
+            # Remove any trailing commas or incomplete structures
+            content = content.rstrip().rstrip(',')
+            
+            # Handle case where content starts with valid JSON array
+            if content.startswith('[') and content.endswith(']'):
+                return content
+            
+            # Handle multiple JSON objects appended together
+            if content.startswith('{'):
+                # This is the main case - multiple JSON objects like: {}{}{}
+                
+                # Method 1: Try simple replacement
+                if '}{' in content:
+                    fixed = '[' + content.replace('}{', '},{') + ']'
+                    # Quick validation
+                    try:
+                        json.loads(fixed)
+                        return fixed
+                    except:
+                        pass
+                
+                # Method 2: More robust parsing for complex cases
+                fixed = self._parse_concatenated_json_objects(content)
+                if fixed:
+                    return fixed
+            
+            # Handle case where content is a single object
+            if content.startswith('{') and content.endswith('}'):
+                return '[' + content + ']'
+            
+            # If all else fails, try to salvage what we can
+            self.banner.show_warning(f"Complex JSON structure in {filename}, attempting recovery...")
+            return self._attempt_json_recovery(content)
+            
+        except Exception as e:
+            self.banner.show_error(f"Error in _fix_malformed_json: {e}")
+            return None
+
+    def _parse_concatenated_json_objects(self, content):
+        """Parse concatenated JSON objects more robustly"""
+        try:
+            objects = []
+            decoder = json.JSONDecoder()
+            idx = 0
+            
+            while idx < len(content):
+                content_remaining = content[idx:].lstrip()
+                if not content_remaining:
+                    break
+                    
+                try:
+                    obj, end_idx = decoder.raw_decode(content_remaining)
+                    objects.append(obj)
+                    idx += len(content[idx:]) - len(content_remaining) + end_idx
+                except json.JSONDecodeError:
+                    break
+            
+            if objects:
+                return json.dumps(objects)
+            
+        except Exception as e:
+            self.banner.show_error(f"Error parsing concatenated objects: {e}")
+        
+        return None
+
+    def _attempt_json_recovery(self, content):
+        """Last resort JSON recovery"""
+        try:
+            # Try to find complete JSON objects using regex
+            import re
+            
+            # Find JSON object patterns
+            json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+            matches = re.findall(json_pattern, content)
+            
+            valid_objects = []
+            for match in matches:
+                try:
+                    obj = json.loads(match)
+                    valid_objects.append(obj)
+                except:
+                    continue
+            
+            if valid_objects:
+                return json.dumps(valid_objects)
+                
+        except Exception as e:
+            self.banner.show_error(f"JSON recovery failed: {e}")
+        
+        return None
+
+
   
     def generate_unique_id(self, base_name: str) -> str:
         """Generate unique IDs to avoid conflicts"""
@@ -103,14 +261,14 @@ class JSONToMermaidConverter:
             return "unknown_domain"
    
     def reorganize_data_by_hierarchy(self, data: Dict) -> Dict:
-        """Reorganize data to Domain->Category->Endpoint - no evidence/JS links"""
-        if not isinstance(data, dict) or 'endpoints_by_source' not in data:
+        """Reorganize data to Domain->Category->Category - no evidence/JS links"""
+        if not isinstance(data, dict) or 'contents_by_source' not in data:
             return {}
             
         reorganized = {}
-        endpoints_by_source = data.get('endpoints_by_source', {})
+        contents_by_source = data.get('contents_by_source', {})
         
-        for source_url, source_data in endpoints_by_source.items():
+        for source_url, source_data in contents_by_source.items():
             domain = self.extract_domain(source_url)
             
             if domain not in reorganized:
@@ -189,28 +347,28 @@ class JSONToMermaidConverter:
             r'/user', r'/profile', r'/settings', r'/config'
         ]
         
-        def get_endpoint_priority(endpoint):
+        def get_content_priority(endpoint):
             """Get priority score for an endpoint"""
-            endpoint_lower = endpoint.lower()
+            content_lower = endpoint.lower()
             
             # Check high priority patterns
             for pattern in high_priority_patterns:
-                if re.search(pattern, endpoint_lower):
+                if re.search(pattern, content_lower):
                     return 1
             
             # Check medium priority patterns  
             for pattern in medium_priority_patterns:
-                if re.search(pattern, endpoint_lower):
+                if re.search(pattern, content_lower):
                     return 2
             
             return 3
         
         # Sort by priority, then limit
-        prioritized = sorted(endpoints, key=get_endpoint_priority)
+        prioritized = sorted(endpoints, key=get_content_priority)
         return prioritized[:max_endpoints]
 
     def create_flowchart_with_proper_hierarchy(self, data: Any) -> str:
-        """Create prioritized left-to-right flowchart with Domain -> Category -> Endpoint hierarchy"""
+        """Create prioritized left-to-right flowchart with Domain -> Category -> Category hierarchy"""
         self.used_ids = set()
         self.edge_count = 0
         self.text_size = 0
@@ -241,7 +399,7 @@ class JSONToMermaidConverter:
         
         domain_nodes = []
         category_nodes = []
-        endpoint_nodes = []
+        content_nodes = []
         high_priority_nodes = []
         
         for domain, domain_data in reorganized_data.items():
@@ -281,34 +439,34 @@ class JSONToMermaidConverter:
                 category_nodes.append(cat_id)
                 
                 # Prioritize and limit endpoints
-                max_endpoints_per_category = 8 if self.get_category_priority(category) == 1 else 5
+                max_content_per_category = 8 if self.get_category_priority(category) == 1 else 5
                 if self.text_size > self.max_text_size * 0.5:
-                    max_endpoints_per_category = 3
+                    max_content_per_category = 3
                 
-                prioritized_endpoints = self.prioritize_endpoints(endpoints, max_endpoints_per_category)
+                prioritized_endpoints = self.prioritize_endpoints(endpoints, max_content_per_category)
                 
                 for endpoint in prioritized_endpoints:
                     if not endpoint:
                         continue
                         
                     # Create endpoint node
-                    endpoint_id = self.generate_unique_id(f"ep_{category}_{domain}")
+                    content_id = self.generate_unique_id(f"ep_{category}_{domain}")
                     
                     # Truncate very long endpoints for text size
-                    endpoint_clean = str(endpoint).replace('[', '').replace(']', '').replace('"', "'")
-                    if len(endpoint_clean) > 50:
-                        endpoint_clean = endpoint_clean[:47] + "..."
+                    content_clean = str(endpoint).replace('[', '').replace(']', '').replace('"', "'")
+                    if len(content_clean) > 50:
+                        content_clean = content_clean[:47] + "..."
                     
-                    if not self.add_node(mermaid_lines, f'    {endpoint_id}["{endpoint_clean}"]'):
+                    if not self.add_node(mermaid_lines, f'    {content_id}["{content_clean}"]'):
                         break
-                    if not self.add_edge(mermaid_lines, f'    {cat_id} --> {endpoint_id}'):
+                    if not self.add_edge(mermaid_lines, f'    {cat_id} --> {content_id}'):
                         break
                     
                     # Mark high priority endpoints
                     if self.get_category_priority(category) == 1:
-                        high_priority_nodes.append(endpoint_id)
+                        high_priority_nodes.append(content_id)
                     else:
-                        endpoint_nodes.append(endpoint_id)
+                        content_nodes.append(content_id)
                     
                     if self.edge_count >= self.max_edges or self.text_size >= self.max_text_size:
                         break
@@ -353,8 +511,8 @@ class JSONToMermaidConverter:
             self.add_node(mermaid_lines, f'    class {",".join(domain_nodes)} domainStyle')
         if category_nodes:
             self.add_node(mermaid_lines, f'    class {",".join(category_nodes)} categoryStyle')
-        if endpoint_nodes:
-            self.add_node(mermaid_lines, f'    class {",".join(endpoint_nodes)} endpointStyle')
+        if content_nodes:
+            self.add_node(mermaid_lines, f'    class {",".join(content_nodes)} endpointStyle')
         if high_priority_nodes:
             self.add_node(mermaid_lines, f'    class {",".join(high_priority_nodes)} highPriority')
         
@@ -364,18 +522,18 @@ class JSONToMermaidConverter:
         """Create a flowchart showing the structure with proper hierarchy"""
         self.used_ids = set()  # Reset IDs for each conversion
         
-        # Handle your tool's detailed JSON format (endpoints_detailed.json)
-        if isinstance(data, dict) and 'endpoints_by_source' in data:
+        # Handle your tool's detailed JSON format (contents_detailed.json)
+        if isinstance(data, dict) and 'contents_by_source' in data:
             return self.create_flowchart_with_proper_hierarchy(data)
         
-        # Handle your tool's stats format (endpoint_stats.json) - keep existing logic
+        # Handle your tool's stats format (content_stats.json) - keep existing logic
         elif isinstance(data, dict) and 'categories' in data:
             return self.create_simple_stats_flowchart(data)
         
         # Handle list format
         elif isinstance(data, list) and len(data) > 0:
             first_item = data[0]
-            if 'endpoints_by_source' in first_item:
+            if 'contents_by_source' in first_item:
                 return self.create_flowchart_with_proper_hierarchy(first_item)
             else:
                 return self.create_simple_list_flowchart(data)
@@ -445,24 +603,24 @@ class JSONToMermaidConverter:
     def generate_mermaid(self, urls):
         """Generate Mermaid flowcharts"""
 
-        jsauce_banner.add_status("CONVERTING TO MERMAID FORMAT...")
+        self.banner.add_status("CONVERTING TO MERMAID FORMAT...")
         
         # Check if Mermaid CLI is available first
-        if not mermaid_cli.is_available():
-            jsauce_banner.show_warning("Mermaid CLI not available - skipping diagram generation")
-            jsauce_banner.show_warning("Install with: npm install -g @mermaid-js/mermaid-cli")
+        if not self.mermaid_cli.is_available():
+            self.banner.show_warning("Mermaid CLI not available - skipping diagram generation")
+            self.banner.show_warning("Install with: npm install -g @mermaid-js/mermaid-cli")
             return
         
         diagrams_created = 0
         diagrams_failed = 0
 
-        jsauce_banner.update_status("CONVERTING TO MERMAID FORMAT...")
+        self.banner.update_status("CONVERTING TO MERMAID FORMAT...")
         for url in urls:
-            domain = domain_handler.extract_domain(url)
+            domain = self.domain_handler.extract_domain(url)
             if not domain:
                 continue
             
-            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_endpoints_detailed.json"
+            json_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template}_detailed.json"
             if not (os.path.exists(json_file) and os.path.getsize(json_file) > 0):
                 continue
             
@@ -471,27 +629,27 @@ class JSONToMermaidConverter:
                     json_data = json.load(f)
                 
                 mermaid_output = self.convert_to_flowchart(json_data)
-                mermaid_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.mmd"
+                mermaid_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template}_flowchart.mmd"
                 
                 with open(mermaid_file, 'w', encoding='utf-8') as f:
                     f.write(mermaid_output)
                 
-                jsauce_banner.show_completion(f"Mermaid saved: {mermaid_file}")
+                self.banner.add_status(f"Mermaid saved: {mermaid_file}")
                 
                 time.sleep(1)
                 
                 # Render to SVG/PNG
                 for ext in ['svg', 'png']:
-                    output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_flowchart.{ext}"
-                    mermaid_cli.render(mermaid_file, output_file)
-                    jsauce_banner.show_completion(f"Rendered: {output_file}")
+                    output_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template}_flowchart.{ext}"
+                    self.mermaid_cli.render(mermaid_file, output_file)
+                    self.banner.show_completion(f"Rendered: {output_file}")
                     
             except Exception as e:
-                jsauce_banner.show_error(f"Mermaid error for {domain}: {e}")
+                self.banner.add_status(f"Mermaid error for {domain}: {e}")
                 time.sleep(1)
 
         if diagrams_created > 0:
-            jsauce_banner.show_completion(f"Diagrams created for {diagrams_created} domains")
+            self.banner.show_completion(f"Diagrams created for {diagrams_created} domains")
         if diagrams_failed > 0:
-            jsauce_banner.show_completion(f" {diagrams_failed} diagrams failed to generate, is Mermaid CLI installed?")
+            self.banner.show_completion(f" {diagrams_failed} diagrams failed to generate, is Mermaid CLI installed?")
         time.sleep(3)

@@ -3,22 +3,22 @@
 </div>
 
 
-# JSauce - JavaScript Endpoint Grabber
+# JSauce - JavaScript Content Parser
 
-A Python tool for discovering and extracting API endpoints, authentication URLs, and security-sensitive patterns from JavaScript files found on websites. JSauce is designed for security researchers, penetration testers, and developers who need to comprehensively map web application attack surfaces.
+A Python tool for discovering and extracting contents and patterns (via templates) from JavaScript files found on websites. 
 
 ## Features
 
 - **Automated JS Discovery**: Intelligently extracts JavaScript file URLs from target websites
-- **Advanced Pattern Matching**: Uses comprehensive YAML-based regex templates for endpoint discovery
-- **Security-Focused Categories**: Organizes findings into 40+ security-relevant categories including:
+- **Pattern Matching**: Uses YAML-based regex templates for content discovery
+- **Security-Focused Categories**: Organizes findings into 40+ categories including:
   - API endpoints and authentication systems
   - Payment processing and admin interfaces  
   - API keys, tokens, and sensitive credentials
   - Cloud services and external integrations
   - Framework-specific patterns and debug endpoints
 - **Multiple Output Formats**: Generates TXT, JSON, and visual Mermaid flowcharts
-- **Visual Reporting**: Creates interactive flowchart diagrams showing endpoint relationships
+- **Visual Reporting**: Creates flowchart diagrams showing content relationships
 - **Domain-Aware Processing**: Handles multiple domains with organized output structure
 - **Prioritized Results**: Focuses on high-impact security findings first
 
@@ -42,7 +42,7 @@ pip install .
 # Install Mermaid CLI for diagram generation (optional but recommended)
 npm install -g @mermaid-js/mermaid-cli
 
-# Verify Mermaid installation
+# Verify Mermaid installation (optional but recommended)
 mmdc --version
 ```
 
@@ -50,7 +50,7 @@ mmdc --version
 
 ### Basic Usage
 ```bash
-python3 jsauce.py input_file.txt
+python3 jsauce.py -i input_file.txt 
 ```
 
 ### Input File Format
@@ -69,7 +69,9 @@ facebook.com
 echo -e "https://facebook.com\nhttps://walmart.com" > targets.txt
 
 # Run JSauce
-python jsauce.py targets.txt
+python jsauce.py -i targets.txt -t endpoints
+pyhton jsauce.py -i targets.txt -t security
+python jsauce.py -i targets.txt
 
 # View results
 ls output/facebook.com/
@@ -130,26 +132,11 @@ custom_endpoints:
 ### Settings
 Modify `src/config.py` for custom behavior:
 
-```python
-# HTTP request timeout
-REQUEST_TIMEOUT = 10
-
-# Custom User-Agent
-USER_AGENT = "JSauce-Scanner/1.0"
-
-# Output directories
-OUTPUT_DIR = "./output"
-DATA_DIR = "./data"
-
-# Template file
-DEFAULT_TEMPLATE = "templates/default_template.yaml"
-```
-
 ## Architecture
 
 ### Core Components
 - **`jsauce.py`** - Main entry point and orchestration
-- **`EndpointProcessor`** - Pattern matching and categorization engine
+- **`CategoryProcessor`** - Pattern matching and categorization engine
 - **`JsProcessor`** - JavaScript file extraction and analysis
 - **`WebRequests`** - HTTP client with error handling and retry logic
 - **`MermaidConverter`** - Visual diagram generation
@@ -197,7 +184,7 @@ curl -I https://target.com
 ```bash
 # Verify template file exists and is valid
 python -c "import yaml; yaml.safe_load(open('templates/default_template.yaml'))"
-# Check if JS files are publicly accessible
+# Check if JS files are accessible
 ```
 
 **Mermaid diagrams not generating:**
@@ -215,7 +202,7 @@ REQUEST_TIMEOUT = 30
 ```
 
 ### Debug Mode
-Enable verbose output by modifying the banner updates in the code:
+Enable verbose output by modifying the banner updates in the code: (verbosity flag coming soon..)
 
 ```python
 # In src/packages/UrlProcessor.py, uncomment debug lines:
@@ -234,17 +221,11 @@ jsauce_banner.update_status(f"Found {len(js_links)} JS links")
      ╚════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝
                        JSauce: .js Content Mapping Tool
 ================================================================================
-✓ ALL PROCESSING COMPLETED!
-Processed 2 items total
-✓ All URLs processed successfully
-✓ JSON files cleaned
-✓ Mermaid diagrams generated
+ALL PROCESSING COMPLETED!
 ================================================================================
 ```
 
 ## Contributing
-
-We welcome contributions! Here's how to help:
 
 ### Adding New Patterns
 1. Fork the repository
@@ -283,7 +264,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Acknowledgments
 
 - Created by **Papv2** (ethicalPap@gmail.com)
-- Inspired by the need for comprehensive JavaScript security analysis
 - Built for the security research community
 
 ## Support

@@ -1,14 +1,11 @@
 import os
 import re
 from urllib.parse import urljoin
-import time
-from src.utils.Banner import Banner
-
-jsauce_banner = Banner()
 
 class JsProcessor:
-    def __init__(self):
-        pass
+    def __init__(self, banner, category_processor):
+        self.banner = banner
+        self.category_processor = category_processor
 
     # parse saved url content for js links
     def extract_js_links(self, html_content, base_url):
@@ -34,7 +31,7 @@ class JsProcessor:
             
             # Basic validation - skip if it looks malformed
             if '\\' in clean_link or clean_link.count('//') > 1:
-                jsauce_banner.show_error(f"Skipping malformed URL: {link}")
+                self.banner.show_error(f"Skipping malformed URL: {link}")
                 continue
                 
             js_links.append(clean_link)
@@ -67,7 +64,7 @@ class JsProcessor:
                 js_links = [line.strip() for line in lines if line.strip()]
                 return js_links
         except FileNotFoundError:
-            jsauce_banner.show_error(f"File {file_path} not found")
+            self.banner.show_error(f"File {file_path} not found")
             return []
         
 
@@ -76,18 +73,68 @@ class JsProcessor:
         with open(file_path, 'r') as file:
             content = file.read()
             return content
-
-
-    # search js content for findings based on templates (legacy function)
-    def search_js_content(self, js_content, templates):
+        
+    def search_js_content_by_category_with_context(self, js_content, js_url, source_url, templates_by_category=None):
+        """Search JS content with context"""
+        templates = templates_by_category or self.category_processor.templates_by_category
         results = {}
-        for template, regex in templates.items():
-            try:
-                matches = re.findall(regex, js_content)
-                if matches:
-                    results[template] = matches
-            except re.error as e:
-                jsauce_banner.show_error(f"Invalid regex '{regex}': {e}")
-                time.sleep(1)
-                continue
-        return results  
+        
+        for category, patterns in templates.items():
+            matches = []
+            for pattern in patterns:
+                try:
+                    flags = re.MULTILINE if any(k in category.lower() for k in ['token', 'key', 'secret', 'auth']) else re.IGNORECASE | re.MULTILINE
+                    found = re.findall(pattern, js_content, flags)
+                    
+                    # Handle tuples from capture groups
+                    if found and isinstance(found[0], tuple):
+                        found = [next((g for g in match if g and g.strip()), '') for match in found]
+                    
+                    matches.extend([m.strip() for m in found if m and m.strip()])
+                except:
+                    continue
+            
+            if matches:
+                filtered = [m for m in matches if not self.category_processor._is_false_positive(m, category)]
+                if filtered:
+                    results[category] = list(dict.fromkeys(filtered))
+        
+        # Store results
+        if js_url not in self.category_processor.detailed_results:
+           self.category_processor.detailed_results[js_url] = {'source_url': source_url, 'js_url': js_url, 'categories': {}}
+        
+        for category, matches in results.items():
+            if category not in self.category_processor.detailed_results[js_url]['categories']:
+                self.category_processor.detailed_results[js_url]['categories'][category] = []
+            self.category_processor.detailed_results[js_url]['categories'][category].extend(matches)
+            self.category_processor.detailed_results[js_url]['categories'][category] = list(dict.fromkeys(
+                self.category_processor.detailed_results[js_url]['categories'][category]
+            ))
+        
+        return results
+        
+    def search_js_content_by_category(self, js_content, templates_by_category=None):
+        """Search JS content by category"""
+        templates = templates_by_category or self.category_processor.templates_by_category
+        results = {}
+        
+        for category, patterns in templates.items():
+            matches = []
+            for pattern in patterns:
+                try:
+                    flags = re.MULTILINE if any(k in category.lower() for k in ['token', 'key', 'secret', 'auth']) else re.IGNORECASE | re.MULTILINE
+                    found = re.findall(pattern, js_content, flags)
+                    
+                    if found and isinstance(found[0], tuple):
+                        found = [next((g for g in match if g and g.strip()), '') for match in found]
+                    
+                    matches.extend([m.strip() for m in found if m and m.strip()])
+                except:
+                    continue
+            
+            if matches:
+                filtered = [m for m in matches if not self.category_processor._is_false_positive(m, category)]
+                if filtered:
+                    results[category] = list(dict.fromkeys(filtered))
+        
+        return results
