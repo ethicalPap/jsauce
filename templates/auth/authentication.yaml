@@ -1,0 +1,45 @@
+info:
+  name: Authentication Endpoints
+  author: JSauce
+  severity: medium
+  description: Detect authentication and authorization endpoints
+  tags:
+    - auth
+    - authentication
+    - login
+
+authentication_endpoints:
+  description: "Authentication and authorization endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/auth/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/login)[\\'\"``]"
+    - "[\\'\"``](/logout)[\\'\"``]"
+    - "[\\'\"``](/register)[\\'\"``]"
+    - "[\\'\"``](/signin)[\\'\"``]"
+    - "[\\'\"``](/signup)[\\'\"``]"
+    - "[\\'\"``](/sign-in)[\\'\"``]"
+    - "[\\'\"``](/sign-up)[\\'\"``]"
+
+security_endpoints:
+  description: "Security-related endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/password/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/reset/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/verify/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/2fa/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/mfa/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/captcha/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/csrf/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/totp/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+session_endpoints:
+  description: "Session management endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/session/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/sessions/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/refresh/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/logout-all)[\\'\"``]"
+    - "[\\'\"``](/invalidate)[\\'\"``]"

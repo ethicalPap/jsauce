@@ -1,0 +1,66 @@
+info:
+  name: File Operations Detection
+  author: JSauce
+  severity: medium
+  description: Detect file upload, download, and manipulation operations
+  tags:
+    - files
+    - upload
+    - download
+
+file_operations:
+  description: "File upload/download operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/upload/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/download/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/files?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/documents?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/attachments?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_upload_sinks:
+  description: "File upload sinks - unsafe file handling"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "FileReader\\s*\\(\\)"
+    - "readAsText\\s*\\([^)]*\\)"
+    - "readAsDataURL\\s*\\([^)]*\\)"
+    - "readAsBinaryString\\s*\\([^)]*\\)"
+    - "readAsArrayBuffer\\s*\\([^)]*\\)"
+    - "FormData\\s*\\(\\)"
+    - "files\\[\\d+\\]"
+    - "input\\[type=['\"`]file['\"`]\\]"
+
+file_storage:
+  description: "File storage and CDN patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/storage/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/assets/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/cdn/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/static/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/media/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+media_endpoints:
+  description: "Media content endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/photos?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/videos?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/images?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/thumbnails?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+path_traversal_sinks:
+  description: "Path traversal sinks - unsafe file operations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "fs\\.readFile\\s*\\([^)]*\\)"
+    - "fs\\.writeFile\\s*\\([^)]*\\)"
+    - "fs\\.createReadStream\\s*\\([^)]*\\)"
+    - "fs\\.createWriteStream\\s*\\([^)]*\\)"
+    - "require\\s*\\([^)]*\\)"
+    - "import\\s*\\([^)]*\\)"
+    - "fetch\\s*\\(['\"`]\\.\\./[^'\"``]*['\"`]"
+    - "XMLHttpRequest.*\\.open\\s*\\([^,]*,\\s*['\"`]\\.\\./[^'\"``]*['\"`]"

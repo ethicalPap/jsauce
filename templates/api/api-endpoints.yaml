@@ -1,0 +1,77 @@
+info:
+  name: API Endpoints Detection
+  author: JSauce
+  severity: info
+  description: Detect API endpoints and RESTful services
+  tags:
+    - api
+    - endpoints
+    - rest
+
+api_endpoints:
+  description: "API endpoint patterns with quoted strings"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/v\\d+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/rest/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/api/v\\d+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/endpoints?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+version_endpoints:
+  description: "Versioning endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/v[0-9]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/version/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+rest_patterns:
+  description: "RESTful API patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/users/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/posts/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/comments/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/refresh)[\\'\"``]"
+    - "[\\'\"``](/search)[\\'\"``]"
+    - "[\\'\"``](/health)[\\'\"``]"
+    - "[\\'\"``](/status)[\\'\"``]"
+    - "[\\'\"``](/metrics)[\\'\"``]"
+
+crud_operations:
+  description: "CRUD operation endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/create/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/read/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/update/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/delete/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/edit/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/remove/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/add/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+http_api_calls:
+  description: "HTTP API function calls (fetch, axios, jQuery)"
+  flags: "gi"
+  patterns:
+    - "fetch\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "fetch\\s*\\(\\s*[\\'\"``](https?://[^'\"``\\s]+/api/[^'\"``\\s]*)[\\'\"``]"
+    - "axios\\.(get|post|put|delete|patch|head|options)\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "\\$\\.ajax\\s*\\(\\s*\\{\\s*url:\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "\\$\\.(get|post)\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "XMLHttpRequest.*\\.open\\s*\\(\\s*[\\'\"``]\\w+[\\'\"``]\\s*,\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+http_methods_with_urls:
+  description: "HTTP methods with URL patterns"
+  flags: "gi"
+  patterns:
+    - "(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "method:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``].*url:\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``]method[\\'\"``]:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``]"
+
+http_methods:
+  description: "HTTP method patterns"
+  flags: "gi"
+  patterns:
+    - "(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "method:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``].*url:\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"

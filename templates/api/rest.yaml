@@ -1,0 +1,45 @@
+info:
+  name: AJAX Endpoints Detection
+  author: JSauce
+  severity: info
+  description: Detect AJAX endpoints and asynchronous requests
+  tags:
+    - ajax
+    - async
+    - api
+
+ajax_endpoints:
+  description: "AJAX endpoint patterns"
+  flags: "gi"
+  patterns:
+    - "/ajax/[\\w\\d/-_.?=&%]+"
+    - "_ajax\\.php"
+    - "ajax_callback"
+    - "/si/ajax/"
+    - "[\\'\"``](/ajax/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+jquery_ajax:
+  description: "jQuery AJAX patterns"
+  flags: "gi"
+  patterns:
+    - "\\$\\.ajax\\s*\\("
+    - "\\$\\.get\\s*\\("
+    - "\\$\\.post\\s*\\("
+    - "\\$\\.load\\s*\\("
+    - "\\$\\.getJSON\\s*\\("
+    - "\\$\\.getScript\\s*\\("
+    - "jQuery\\.ajax\\s*\\("
+    - "jQuery\\.get\\s*\\("
+    - "jQuery\\.post\\s*\\("
+
+xhr_patterns:
+  description: "XMLHttpRequest patterns"
+  flags: "gi"
+  patterns:
+    - "new\\s+XMLHttpRequest\\s*\\("
+    - "XMLHttpRequest\\s*\\(\\)"
+    - "\\.open\\s*\\(['\"`]\\w+['\"`]\\s*,\\s*['\"`][^'\"``]+['\"`]"
+    - "\\.send\\s*\\("
+    - "\\.responseText"
+    - "\\.responseXML"
+    - "\\.onreadystatechange"

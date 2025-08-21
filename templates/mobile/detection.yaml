@@ -1,0 +1,66 @@
+info:
+  name: Mobile App Detection
+  author: JSauce
+  severity: info
+  description: Detect mobile app patterns and device-specific features
+  tags:
+    - mobile
+    - app
+    - device
+
+mobile_endpoints:
+  description: "Mobile-specific endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/mobile/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/app/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/native/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+mobile_apps:
+  description: "Mobile app patterns"
+  flags: "gi"
+  patterns:
+    - "apps\\.apple\\.com"
+    - "play\\.google\\.com"
+    - "appid="
+    - "id=com\\."
+    - "bundle.*identifier"
+    - "app.*store"
+
+device_api_sinks:
+  description: "Device API sinks - sensitive device information"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "navigator\\.userAgent"
+    - "navigator\\.platform"
+    - "navigator\\.appVersion"
+    - "navigator\\.language"
+    - "navigator\\.languages"
+    - "navigator\\.cookieEnabled"
+    - "navigator\\.onLine"
+    - "screen\\.width"
+    - "screen\\.height"
+    - "navigator\\.hardwareConcurrency"
+
+geolocation_sinks:
+  description: "Geolocation privacy sinks - location data exposure"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "navigator\\.geolocation\\.getCurrentPosition\\s*\\([^)]*\\)"
+    - "navigator\\.geolocation\\.watchPosition\\s*\\([^)]*\\)"
+    - "position\\.coords\\.latitude"
+    - "position\\.coords\\.longitude"
+    - "coords\\.accuracy"
+
+cordova_patterns:
+  description: "Apache Cordova/PhoneGap patterns"
+  flags: "gi"
+  patterns:
+    - "cordova\\."
+    - "phonegap\\."
+    - "device\\.platform"
+    - "device\\.version"
+    - "device\\.uuid"
+    - "onDeviceReady"

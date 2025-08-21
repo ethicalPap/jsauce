@@ -1,0 +1,43 @@
+info:
+  name: GraphQL Endpoints Detection
+  author: JSauce
+  severity: info
+  description: Detect GraphQL endpoints and operations
+  tags:
+    - graphql
+    - api
+
+graphql_endpoints:
+  description: "GraphQL endpoints and operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/graphql/?)[\\'\"``]"
+    - "query:\\s*[\\'\"``]\\s*\\{[^}]*\\}"
+    - "mutation:\\s*[\\'\"``]\\s*\\{[^}]*\\}"
+    - "subscription:\\s*[\\'\"``]\\s*\\{[^}]*\\}"
+    - "new\\s+ApolloClient.*uri:\\s*[\\'\"``](/graphql)[\\'\"``]"
+    - "graphqlEndpoint\\s*[:=]\\s*[\\'\"``]([^'\"``]+)[\\'\"``]"
+    - "gql\\s*\\`[^`]*\\`"
+    - "\\{\\s*query\\s*:"
+    - "\\{\\s*mutation\\s*:"
+    - "\\{\\s*subscription\\s*:"
+
+graphql_introspection:
+  description: "GraphQL introspection queries"
+  flags: "gi"
+  patterns:
+    - "__schema"
+    - "__type"
+    - "__typename"
+    - "IntrospectionQuery"
+    - "getIntrospectionQuery"
+    - "introspection"
+
+graphql_operations:
+  description: "Common GraphQL operations"
+  flags: "gi"
+  patterns:
+    - "query\\s+\\w+\\s*\\{"
+    - "mutation\\s+\\w+\\s*\\{"
+    - "subscription\\s+\\w+\\s*\\{"
+    - "fragment\\s+\\w+\\s+on\\s+\\w+"

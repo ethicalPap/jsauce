@@ -1,0 +1,95 @@
+info:
+  name: "Injection Vulnerability Sinks"
+  author: "jsauce"
+  severity: "critical"
+  description: "Detect various injection vulnerability sinks including SQL, NoSQL, Command, and LDAP injection"
+  tags:
+    - "injection"
+    - "sql"
+    - "nosql"
+    - "command"
+    - "ldap"
+    - "security"
+
+patterns:
+  sql_injection_sinks:
+    description: "SQL injection sinks - unsafe database queries"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "\\.query\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+      - "\\.execute\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+      - "SELECT\\s+.*\\+.*FROM"
+      - "INSERT\\s+.*\\+.*INTO"
+      - "UPDATE\\s+.*\\+.*SET"
+      - "DELETE\\s+.*\\+.*FROM"
+      - "UNION\\s+.*\\+.*SELECT"
+      - "mysql\\.query\\s*\\([^)]*\\)"
+      - "pg\\.query\\s*\\([^)]*\\)"
+      - "sqlite3\\.run\\s*\\([^)]*\\)"
+
+  nosql_injection_sinks:
+    description: "NoSQL injection sinks - unsafe NoSQL queries"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "\\.find\\s*\\(\\{.*\\$.*\\}"
+      - "\\.findOne\\s*\\(\\{.*\\$.*\\}"
+      - "\\.update\\s*\\(\\{.*\\$.*\\}"
+      - "\\.remove\\s*\\(\\{.*\\$.*\\}"
+      - "\\.aggregate\\s*\\([^)]*\\$.*\\)"
+      - "\\$where\\s*:"
+      - "\\$regex\\s*:"
+      - "\\$ne\\s*:"
+      - "\\$gt\\s*:"
+      - "\\$lt\\s*:"
+
+  command_injection_sinks:
+    description: "Command injection sinks - unsafe system commands"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "child_process\\.exec\\s*\\([^)]*\\)"
+      - "child_process\\.spawn\\s*\\([^)]*\\)"
+      - "child_process\\.execFile\\s*\\([^)]*\\)"
+      - "child_process\\.fork\\s*\\([^)]*\\)"
+      - "process\\.exec\\s*\\([^)]*\\)"
+      - "shell\\.exec\\s*\\([^)]*\\)"
+      - "system\\s*\\([^)]*\\)"
+      - "popen\\s*\\([^)]*\\)"
+
+  ldap_injection_sinks:
+    description: "LDAP injection sinks - unsafe LDAP queries"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "ldap\\.search\\s*\\([^)]*\\)"
+      - "ldap\\.compare\\s*\\([^)]*\\)"
+      - "ldap\\.modify\\s*\\([^)]*\\)"
+      - "ldap\\.add\\s*\\([^)]*\\)"
+      - "ldap\\.del\\s*\\([^)]*\\)"
+      - "searchFilter\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+
+  code_injection_sinks:
+    description: "Code injection sinks - dynamic code execution"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "eval\\s*\\([^)]*\\)"
+      - "Function\\s*\\([^)]*\\)"
+      - "setTimeout\\s*\\(['\"`][^'\"``]*['\"`]"
+      - "setInterval\\s*\\(['\"`][^'\"``]*['\"`]"
+      - "execScript\\s*\\([^)]*\\)"
+      - "msWriteProfilerMark\\s*\\([^)]*\\)"
+      - "crypto\\.generateCRMFRequest\\s*\\([^)]*\\)"
+
+  json_injection_sinks:
+    description: "JSON injection sinks - unsafe JSON parsing"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "JSON\\.parse\\s*\\([^)]*\\)"
+      - "\\$\\.parseJSON\\s*\\([^)]*\\)"
+      - "jQuery\\.parseJSON\\s*\\([^)]*\\)"
+      - "eval\\s*\\(['\"`]\\{[^'\"``]*\\}['\"`]\\)"
+      - "new\\s+Function\\s*\\(['\"`]return\\s+\\{[^'\"``]*\\}['\"`]\\)"

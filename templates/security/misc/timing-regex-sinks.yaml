@@ -1,0 +1,38 @@
+info:
+  name: "Timing Attack and ReDoS Vulnerability Sinks"
+  author: "jsauce"
+  severity: "medium"
+  description: "Detect timing attack vectors and Regular Expression Denial of Service (ReDoS) vulnerabilities"
+  tags:
+    - "timing-attack"
+    - "redos"
+    - "regex"
+    - "dos"
+    - "security"
+
+patterns:
+  timing_attack_sinks:
+    description: "Timing attack sinks - operations vulnerable to timing analysis"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "performance\\.now\\s*\\(\\)"
+      - "Date\\.now\\s*\\(\\)"
+      - "new\\s+Date\\s*\\(\\)\\.getTime\\s*\\(\\)"
+      - "console\\.time\\s*\\([^)]*\\)"
+      - "console\\.timeEnd\\s*\\([^)]*\\)"
+      - "setTimeout\\s*\\([^)]*\\)"
+      - "setInterval\\s*\\([^)]*\\)"
+
+  regex_redos_sinks:
+    description: "ReDoS (Regular Expression Denial of Service) sinks"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "new\\s+RegExp\\s*\\([^)]*\\)"
+      - "\\.match\\s*\\([^)]*\\)"
+      - "\\.replace\\s*\\([^)]*\\)"
+      - "\\.search\\s*\\([^)]*\\)"
+      - "\\.split\\s*\\([^)]*\\)"
+      - "\\.test\\s*\\([^)]*\\)"
+      - "RegExp\\.prototype\\.test\\s*\\([^)]*\\)"

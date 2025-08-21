@@ -1,0 +1,42 @@
+info:
+  name: WebSocket Endpoints Detection
+  author: JSauce
+  severity: info
+  description: Detect WebSocket connections and real-time communication
+  tags:
+    - websockets
+    - realtime
+    - api
+
+websockets:
+  description: "WebSocket connections"
+  flags: "gi"
+  patterns:
+    - "new\\s+WebSocket\\s*\\(\\s*[\\'\"``](wss?://[^'\"``\\s]+)[\\'\"``]"
+    - "[\\'\"``](/socket\\.io/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/ws/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/websocket/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "io\\s*\\(['\"`][^'\"``]*['\"`]\\)"
+    - "socket\\.connect\\s*\\("
+    - "socket\\.emit\\s*\\("
+    - "socket\\.on\\s*\\("
+
+socketio_patterns:
+  description: "Socket.IO specific patterns"
+  flags: "gi"
+  patterns:
+    - "io\\([\\'\"``][^'\"``]+[\\'\"``]\\)"
+    - "socket\\.emit\\s*\\(['\"`][^'\"``]*['\"`]"
+    - "socket\\.on\\s*\\(['\"`][^'\"``]*['\"`]"
+    - "/socket\\.io/"
+    - "transports\\s*:\\s*\\[\\s*['\"`]websocket['\"`]"
+
+realtime_patterns:
+  description: "Real-time communication patterns"
+  flags: "gi"
+  patterns:
+    - "EventSource\\s*\\("
+    - "Server-Sent Events"
+    - "text/event-stream"
+    - "addEventListener\\s*\\(['\"`]message['\"`]"
+    - "onmessage\\s*="

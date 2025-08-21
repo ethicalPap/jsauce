@@ -1,0 +1,54 @@
+info:
+  name: Admin Panel Detection
+  author: JSauce
+  severity: high
+  description: Detect administrative interfaces and control panels
+  tags:
+    - admin
+    - panel
+    - management
+
+admin_endpoints:
+  description: "Administrative endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/administrator/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/management/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/control/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/console/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+dashboard_endpoints:
+  description: "Dashboard and control panel endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/dashboard/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/panel/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/cp/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/control-panel/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+config_endpoints:
+  description: "Configuration endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/config/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/configuration/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/settings/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/preferences/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+admin_settings:
+  description: "Admin settings and configuration"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "admin_settings"
+    - "admin_config"
+    - "admin_panel"
+    - "isAdmin"
+    - "admin_access"
+    - "admin_role"
+    - "super_admin"
+    - "root_access"

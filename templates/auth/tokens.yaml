@@ -1,0 +1,62 @@
+info:
+  name: API Keys and Tokens Detection
+  author: JSauce
+  severity: high
+  description: Detect API keys, tokens, and secrets in JavaScript
+  tags:
+    - tokens
+    - secrets
+    - api-keys
+
+api_keys_tokens:
+  description: "API keys, tokens, and secrets"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]api_key[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{16,})[\\'\"``]"
+    - "[\\'\"``]apiKey[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{16,})[\\'\"``]"
+    - "[\\'\"``]token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{20,})[\\'\"``]"
+    - "[\\'\"``]access_token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{20,})[\\'\"``]"
+    - "[\\'\"``]client_id[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{10,})[\\'\"``]"
+    - "Bearer\\s+([A-Za-z0-9\\-_.+=\\/]{20,})"
+
+jwt_tokens:
+  description: "JWT token patterns"
+  flags: "g"
+  sensitive: true
+  patterns:
+    - "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9._-]+\\.[A-Za-z0-9._-]+"
+
+cloud_keys:
+  description: "Cloud service API keys"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]aws_secret_access_key[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\/+=]{40})[\\'\"``]"
+    - "[\\'\"``]aws_access_key_id[\\'\"``]\\s*:\\s*[\\'\"``](AKIA[0-9A-Z]{16})[\\'\"``]"
+    - "AIza[0-9A-Za-z\\-_]{35}"
+    - "AIzaSy[0-9A-Za-z\\-_]{33}"
+
+service_keys:
+  description: "Service-specific API keys"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "sk_live_[0-9a-zA-Z]{24,}"
+    - "sk_test_[0-9a-zA-Z]{24,}"
+    - "pk_live_[0-9a-zA-Z]{24,}"
+    - "pk_test_[0-9a-zA-Z]{24,}"
+    - "xox[baprs]-[0-9A-Za-z]{10,48}"
+    - "SG\\.[A-Za-z0-9_\\-]{22}\\.[A-Za-z0-9_\\-]{43}"
+    - "key-[0-9a-zA-Z]{32}"
+    - "ya29\\.[0-9A-Za-z\\-_]+"
+
+environment_vars:
+  description: "Environment variable patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "process\\.env\\.([A-Z_]+_API_KEY)"
+    - "process\\.env\\.([A-Z_]+_SECRET)"
+    - "process\\.env\\.([A-Z_]+_TOKEN)"
+    - "process\\.env\\.([A-Z_]+_CLIENT_ID)"

@@ -1,0 +1,47 @@
+info:
+  name: OAuth Endpoints Detection
+  author: JSauce
+  severity: medium
+  description: Detect OAuth endpoints and SSO integrations
+  tags:
+    - oauth
+    - sso
+    - auth
+
+oauth_endpoints:
+  description: "OAuth and SSO endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/sso/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/saml/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/oauth2?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/authorize)[\\'\"``]"
+    - "[\\'\"``](/callback)[\\'\"``]"
+    - "[\\'\"``](/token)[\\'\"``]"
+    - "[\\'\"``](/oidc/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+oauth_flows:
+  description: "OAuth flow patterns"
+  flags: "gi"
+  patterns:
+    - "client_id\\s*[:=]"
+    - "client_secret\\s*[:=]"
+    - "redirect_uri\\s*[:=]"
+    - "response_type\\s*[:=]"
+    - "grant_type\\s*[:=]"
+    - "authorization_code"
+    - "access_token"
+    - "refresh_token"
+    - "Bearer\\s+"
+
+social_auth:
+  description: "Social authentication patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/auth/google)[\\'\"``]"
+    - "[\\'\"``](/auth/facebook)[\\'\"``]"
+    - "[\\'\"``](/auth/github)[\\'\"``]"
+    - "[\\'\"``](/auth/twitter)[\\'\"``]"
+    - "[\\'\"``](/auth/linkedin)[\\'\"``]"
+    - "[\\'\"``](/auth/microsoft)[\\'\"``]"
+    - "[\\'\"``](/auth/apple)[\\'\"``]"

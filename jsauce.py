@@ -35,72 +35,26 @@ class JSauceApp:
         self.category_processor = CategoryProcessor(self.banner, self.domain_handler)
         self.jsprocessor = JsProcessor(self.banner, self.category_processor)
 
-    def _scan_template_folders(self):
-        """Scan template folders and then map outfile names to template names (pre-req for -all flag)"""
-        name_mappings = {}
-        template_base_dir = config.TEMPLATES
-
-        if not os.path.exists(template_base_dir):
-            return {'default': 'default'}
-        
-        # scan each subdirectory in templates/
-        for folder_name in os.listdir(template_base_dir):
-            folder_path = os.path.join(template_base_dir, folder_name)
-
-        # scan for yaml files in each specified folder
-            if os.path.isdir(folder_path):
-                template_files = []
-                for file_name in os.listdir(folder_path):
-                    if file_name.endswith(('.yaml', '.yml')):
-                        template_files.append(file_name)
-
-                        # extract clean name from file names
-                        base_name = os.path.splitext(file_name)[0].lower()
-                        clean_name = base_name.replace(' ', '_').replace('-', '_')
-
-                        # map template files to folder names for reference
-                        name_mappings[clean_name] = folder_name
-
-                name_mappings[clean_name] = folder_name
-
-                if template_files:
-                    self.logger.verbose(f"Found {len(template_files)} templates in {folder_name}/: {', '.join(template_files)}")
-
-        # Add some common fallbacks ---> may be able to remove later but just for fallback for now
-        fallback_mappings = {
-            'sinks': 'security',
-            'default_template': 'endpoints',
-            'endpoint': 'endpoints',
-        }
-
-        for key, value in fallback_mappings.items():
-            if key not in name_mappings:
-                name_mappings[key] = value
-
-        self.banner.add_status(f"Template name mappings: {name_mappings}")
-
-        return name_mappings
-
-    # get the template name for output files
-    def _extract_template_name(self, template_file_path):
-        """Extract a clean template name from the file path for use in filenames"""
-        if not template_file_path:
+    # get the template names from template file paths
+    def _extract_template_name_from_paths(self, template_paths):
+        if not template_paths:
             return "default"
         
-        name_mappings = self._scan_template_folders()
-
-        # Get the filename without extension
-        filename = os.path.basename(template_file_path)
-        template_name = os.path.splitext(filename)[0]
-        
-        # Clean up the name for use in filenames
-        clean_name = template_name.lower().replace(' ', '_').replace('-', '_')
-        
-        if clean_name in name_mappings:
-            folder_name = name_mappings[clean_name]
-            return clean_name
-        
-        return clean_name
+        if len(template_paths) == 1:
+            # Single template file
+            template_path = template_paths[0]
+            filename = os.path.basename(template_path)
+            template_name = os.path.splitext(filename)[0]
+            return template_name.lower().replace(' ', '_').replace('-', '_')
+        else:
+            # For multiple template files - use directory name or generic name
+            common_dir = os.path.commonpath([os.path.dirname(p) for p in template_paths])
+            if common_dir:
+                dir_name = os.path.basename(common_dir)
+                if dir_name and dir_name != '.':
+                    return dir_name.lower().replace(' ', '_').replace('-', '_')
+                
+            return "multi_template"
     
     def run(self):
         """Main execution method"""
@@ -114,12 +68,18 @@ class JSauceApp:
             self.logger.debug(f"Verbosity level: {args.verbose}")
 
             # Load template arg
-            template_file = self.argument_handler.get_templates(args.template)
-            load_template = LoadTemplate(template_file, self.banner, self.category_processor)
+            template_files = self.argument_handler.get_templates(args.template)
+
+            if not template_files:
+                self.banner.show_error("No templates found. Check your template path.")
+                self.logger.error("No templates found. Cannot proceed.")
+                return False
+            
+            load_template = LoadTemplate(template_files, self.banner, self.category_processor)
 
             # grab template name
-            template_name = self._extract_template_name(template_file)
-            self.logger.verbose(f"Using template name {template_name} from file {template_file}")
+            template_name = self._extract_template_name_from_paths(template_files)
+            self.logger.verbose(f"Using template name {template_name} from file {template_files}")
 
             # Initialize banner with persistent display
             self.banner.initialize_persistent_display()
@@ -180,7 +140,7 @@ class JSauceApp:
                 self.banner.show_error("No patterns loaded. Cannot proceed.")
                 return False
             
-            self.logger.log_template_loading(template_file, len(templates))
+            self.logger.log_template_loading(template_files, len(templates))
             self.banner.add_status(f"Template categories: {list(templates.keys())}")
 
 

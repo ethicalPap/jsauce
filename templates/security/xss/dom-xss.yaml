@@ -1,0 +1,58 @@
+info:
+  name: "XSS Vulnerability Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect XSS sinks in DOM manipulation and jQuery operations"
+  tags:
+    - "xss"
+    - "dom"
+    - "jquery"
+    - "security"
+    - "javascript"
+
+patterns:
+  xss_dom_sinks:
+    description: "DOM-based XSS sinks - dangerous innerHTML/outerHTML usage"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "\\.innerHTML\\s*=\\s*[^;]+"
+      - "\\.outerHTML\\s*=\\s*[^;]+"
+      - "document\\.write\\s*\\([^)]*\\)"
+      - "document\\.writeln\\s*\\([^)]*\\)"
+      - "\\.insertAdjacentHTML\\s*\\([^)]*\\)"
+      - "eval\\s*\\([^)]*\\)"
+      - "setTimeout\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+      - "setInterval\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+      - "Function\\s*\\([^)]*\\)"
+      - "execScript\\s*\\([^)]*\\)"
+
+  xss_jquery_sinks:
+    description: "jQuery XSS sinks - dangerous jQuery methods"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "\\$\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.append\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.prepend\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.after\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.before\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.replaceWith\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.wrap\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.wrapAll\\s*\\([^)]*\\)"
+      - "\\$\\([^)]*\\)\\.wrapInner\\s*\\([^)]*\\)"
+      - "jQuery\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
+
+  postmessage_sinks:
+    description: "PostMessage vulnerabilities - unsafe message handling"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "window\\.addEventListener\\s*\\(['\"`]message['\"`]"
+      - "addEventListener\\s*\\(['\"`]message['\"`]"
+      - "onmessage\\s*="
+      - "postMessage\\s*\\([^)]*\\)"
+      - "event\\.data"
+      - "e\\.data"
+      - "message\\.data"
+      - "\\*['\"`]\\s*\\)\\s*;\\s*//.*postMessage"

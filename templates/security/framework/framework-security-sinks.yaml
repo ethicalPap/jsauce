@@ -1,0 +1,58 @@
+info:
+  name: "Framework-Specific Security Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect security vulnerabilities specific to React, Angular, Vue.js and template engines"
+  tags:
+    - "react"
+    - "angular"
+    - "vue"
+    - "template"
+    - "framework"
+    - "security"
+
+patterns:
+  react_sinks:
+    description: "React-specific security sinks"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "dangerouslySetInnerHTML\\s*:\\s*\\{"
+      - "React\\.createElement\\s*\\(['\"`]script['\"`]"
+      - "ReactDOM\\.render\\s*\\([^)]*\\)"
+      - "ref\\s*=\\s*\\{[^}]*\\}"
+
+  angular_sinks:
+    description: "Angular-specific security sinks"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "\\$sce\\.trustAsHtml\\s*\\([^)]*\\)"
+      - "\\$sce\\.trustAsUrl\\s*\\([^)]*\\)"
+      - "\\$sce\\.trustAsResourceUrl\\s*\\([^)]*\\)"
+      - "\\$sce\\.trustAsJs\\s*\\([^)]*\\)"
+      - "bypassSecurityTrustHtml\\s*\\([^)]*\\)"
+      - "bypassSecurityTrustUrl\\s*\\([^)]*\\)"
+      - "bypassSecurityTrustResourceUrl\\s*\\([^)]*\\)"
+
+  vue_sinks:
+    description: "Vue.js-specific security sinks"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "v-html\\s*="
+      - "\\$refs\\."
+      - "\\$el\\.innerHTML"
+      - "Vue\\.compile\\s*\\([^)]*\\)"
+
+  template_injection_sinks:
+    description: "Client-side template injection sinks"
+    flags: "gi"
+    sensitive: true
+    patterns:
+      - "Handlebars\\.compile\\s*\\([^)]*\\)"
+      - "Mustache\\.render\\s*\\([^)]*\\)"
+      - "\\{\\{.*\\}\\}"
+      - "<%.*%>"
+      - "\\$\\{.*\\}"
+      - "template\\s*:\\s*['\"`][^'\"``]*\\{\\{[^'\"``]*\\}\\}[^'\"``]*['\"`]"
