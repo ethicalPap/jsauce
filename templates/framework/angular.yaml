@@ -1,0 +1,86 @@
+info:
+  name: Angular Framework Detection
+  author: JSauce
+  severity: info
+  description: Detect Angular.js and Angular-specific patterns and potential security issues
+  tags:
+    - angular
+    - framework
+    - javascript
+
+angular_sinks:
+  description: "Angular-specific security sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$sce\\.trustAsHtml\\s*\\([^)]*\\)"
+    - "\\$sce\\.trustAsUrl\\s*\\([^)]*\\)"
+    - "\\$sce\\.trustAsResourceUrl\\s*\\([^)]*\\)"
+    - "\\$sce\\.trustAsJs\\s*\\([^)]*\\)"
+    - "bypassSecurityTrustHtml\\s*\\([^)]*\\)"
+    - "bypassSecurityTrustUrl\\s*\\([^)]*\\)"
+    - "bypassSecurityTrustResourceUrl\\s*\\([^)]*\\)"
+
+angular_patterns:
+  description: "Angular framework patterns"
+  flags: "gi"
+  patterns:
+    - "angular\\.module\\s*\\("
+    - "\\$scope\\."
+    - "\\$rootScope\\."
+    - "\\$controller\\s*\\("
+    - "\\$directive\\s*\\("
+    - "\\$service\\s*\\("
+    - "\\$factory\\s*\\("
+    - "\\$provider\\s*\\("
+    - "\\$filter\\s*\\("
+
+angular_directives:
+  description: "Angular directive patterns"
+  flags: "gi"
+  patterns:
+    - "ng-[\\w-]+"
+    - "\\[\\([^)]*\\)\\]"
+    - "\\*ng[A-Z][\\w]*"
+    - "@Component\\s*\\("
+    - "@Directive\\s*\\("
+    - "@Injectable\\s*\\("
+    - "@Pipe\\s*\\("
+
+angular_http:
+  description: "Angular HTTP patterns"
+  flags: "gi"
+  patterns:
+    - "\\$http\\."
+    - "\\$httpBackend\\."
+    - "HttpClient\\."
+    - "HttpClientModule"
+    - "\\$resource\\s*\\("
+    - "\\$q\\."
+    - "Observable\\s*\\."
+
+angular_routing:
+  description: "Angular routing patterns"
+  flags: "gi"
+  patterns:
+    - "\\$route\\."
+    - "\\$routeProvider\\."
+    - "\\$location\\."
+    - "Router\\."
+    - "ActivatedRoute\\."
+    - "RouterModule\\."
+    - "routerLink"
+    - "router-outlet"
+
+angular_security:
+  description: "Angular security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "ng-bind-html"
+    - "\\[innerHTML\\]"
+    - "\\$compile\\s*\\("
+    - "\\$eval\\s*\\("
+    - "\\$parse\\s*\\("
+    - "\\$interpolate\\s*\\("
+    - "DomSanitizer\\."

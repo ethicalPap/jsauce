@@ -1,7 +1,7 @@
 info:
   name: Authentication Endpoints
   author: JSauce
-  severity: medium
+  severity: critical
   description: Detect authentication and authorization endpoints
   tags:
     - auth
@@ -11,8 +11,10 @@ info:
 authentication_endpoints:
   description: "Authentication and authorization endpoints"
   flags: "gi"
+  sensitive: true
   patterns:
     - "[\\'\"``](/auth/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/authentication/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/login)[\\'\"``]"
     - "[\\'\"``](/logout)[\\'\"``]"
     - "[\\'\"``](/register)[\\'\"``]"
@@ -20,26 +22,114 @@ authentication_endpoints:
     - "[\\'\"``](/signup)[\\'\"``]"
     - "[\\'\"``](/sign-in)[\\'\"``]"
     - "[\\'\"``](/sign-up)[\\'\"``]"
+    - "[\\'\"``](/sign-out)[\\'\"``]"
 
 security_endpoints:
   description: "Security-related endpoints"
   flags: "gi"
+  sensitive: true
   patterns:
     - "[\\'\"``](/password/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/reset/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/verify/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/2fa/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/mfa/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/totp/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/captcha/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/csrf/[\\w\\d/-_.?=&%]*)[\\'\"``]"
-    - "[\\'\"``](/totp/[\\w\\d/-_.?=&%]*)[\\'\"``]"
 
 session_endpoints:
   description: "Session management endpoints"
   flags: "gi"
+  sensitive: true
   patterns:
     - "[\\'\"``](/session/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/sessions/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/refresh/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/logout-all)[\\'\"``]"
     - "[\\'\"``](/invalidate)[\\'\"``]"
+    - "[\\'\"``](/session-check)[\\'\"``]"
+
+password_operations:
+  description: "Password management operations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/forgot-password)[\\'\"``]"
+    - "[\\'\"``](/reset-password)[\\'\"``]"
+    - "[\\'\"``](/change-password)[\\'\"``]"
+    - "[\\'\"``](/update-password)[\\'\"``]"
+    - "[\\'\"``](/set-password)[\\'\"``]"
+    - "[\\'\"``](/confirm-password)[\\'\"``]"
+
+email_verification:
+  description: "Email verification endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/verify-email)[\\'\"``]"
+    - "[\\'\"``](/email-verification)[\\'\"``]"
+    - "[\\'\"``](/confirm-email)[\\'\"``]"
+    - "[\\'\"``](/activate-account)[\\'\"``]"
+    - "[\\'\"``](/resend-verification)[\\'\"``]"
+
+account_management:
+  description: "Account management endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/account/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/profile/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/user/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/me)[\\'\"``]"
+    - "[\\'\"``](/whoami)[\\'\"``]"
+
+authentication_providers:
+  description: "Authentication provider patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/auth/google)[\\'\"``]"
+    - "[\\'\"``](/auth/facebook)[\\'\"``]"
+    - "[\\'\"``](/auth/github)[\\'\"``]"
+    - "[\\'\"``](/auth/twitter)[\\'\"``]"
+    - "[\\'\"``](/auth/linkedin)[\\'\"``]"
+    - "[\\'\"``](/auth/microsoft)[\\'\"``]"
+    - "[\\'\"``](/auth/apple)[\\'\"``]"
+
+authentication_tokens:
+  description: "Authentication token patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "access[_-]?token"
+    - "refresh[_-]?token"
+    - "auth[_-]?token"
+    - "bearer[_-]?token"
+    - "jwt[_-]?token"
+    - "api[_-]?token"
+    - "session[_-]?token"
+
+authentication_headers:
+  description: "Authentication header patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Authorization"
+    - "Bearer\\s+"
+    - "Basic\\s+"
+    - "Digest\\s+"
+    - "X-Auth-Token"
+    - "X-API-Key"
+    - "X-Access-Token"
+
+authentication_cookies:
+  description: "Authentication cookie patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "auth[_-]?cookie"
+    - "session[_-]?cookie"
+    - "login[_-]?cookie"
+    - "remember[_-]?me"
+    - "stay[_-]?logged[_-]?in"
+    - "persistent[_-]?login"

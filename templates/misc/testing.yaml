@@ -1,0 +1,134 @@
+info:
+  name: Testing Endpoints Detection
+  author: JSauce
+  severity: medium
+  description: Detect testing endpoints, QA environments, and test utilities
+  tags:
+    - testing
+    - qa
+    - test-env
+
+test_endpoints:
+  description: "Testing and QA endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/test/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/testing/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/qa/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/staging/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/dev/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/development/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+test_frameworks:
+  description: "Testing framework patterns"
+  flags: "gi"
+  patterns:
+    - "jest"
+    - "mocha"
+    - "jasmine"
+    - "karma"
+    - "chai"
+    - "sinon"
+    - "enzyme"
+    - "cypress"
+    - "selenium"
+    - "puppeteer"
+    - "playwright"
+
+unit_test_patterns:
+  description: "Unit testing patterns"
+  flags: "gi"
+  patterns:
+    - "describe\\s*\\(['\"`][^'\"``]+['\"`]"
+    - "it\\s*\\(['\"`][^'\"``]+['\"`]"
+    - "test\\s*\\(['\"`][^'\"``]+['\"`]"
+    - "expect\\s*\\("
+    - "assert\\s*\\("
+    - "should\\s*\\."
+    - "beforeEach\\s*\\("
+    - "afterEach\\s*\\("
+
+integration_test_patterns:
+  description: "Integration testing patterns"
+  flags: "gi"
+  patterns:
+    - "integration[_-]?test"
+    - "e2e[_-]?test"
+    - "end[_-]?to[_-]?end"
+    - "api[_-]?test"
+    - "request\\s*\\("
+    - "supertest"
+    - "axios[_-]?mock"
+
+mock_patterns:
+  description: "Mocking and stubbing patterns"
+  flags: "gi"
+  patterns:
+    - "mock\\s*\\("
+    - "stub\\s*\\("
+    - "spy\\s*\\("
+    - "fake\\s*\\("
+    - "sinon\\."
+    - "jest\\.mock\\s*\\("
+    - "jest\\.fn\\s*\\(\\)"
+    - "mockReturnValue"
+
+test_utilities:
+  description: "Test utility endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/fixtures/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/mocks/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/stubs/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/seed/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/factory/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+test_databases:
+  description: "Test database patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "test[_-]?db"
+    - "testing[_-]?database"
+    - "mock[_-]?db"
+    - "sqlite.*memory"
+    - "in[_-]?memory[_-]?db"
+
+performance_testing:
+  description: "Performance testing patterns"
+  flags: "gi"
+  patterns:
+    - "load[_-]?test"
+    - "stress[_-]?test"
+    - "performance[_-]?test"
+    - "benchmark"
+    - "artillery"
+    - "jmeter"
+    - "k6"
+
+security_testing:
+  description: "Security testing patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "security[_-]?test"
+    - "penetration[_-]?test"
+    - "vulnerability[_-]?test"
+    - "fuzz[_-]?test"
+    - "injection[_-]?test"
+    - "xss[_-]?test"
+    - "csrf[_-]?test"
+
+test_environments:
+  description: "Test environment indicators"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "NODE_ENV.*test"
+    - "RAILS_ENV.*test"
+    - "ENV.*test"
+    - "test[_-]?environment"
+    - "staging[_-]?environment"
+    - "development[_-]?mode"

@@ -1,0 +1,100 @@
+info:
+  name: Vue.js Framework Detection
+  author: JSauce
+  severity: info
+  description: Detect Vue.js-specific patterns and potential security issues
+  tags:
+    - vue
+    - vuejs
+    - framework
+
+vue_sinks:
+  description: "Vue.js-specific security sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "v-html\\s*="
+    - "\\$refs\\."
+    - "\\$el\\.innerHTML"
+    - "Vue\\.compile\\s*\\([^)]*\\)"
+    - "\\$mount\\s*\\([^)]*\\)"
+    - "render\\s*:\\s*function\\s*\\([^)]*createElement"
+
+vue_patterns:
+  description: "Vue.js framework patterns"
+  flags: "gi"
+  patterns:
+    - "new\\s+Vue\\s*\\("
+    - "Vue\\.component\\s*\\("
+    - "Vue\\.directive\\s*\\("
+    - "Vue\\.filter\\s*\\("
+    - "Vue\\.mixin\\s*\\("
+    - "Vue\\.use\\s*\\("
+    - "Vue\\.extend\\s*\\("
+    - "Vue\\.nextTick\\s*\\("
+
+vue_directives:
+  description: "Vue.js directive patterns"
+  flags: "gi"
+  patterns:
+    - "v-if\\s*="
+    - "v-else\\s*="
+    - "v-show\\s*="
+    - "v-for\\s*="
+    - "v-on\\s*="
+    - "v-bind\\s*="
+    - "v-model\\s*="
+    - "@[\\w-]+\\s*="
+    - ":[\\w-]+\\s*="
+
+vue_lifecycle:
+  description: "Vue.js lifecycle hooks"
+  flags: "gi"
+  patterns:
+    - "beforeCreate\\s*:"
+    - "created\\s*:"
+    - "beforeMount\\s*:"
+    - "mounted\\s*:"
+    - "beforeUpdate\\s*:"
+    - "updated\\s*:"
+    - "beforeDestroy\\s*:"
+    - "destroyed\\s*:"
+
+vue_composition:
+  description: "Vue 3 Composition API patterns"
+  flags: "gi"
+  patterns:
+    - "setup\\s*\\("
+    - "ref\\s*\\("
+    - "reactive\\s*\\("
+    - "computed\\s*\\("
+    - "watch\\s*\\("
+    - "watchEffect\\s*\\("
+    - "onMounted\\s*\\("
+    - "onUnmounted\\s*\\("
+
+vue_router:
+  description: "Vue Router patterns"
+  flags: "gi"
+  patterns:
+    - "VueRouter\\s*\\("
+    - "\\$router\\."
+    - "\\$route\\."
+    - "router-link"
+    - "router-view"
+    - "beforeRouteEnter"
+    - "beforeRouteUpdate"
+    - "beforeRouteLeave"
+
+vuex_patterns:
+  description: "Vuex state management patterns"
+  flags: "gi"
+  patterns:
+    - "new\\s+Vuex\\.Store\\s*\\("
+    - "\\$store\\."
+    - "mapState\\s*\\("
+    - "mapGetters\\s*\\("
+    - "mapMutations\\s*\\("
+    - "mapActions\\s*\\("
+    - "commit\\s*\\("
+    - "dispatch\\s*\\("

@@ -1,7 +1,7 @@
 info:
   name: Mobile App Detection
   author: JSauce
-  severity: info
+  severity: medium
   description: Detect mobile app patterns and device-specific features
   tags:
     - mobile
@@ -15,6 +15,9 @@ mobile_endpoints:
     - "[\\'\"``](/mobile/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/app/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/native/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/android/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/ios/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/m/[\\w\\d/-_.?=&%]+)[\\'\"``]"
 
 mobile_apps:
   description: "Mobile app patterns"
@@ -23,9 +26,11 @@ mobile_apps:
     - "apps\\.apple\\.com"
     - "play\\.google\\.com"
     - "appid="
-    - "id=com\\."
-    - "bundle.*identifier"
-    - "app.*store"
+    - "app[_-]?id="
+    - "bundle[_-]?identifier"
+    - "package[_-]?name"
+    - "app[_-]?store"
+    - "google[_-]?play"
 
 device_api_sinks:
   description: "Device API sinks - sensitive device information"
@@ -42,6 +47,7 @@ device_api_sinks:
     - "screen\\.width"
     - "screen\\.height"
     - "navigator\\.hardwareConcurrency"
+    - "navigator\\.deviceMemory"
 
 geolocation_sinks:
   description: "Geolocation privacy sinks - location data exposure"
@@ -53,6 +59,9 @@ geolocation_sinks:
     - "position\\.coords\\.latitude"
     - "position\\.coords\\.longitude"
     - "coords\\.accuracy"
+    - "coords\\.altitude"
+    - "coords\\.heading"
+    - "coords\\.speed"
 
 cordova_patterns:
   description: "Apache Cordova/PhoneGap patterns"
@@ -63,4 +72,100 @@ cordova_patterns:
     - "device\\.platform"
     - "device\\.version"
     - "device\\.uuid"
+    - "device\\.model"
     - "onDeviceReady"
+    - "deviceready"
+
+react_native_patterns:
+  description: "React Native patterns"
+  flags: "gi"
+  patterns:
+    - "react-native"
+    - "Platform\\.OS"
+    - "Platform\\.Version"
+    - "Dimensions\\.get"
+    - "AsyncStorage"
+    - "NetInfo"
+    - "Linking\\."
+    - "Alert\\."
+
+ionic_patterns:
+  description: "Ionic framework patterns"
+  flags: "gi"
+  patterns:
+    - "ionic"
+    - "ion-"
+    - "\\$ionicPlatform"
+    - "\\$cordova"
+    - "ionic\\.Platform"
+    - "ionic\\.Bundle"
+
+flutter_patterns:
+  description: "Flutter patterns"
+  flags: "gi"
+  patterns:
+    - "flutter"
+    - "dart"
+    - "defaultTargetPlatform"
+    - "kIsWeb"
+    - "Platform\\.isAndroid"
+    - "Platform\\.isIOS"
+
+mobile_frameworks:
+  description: "Mobile framework detection"
+  flags: "gi"
+  patterns:
+    - "xamarin"
+    - "nativescript"
+    - "titanium"
+    - "sencha"
+    - "jquery[_-]?mobile"
+    - "framework7"
+    - "onsen"
+
+push_notifications:
+  description: "Push notification patterns"
+  flags: "gi"
+  patterns:
+    - "push[_-]?notification"
+    - "fcm[_-]?token"
+    - "apns[_-]?token"
+    - "registration[_-]?id"
+    - "device[_-]?token"
+    - "notification[_-]?permission"
+    - "Notification\\."
+
+camera_access:
+  description: "Camera and media access patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "navigator\\.mediaDevices\\.getUserMedia"
+    - "navigator\\.camera"
+    - "camera\\."
+    - "video[_-]?capture"
+    - "audio[_-]?capture"
+    - "media[_-]?stream"
+
+mobile_storage:
+  description: "Mobile storage patterns"
+  flags: "gi"
+  patterns:
+    - "AsyncStorage"
+    - "SecureStore"
+    - "sqlite"
+    - "realm"
+    - "CoreData"
+    - "SharedPreferences"
+    - "UserDefaults"
+
+mobile_navigation:
+  description: "Mobile navigation patterns"
+  flags: "gi"
+  patterns:
+    - "react[_-]?navigation"
+    - "router[_-]?flux"
+    - "nav[_-]?controller"
+    - "stack[_-]?navigator"
+    - "tab[_-]?navigator"
+    - "drawer[_-]?navigator"

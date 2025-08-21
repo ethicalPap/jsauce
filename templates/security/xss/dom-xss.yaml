@@ -1,8 +1,8 @@
 info:
-  name: "XSS Vulnerability Sinks"
+  name: "DOM XSS Vulnerability Sinks"
   author: "jsauce"
   severity: "high"
-  description: "Detect XSS sinks in DOM manipulation and jQuery operations"
+  description: "Detect DOM-based XSS sinks in DOM manipulation and jQuery operations"
   tags:
     - "xss"
     - "dom"
@@ -10,49 +10,75 @@ info:
     - "security"
     - "javascript"
 
-patterns:
-  xss_dom_sinks:
-    description: "DOM-based XSS sinks - dangerous innerHTML/outerHTML usage"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "\\.innerHTML\\s*=\\s*[^;]+"
-      - "\\.outerHTML\\s*=\\s*[^;]+"
-      - "document\\.write\\s*\\([^)]*\\)"
-      - "document\\.writeln\\s*\\([^)]*\\)"
-      - "\\.insertAdjacentHTML\\s*\\([^)]*\\)"
-      - "eval\\s*\\([^)]*\\)"
-      - "setTimeout\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
-      - "setInterval\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
-      - "Function\\s*\\([^)]*\\)"
-      - "execScript\\s*\\([^)]*\\)"
+xss_dom_sinks:
+  description: "DOM-based XSS sinks - dangerous innerHTML/outerHTML usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.innerHTML\\s*=\\s*[^;]+"
+    - "\\.outerHTML\\s*=\\s*[^;]+"
+    - "document\\.write\\s*\\([^)]*\\)"
+    - "document\\.writeln\\s*\\([^)]*\\)"
+    - "\\.insertAdjacentHTML\\s*\\([^)]*\\)"
+    - "eval\\s*\\([^)]*\\)"
+    - "setTimeout\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "setInterval\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "Function\\s*\\([^)]*\\)"
+    - "execScript\\s*\\([^)]*\\)"
 
-  xss_jquery_sinks:
-    description: "jQuery XSS sinks - dangerous jQuery methods"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "\\$\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.append\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.prepend\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.after\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.before\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.replaceWith\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.wrap\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.wrapAll\\s*\\([^)]*\\)"
-      - "\\$\\([^)]*\\)\\.wrapInner\\s*\\([^)]*\\)"
-      - "jQuery\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
+xss_jquery_sinks:
+  description: "jQuery XSS sinks - dangerous jQuery methods"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.append\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.prepend\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.after\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.before\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.replaceWith\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.wrap\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.wrapAll\\s*\\([^)]*\\)"
+    - "\\$\\([^)]*\\)\\.wrapInner\\s*\\([^)]*\\)"
+    - "jQuery\\([^)]*\\)\\.html\\s*\\([^)]*\\)"
 
-  postmessage_sinks:
-    description: "PostMessage vulnerabilities - unsafe message handling"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "window\\.addEventListener\\s*\\(['\"`]message['\"`]"
-      - "addEventListener\\s*\\(['\"`]message['\"`]"
-      - "onmessage\\s*="
-      - "postMessage\\s*\\([^)]*\\)"
-      - "event\\.data"
-      - "e\\.data"
-      - "message\\.data"
-      - "\\*['\"`]\\s*\\)\\s*;\\s*//.*postMessage"
+postmessage_sinks:
+  description: "PostMessage vulnerabilities - unsafe message handling"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.addEventListener\\s*\\(['\"`]message['\"`]"
+    - "addEventListener\\s*\\(['\"`]message['\"`]"
+    - "onmessage\\s*="
+    - "postMessage\\s*\\([^)]*\\)"
+    - "event\\.data"
+    - "e\\.data"
+    - "message\\.data"
+    - "\\*['\"`]\\s*\\)\\s*;\\s*//.*postMessage"
+
+url_sinks:
+  description: "URL-based XSS sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "location\\.search"
+    - "location\\.hash"
+    - "location\\.href"
+    - "window\\.location\\.search"
+    - "window\\.location\\.hash"
+    - "document\\.referrer"
+    - "document\\.URL"
+    - "document\\.baseURI"
+
+attribute_sinks:
+  description: "DOM attribute manipulation sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.setAttribute\\s*\\(['\"`]src['\"`]"
+    - "\\.setAttribute\\s*\\(['\"`]href['\"`]"
+    - "\\.setAttribute\\s*\\(['\"`]onclick['\"`]"
+    - "\\.src\\s*="
+    - "\\.href\\s*="
+    - "\\.action\\s*="
+    - "\\.formAction\\s*="

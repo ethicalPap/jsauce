@@ -1,0 +1,86 @@
+info:
+  name: "LDAP Injection Vulnerability Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect LDAP injection vulnerabilities in directory service queries"
+  tags:
+    - "injection"
+    - "ldap"
+    - "directory"
+    - "security"
+
+ldap_query_sinks:
+  description: "LDAP query sinks - unsafe LDAP operations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "ldap\\.search\\s*\\([^)]*\\)"
+    - "ldap\\.compare\\s*\\([^)]*\\)"
+    - "ldap\\.modify\\s*\\([^)]*\\)"
+    - "ldap\\.add\\s*\\([^)]*\\)"
+    - "ldap\\.del\\s*\\([^)]*\\)"
+    - "ldap\\.bind\\s*\\([^)]*\\)"
+    - "ldap\\.unbind\\s*\\([^)]*\\)"
+
+ldap_filter_sinks:
+  description: "LDAP filter construction sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "searchFilter\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "filter\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "ldapFilter\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "['\"`]\\([^'\"``]*\\+[^'\"``]*\\)['\"`]"
+    - "['\"`]&\\([^'\"``]*\\+[^'\"``]*\\)['\"`]"
+    - "['\"`]\\|\\([^'\"``]*\\+[^'\"``]*\\)['\"`]"
+
+ldap_dn_sinks:
+  description: "LDAP Distinguished Name sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "baseDN\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "distinguishedName\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "dn\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "userDN\\s*=\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "['\"`]cn=[^'\"``]*\\+[^'\"``]*['\"`]"
+    - "['\"`]uid=[^'\"``]*\\+[^'\"``]*['\"`]"
+
+active_directory_sinks:
+  description: "Active Directory specific sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "DirectorySearcher\\s*\\([^)]*\\)"
+    - "DirectoryEntry\\s*\\([^)]*\\)"
+    - "SearchScope\\."
+    - "sAMAccountName\\s*="
+    - "userPrincipalName\\s*="
+    - "distinguishedName\\s*="
+    - "memberOf\\s*="
+
+ldap_libraries:
+  description: "LDAP library usage patterns"
+  flags: "gi"
+  patterns:
+    - "ldapjs"
+    - "activedirectory"
+    - "passport-ldapauth"
+    - "ldap-authentication"
+    - "simple-ldap-search"
+    - "node-ldap"
+    - "ldap3"
+
+ldap_injection_patterns:
+  description: "Common LDAP injection patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]\\*['\"`]"
+    - "['\"`]\\)['\"`]"
+    - "['\"`]\\(['\"`]"
+    - "['\"`]&['\"`]"
+    - "['\"`]\\|['\"`]"
+    - "['\"`]!['\"`]"
+    - "['\"`]>=\\*['\"`]"
+    - "['\"`]<=\\*['\"`]"

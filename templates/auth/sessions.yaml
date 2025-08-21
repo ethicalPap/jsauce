@@ -1,0 +1,74 @@
+info:
+  name: Session Management Detection
+  author: JSauce
+  severity: medium
+  description: Detect session management patterns and potential vulnerabilities
+  tags:
+    - sessions
+    - auth
+    - cookies
+
+session_endpoints:
+  description: "Session management endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/session/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/sessions/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/refresh/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/logout-all)[\\'\"``]"
+    - "[\\'\"``](/invalidate)[\\'\"``]"
+    - "[\\'\"``](/session-status)[\\'\"``]"
+    - "[\\'\"``](/session-info)[\\'\"``]"
+
+session_storage:
+  description: "Session storage patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "session[_-]?id"
+    - "sessionid"
+    - "jsessionid"
+    - "phpsessid"
+    - "asp\\.net[_-]?sessionid"
+    - "session[_-]?token"
+    - "session[_-]?key"
+    - "csrf[_-]?token"
+
+cookie_security:
+  description: "Cookie security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.cookie"
+    - "httpOnly"
+    - "secure"
+    - "sameSite"
+    - "expires"
+    - "max-age"
+    - "path="
+    - "domain="
+    - "cookie[_-]?parser"
+
+session_attacks:
+  description: "Session attack patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "session[_-]?fixation"
+    - "session[_-]?hijack"
+    - "session[_-]?timeout"
+    - "session[_-]?expired"
+    - "concurrent[_-]?session"
+    - "session[_-]?limit"
+
+jwt_session:
+  description: "JWT session patterns"
+  flags: "gi"
+  patterns:
+    - "jwt[_-]?token"
+    - "refresh[_-]?token"
+    - "access[_-]?token"
+    - "bearer[_-]?token"
+    - "authorization[_-]?header"
+    - "token[_-]?expiry"
+    - "token[_-]?refresh"

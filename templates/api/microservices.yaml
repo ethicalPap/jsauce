@@ -1,0 +1,67 @@
+info:
+  name: Microservices Detection
+  author: JSauce
+  severity: info
+  description: Detect microservice patterns and service mesh communications
+  tags:
+    - microservices
+    - service-mesh
+    - api
+
+microservice_endpoints:
+  description: "Microservice and service mesh endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/services?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/microservice/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/ms/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/service-[\\w\\d]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]+:[0-9]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+service_discovery:
+  description: "Service discovery patterns"
+  flags: "gi"
+  patterns:
+    - "consul\\."
+    - "eureka\\."
+    - "zookeeper\\."
+    - "etcd\\."
+    - "service[_-]?discovery"
+    - "service[_-]?registry"
+    - "load[_-]?balancer"
+    - "circuit[_-]?breaker"
+
+service_mesh:
+  description: "Service mesh and sidecar patterns"
+  flags: "gi"
+  patterns:
+    - "istio\\."
+    - "linkerd\\."
+    - "envoy\\."
+    - "sidecar"
+    - "proxy[_-]?config"
+    - "mesh[_-]?config"
+    - "traffic[_-]?policy"
+
+grpc_patterns:
+  description: "gRPC service patterns"
+  flags: "gi"
+  patterns:
+    - "grpc\\."
+    - "\\.proto"
+    - "protobuf"
+    - "rpc[_-]?service"
+    - "stream[_-]?service"
+    - "unary[_-]?call"
+
+distributed_tracing:
+  description: "Distributed tracing patterns"
+  flags: "gi"
+  patterns:
+    - "jaeger\\."
+    - "zipkin\\."
+    - "tracing[_-]?id"
+    - "span[_-]?id"
+    - "trace[_-]?id"
+    - "correlation[_-]?id"
+    - "request[_-]?id"

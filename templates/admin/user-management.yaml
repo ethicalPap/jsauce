@@ -1,0 +1,83 @@
+info:
+  name: User Management Detection
+  author: JSauce
+  severity: high
+  description: Detect user management endpoints and account operations
+  tags:
+    - users
+    - accounts
+    - management
+
+user_management:
+  description: "User management endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/users/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/user/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/accounts?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/profile/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/profiles/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+account_operations:
+  description: "Account operation endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/account/create)[\\'\"``]"
+    - "[\\'\"``](/account/delete)[\\'\"``]"
+    - "[\\'\"``](/account/update)[\\'\"``]"
+    - "[\\'\"``](/account/activate)[\\'\"``]"
+    - "[\\'\"``](/account/deactivate)[\\'\"``]"
+    - "[\\'\"``](/account/suspend)[\\'\"``]"
+
+user_profile_endpoints:
+  description: "User profile management"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/profile/edit)[\\'\"``]"
+    - "[\\'\"``](/profile/update)[\\'\"``]"
+    - "[\\'\"``](/profile/view)[\\'\"``]"
+    - "[\\'\"``](/profile/avatar)[\\'\"``]"
+    - "[\\'\"``](/profile/settings)[\\'\"``]"
+
+role_management:
+  description: "Role and permission management"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/roles/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/permissions/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/groups/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/access/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/privileges/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+password_management:
+  description: "Password management endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/password/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/change-password)[\\'\"``]"
+    - "[\\'\"``](/reset-password)[\\'\"``]"
+    - "[\\'\"``](/forgot-password)[\\'\"``]"
+    - "[\\'\"``](/update-password)[\\'\"``]"
+
+user_preferences:
+  description: "User preferences and settings"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/preferences/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/settings/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/configuration/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/options/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+user_activity:
+  description: "User activity and history"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/activity/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/history/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/audit/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/logs/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/timeline/[\\w\\d/-_.?=&%]*)[\\'\"``]"

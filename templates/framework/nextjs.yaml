@@ -1,0 +1,94 @@
+info:
+  name: Next.js Framework Detection
+  author: JSauce
+  severity: info
+  description: Detect Next.js-specific patterns and API routes
+  tags:
+    - nextjs
+    - react
+    - framework
+
+nextjs_api_routes:
+  description: "Next.js API routes and endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "pages/api/"
+    - "app/api/"
+    - "export\\s+default\\s+function\\s+handler"
+    - "export\\s+async\\s+function\\s+(GET|POST|PUT|DELETE|PATCH)"
+
+nextjs_patterns:
+  description: "Next.js framework patterns"
+  flags: "gi"
+  patterns:
+    - "getStaticProps\\s*("
+    - "getStaticPaths\\s*("
+    - "getServerSideProps\\s*("
+    - "getInitialProps\\s*("
+    - "next/router"
+    - "next/link"
+    - "next/head"
+    - "next/image"
+    - "next/script"
+
+nextjs_middleware:
+  description: "Next.js middleware patterns"
+  flags: "gi"
+  patterns:
+    - "middleware\\.js"
+    - "middleware\\.ts"
+    - "export\\s+function\\s+middleware"
+    - "NextRequest"
+    - "NextResponse"
+    - "matcher\\s*:"
+
+nextjs_config:
+  description: "Next.js configuration patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "next\\.config\\.js"
+    - "next\\.config\\.ts"
+    - "NEXT_PUBLIC_"
+    - "process\\.env\\.NEXT_PUBLIC_"
+    - "publicRuntimeConfig"
+    - "serverRuntimeConfig"
+
+nextjs_data_fetching:
+  description: "Next.js data fetching patterns"
+  flags: "gi"
+  patterns:
+    - "useSWR\\s*\\("
+    - "fetch\\s*\\(['\"`]/api/"
+    - "axios\\s*\\(['\"`]/api/"
+    - "\\$\\.get\\s*\\(['\"`]/api/"
+    - "revalidate\\s*:"
+    - "notFound\\s*:"
+    - "redirect\\s*:"
+
+nextjs_auth:
+  description: "Next.js authentication patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "next-auth"
+    - "NextAuth"
+    - "\\[\\.\\.\\. nextauth\\]"
+    - "getSession\\s*\\("
+    - "useSession\\s*\\("
+    - "signIn\\s*\\("
+    - "signOut\\s*\\("
+    - "SessionProvider"
+
+nextjs_security:
+  description: "Next.js security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "dangerouslySetInnerHTML"
+    - "Script.*strategy.*beforeInteractive"
+    - "Script.*strategy.*afterInteractive"
+    - "headers\\s*\\(\\s*\\)"
+    - "cookies\\s*\\(\\s*\\)"
+    - "searchParams"

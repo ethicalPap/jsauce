@@ -1,0 +1,98 @@
+info:
+  name: Cloud Metadata Services Detection
+  author: JSauce
+  severity: high
+  description: Detect access to cloud metadata services (SSRF target)
+  tags:
+    - metadata
+    - cloud
+    - ssrf
+
+aws_metadata:
+  description: "AWS metadata service endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://169\\.254\\.169\\.254[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``]169\\.254\\.169\\.254[\\'\"``]"
+    - "/latest/meta-data"
+    - "/latest/user-data"
+    - "/latest/dynamic"
+    - "ec2[_-]?metadata"
+
+gcp_metadata:
+  description: "GCP metadata service endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://metadata\\.google\\.internal[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "metadata\\.google\\.internal"
+    - "/computeMetadata/v1"
+    - "Metadata-Flavor:\\s*Google"
+    - "gce[_-]?metadata"
+
+azure_metadata:
+  description: "Azure metadata service endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://169\\.254\\.169\\.254[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "/metadata/instance"
+    - "/metadata/identity"
+    - "/metadata/attested"
+    - "Metadata:\\s*true"
+    - "azure[_-]?metadata"
+
+digitalocean_metadata:
+  description: "DigitalOcean metadata service endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://169\\.254\\.169\\.254[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "/metadata/v1"
+    - "droplet[_-]?metadata"
+    - "do[_-]?metadata"
+
+openstack_metadata:
+  description: "OpenStack metadata service endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://169\\.254\\.169\\.254[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "/openstack/latest"
+    - "/openstack/content"
+    - "openstack[_-]?metadata"
+
+kubernetes_metadata:
+  description: "Kubernetes metadata and service account patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "/var/run/secrets/kubernetes\\.io"
+    - "/serviceaccount/token"
+    - "/serviceaccount/namespace"
+    - "/serviceaccount/ca\\.crt"
+    - "kubernetes[_-]?service[_-]?account"
+
+docker_metadata:
+  description: "Docker and container metadata patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "/var/run/docker\\.sock"
+    - "docker[_-]?socket"
+    - "/proc/self/cgroup"
+    - "container[_-]?metadata"
+    - "dockerenv"
+
+generic_metadata:
+  description: "Generic metadata access patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "link[_-]?local"
+    - "169\\.254\\."
+    - "127\\.0\\.0\\.1"
+    - "localhost"
+    - "metadata[_-]?service"
+    - "instance[_-]?data"

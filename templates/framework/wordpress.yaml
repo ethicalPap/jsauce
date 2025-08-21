@@ -1,0 +1,106 @@
+info:
+  name: WordPress Detection
+  author: JSauce
+  severity: info
+  description: Detect WordPress-specific patterns and potential vulnerabilities
+  tags:
+    - wordpress
+    - cms
+    - php
+
+wordpress_endpoints:
+  description: "WordPress-specific endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/wp-admin/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/wp-content/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/wp-includes/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/wp-json/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/wp-login\\.php)[\\'\"``]"
+    - "[\\'\"``](/wp-config\\.php)[\\'\"``]"
+    - "[\\'\"``](/xmlrpc\\.php)[\\'\"``]"
+
+wordpress_ajax:
+  description: "WordPress AJAX patterns"
+  flags: "gi"
+  patterns:
+    - "ajaxurl"
+    - "admin-ajax\\.php"
+    - "wp\\.ajax"
+    - "\\$\\.post\\s*\\([^)]*admin-ajax"
+    - "action\\s*:\\s*['\"`][^'\"``]+['\"`]"
+    - "wp_ajax_"
+    - "wp_ajax_nopriv_"
+
+wordpress_api:
+  description: "WordPress REST API patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``]/wp-json/wp/v2/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "[\\'\"``]/wp-json/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "wp-api"
+    - "WP_REST_"
+    - "register_rest_route"
+    - "rest_url\\s*\\("
+
+wordpress_nonces:
+  description: "WordPress nonce and security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "_wpnonce"
+    - "wp_nonce_field"
+    - "wp_create_nonce"
+    - "wp_verify_nonce"
+    - "check_admin_referer"
+    - "_ajax_nonce"
+
+wordpress_hooks:
+  description: "WordPress hook and filter patterns"
+  flags: "gi"
+  patterns:
+    - "add_action\\s*\\("
+    - "add_filter\\s*\\("
+    - "do_action\\s*\\("
+    - "apply_filters\\s*\\("
+    - "wp_enqueue_script"
+    - "wp_enqueue_style"
+    - "wp_localize_script"
+
+wordpress_plugins:
+  description: "WordPress plugin patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``]/wp-content/plugins/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "plugin_dir_url"
+    - "plugin_dir_path"
+    - "WP_PLUGIN_URL"
+    - "WP_PLUGIN_DIR"
+    - "activate_plugin"
+    - "deactivate_plugin"
+
+wordpress_themes:
+  description: "WordPress theme patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``]/wp-content/themes/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "get_template_directory"
+    - "get_stylesheet_directory"
+    - "wp_get_theme"
+    - "WP_CONTENT_URL"
+    - "theme_root"
+
+wordpress_security:
+  description: "WordPress security vulnerabilities"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$_GET\\["
+    - "\\$_POST\\["
+    - "\\$_REQUEST\\["
+    - "eval\\s*\\("
+    - "exec\\s*\\("
+    - "system\\s*\\("
+    - "file_get_contents\\s*\\("
+    - "include\\s*\\("
+    - "require\\s*\\("

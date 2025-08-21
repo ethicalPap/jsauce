@@ -1,0 +1,95 @@
+info:
+  name: "SSRF Vulnerability Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect Server-Side Request Forgery vulnerabilities in HTTP requests"
+  tags:
+    - "ssrf"
+    - "server-side"
+    - "request-forgery"
+    - "security"
+
+http_request_sinks:
+  description: "HTTP request sinks - unsafe HTTP requests"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "fetch\\s*\\([^)]*\\)"
+    - "XMLHttpRequest.*\\.open\\s*\\([^)]*\\)"
+    - "\\$\\.ajax\\s*\\([^)]*url\\s*:[^}]*\\)"
+    - "\\$\\.get\\s*\\([^)]*\\)"
+    - "\\$\\.post\\s*\\([^)]*\\)"
+    - "axios\\.(get|post|put|delete|patch)\\s*\\([^)]*\\)"
+    - "request\\s*\\([^)]*\\)"
+    - "http\\.get\\s*\\([^)]*\\)"
+    - "https\\.get\\s*\\([^)]*\\)"
+
+url_construction_sinks:
+  description: "Dynamic URL construction sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]https?://['\"`]\\s*\\+\\s*[^;]+"
+    - "new\\s+URL\\s*\\([^)]*\\+[^)]*\\)"
+    - "url\\s*=\\s*[^;]*\\+[^;]*"
+    - "endpoint\\s*=\\s*[^;]*\\+[^;]*"
+    - "baseURL\\s*=\\s*[^;]*\\+[^;]*"
+
+internal_network_sinks:
+  description: "Internal network access patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]https?://localhost['\"`]"
+    - "['\"`]https?://127\\.0\\.0\\.1['\"`]"
+    - "['\"`]https?://0\\.0\\.0\\.0['\"`]"
+    - "['\"`]https?://192\\.168\\.[^'\"``]*['\"`]"
+    - "['\"`]https?://10\\.[^'\"``]*['\"`]"
+    - "['\"`]https?://172\\.(1[6-9]|2[0-9]|3[01])\\.[^'\"``]*['\"`]"
+
+cloud_metadata_sinks:
+  description: "Cloud metadata service access patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]https?://169\\.254\\.169\\.254['\"`]"
+    - "['\"`]https?://metadata\\.google\\.internal['\"`]"
+    - "['\"`]https?://[^'\"``]*\\.amazonaws\\.com['\"`]"
+    - "['\"`]https?://[^'\"``]*\\.azure\\.com['\"`]"
+    - "['\"`]https?://[^'\"``]*\\.digitalocean\\.com['\"`]"
+
+file_protocol_sinks:
+  description: "File protocol access sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]file://[^'\"``]*['\"`]"
+    - "['\"`]ftp://[^'\"``]*['\"`]"
+    - "['\"`]gopher://[^'\"``]*['\"`]"
+    - "['\"`]ldap://[^'\"``]*['\"`]"
+    - "['\"`]dict://[^'\"``]*['\"`]"
+
+parameter_based_ssrf:
+  description: "Parameter-based SSRF patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "url\\s*=\\s*[^&;]*"
+    - "uri\\s*=\\s*[^&;]*"
+    - "endpoint\\s*=\\s*[^&;]*"
+    - "callback\\s*=\\s*[^&;]*"
+    - "webhook\\s*=\\s*[^&;]*"
+    - "proxy\\s*=\\s*[^&;]*"
+    - "redirect\\s*=\\s*[^&;]*"
+
+dns_rebinding_sinks:
+  description: "DNS rebinding attack patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.domain\\s*="
+    - "location\\.hostname"
+    - "location\\.host"
+    - "window\\.location\\.hostname"
+    - "getHostname\\s*\\([^)]*\\)"
+    - "resolveHost\\s*\\([^)]*\\)"

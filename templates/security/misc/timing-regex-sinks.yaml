@@ -10,29 +10,63 @@ info:
     - "dos"
     - "security"
 
-patterns:
-  timing_attack_sinks:
-    description: "Timing attack sinks - operations vulnerable to timing analysis"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "performance\\.now\\s*\\(\\)"
-      - "Date\\.now\\s*\\(\\)"
-      - "new\\s+Date\\s*\\(\\)\\.getTime\\s*\\(\\)"
-      - "console\\.time\\s*\\([^)]*\\)"
-      - "console\\.timeEnd\\s*\\([^)]*\\)"
-      - "setTimeout\\s*\\([^)]*\\)"
-      - "setInterval\\s*\\([^)]*\\)"
+timing_attack_sinks:
+  description: "Timing attack sinks - operations vulnerable to timing analysis"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "performance\\.now\\s*\\(\\)"
+    - "Date\\.now\\s*\\(\\)"
+    - "new\\s+Date\\s*\\(\\)\\.getTime\\s*\\(\\)"
+    - "console\\.time\\s*\\([^)]*\\)"
+    - "console\\.timeEnd\\s*\\([^)]*\\)"
+    - "setTimeout\\s*\\([^)]*\\)"
+    - "setInterval\\s*\\([^)]*\\)"
 
-  regex_redos_sinks:
-    description: "ReDoS (Regular Expression Denial of Service) sinks"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "new\\s+RegExp\\s*\\([^)]*\\)"
-      - "\\.match\\s*\\([^)]*\\)"
-      - "\\.replace\\s*\\([^)]*\\)"
-      - "\\.search\\s*\\([^)]*\\)"
-      - "\\.split\\s*\\([^)]*\\)"
-      - "\\.test\\s*\\([^)]*\\)"
-      - "RegExp\\.prototype\\.test\\s*\\([^)]*\\)"
+regex_redos_sinks:
+  description: "ReDoS (Regular Expression Denial of Service) sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "new\\s+RegExp\\s*\\([^)]*\\)"
+    - "\\.match\\s*\\([^)]*\\)"
+    - "\\.replace\\s*\\([^)]*\\)"
+    - "\\.search\\s*\\([^)]*\\)"
+    - "\\.split\\s*\\([^)]*\\)"
+    - "\\.test\\s*\\([^)]*\\)"
+    - "RegExp\\.prototype\\.test\\s*\\([^)]*\\)"
+
+dangerous_regex_patterns:
+  description: "Dangerous regex patterns prone to ReDoS"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\([^)]*\\*[^)]*\\*[^)]*\\)"
+    - "\\([^)]*\\+[^)]*\\+[^)]*\\)"
+    - "\\([^)]*\\{[0-9]*,[0-9]*\\}[^)]*\\*[^)]*\\)"
+    - "\\([^)]*\\?[^)]*\\*[^)]*\\)"
+    - "\\([^)]*\\|[^)]*\\)[^)]*\\*"
+
+timing_comparison_sinks:
+  description: "Timing-vulnerable comparison operations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "password\\s*===\\s*[^;]+"
+    - "token\\s*===\\s*[^;]+"
+    - "secret\\s*===\\s*[^;]+"
+    - "signature\\s*===\\s*[^;]+"
+    - "hmac\\s*===\\s*[^;]+"
+    - "hash\\s*===\\s*[^;]+"
+    - "strcmp\\s*\\([^)]*\\)"
+
+resource_exhaustion:
+  description: "Resource exhaustion patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "while\\s*\\(\\s*true\\s*\\)"
+    - "for\\s*\\([^)]*;;[^)]*\\)"
+    - "setInterval\\s*\\([^)]*0\\s*\\)"
+    - "requestAnimationFrame\\s*\\([^)]*\\)"
+    - "process\\.nextTick\\s*\\([^)]*\\)"

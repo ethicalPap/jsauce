@@ -1,0 +1,71 @@
+info:
+  name: Webhook Detection
+  author: JSauce
+  severity: medium
+  description: Detect webhook endpoints and callback mechanisms
+  tags:
+    - webhooks
+    - callbacks
+    - events
+
+webhooks_callbacks:
+  description: "Webhook and callback endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/webhook/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/webhooks/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/callback/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/callbacks/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/hook/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/hooks/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/notify/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/notification/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+payment_webhooks:
+  description: "Payment and financial service webhooks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/stripe/webhook)[\\'\"``]"
+    - "[\\'\"``](/paypal/webhook)[\\'\"``]"
+    - "[\\'\"``](/payment/webhook)[\\'\"``]"
+    - "[\\'\"``](/billing/webhook)[\\'\"``]"
+    - "[\\'\"``](/subscription/webhook)[\\'\"``]"
+
+third_party_webhooks:
+  description: "Third-party service webhooks"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/github/webhook)[\\'\"``]"
+    - "[\\'\"``](/gitlab/webhook)[\\'\"``]"
+    - "[\\'\"``](/slack/webhook)[\\'\"``]"
+    - "[\\'\"``](/discord/webhook)[\\'\"``]"
+    - "[\\'\"``](/teams/webhook)[\\'\"``]"
+    - "[\\'\"``](/jira/webhook)[\\'\"``]"
+    - "[\\'\"``](/trello/webhook)[\\'\"``]"
+
+webhook_security:
+  description: "Webhook security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "webhook[_-]?secret"
+    - "webhook[_-]?signature"
+    - "x-hub-signature"
+    - "x-slack-signature"
+    - "x-stripe-signature"
+    - "hmac[_-]?sha256"
+    - "webhook[_-]?verify"
+
+event_patterns:
+  description: "Event-driven patterns"
+  flags: "gi"
+  patterns:
+    - "event[_-]?bus"
+    - "event[_-]?stream"
+    - "event[_-]?queue"
+    - "event[_-]?handler"
+    - "message[_-]?queue"
+    - "pub[_-]?sub"
+    - "subscriber"
+    - "publisher"

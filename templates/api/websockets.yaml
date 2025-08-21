@@ -1,7 +1,7 @@
 info:
   name: WebSocket Endpoints Detection
   author: JSauce
-  severity: info
+  severity: medium
   description: Detect WebSocket connections and real-time communication
   tags:
     - websockets
@@ -13,23 +13,50 @@ websockets:
   flags: "gi"
   patterns:
     - "new\\s+WebSocket\\s*\\(\\s*[\\'\"``](wss?://[^'\"``\\s]+)[\\'\"``]"
+    - "new\\s+WebSocket\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/socket\\.io/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/ws/[\\w\\d/-_.?=&%]*)[\\'\"``]"
     - "[\\'\"``](/websocket/[\\w\\d/-_.?=&%]*)[\\'\"``]"
-    - "io\\s*\\(['\"`][^'\"``]*['\"`]\\)"
-    - "socket\\.connect\\s*\\("
-    - "socket\\.emit\\s*\\("
-    - "socket\\.on\\s*\\("
+    - "[\\'\"``](ws://[^'\"``\\s]+)[\\'\"``]"
+    - "[\\'\"``](wss://[^'\"``\\s]+)[\\'\"``]"
 
 socketio_patterns:
   description: "Socket.IO specific patterns"
   flags: "gi"
   patterns:
-    - "io\\([\\'\"``][^'\"``]+[\\'\"``]\\)"
+    - "io\\s*\\([\\'\"``][^'\"``]+[\\'\"``]\\)"
+    - "io\\s*\\(\\)"
     - "socket\\.emit\\s*\\(['\"`][^'\"``]*['\"`]"
     - "socket\\.on\\s*\\(['\"`][^'\"``]*['\"`]"
+    - "socket\\.broadcast"
+    - "socket\\.join\\s*\\("
+    - "socket\\.leave\\s*\\("
     - "/socket\\.io/"
     - "transports\\s*:\\s*\\[\\s*['\"`]websocket['\"`]"
+
+websocket_events:
+  description: "WebSocket event patterns"
+  flags: "gi"
+  patterns:
+    - "socket\\.onopen"
+    - "socket\\.onmessage"
+    - "socket\\.onerror"
+    - "socket\\.onclose"
+    - "addEventListener\\s*\\(['\"`]open['\"`]"
+    - "addEventListener\\s*\\(['\"`]message['\"`]"
+    - "addEventListener\\s*\\(['\"`]error['\"`]"
+    - "addEventListener\\s*\\(['\"`]close['\"`]"
+
+websocket_methods:
+  description: "WebSocket method patterns"
+  flags: "gi"
+  patterns:
+    - "socket\\.send\\s*\\("
+    - "socket\\.close\\s*\\("
+    - "ws\\.send\\s*\\("
+    - "ws\\.close\\s*\\("
+    - "websocket\\.send\\s*\\("
+    - "websocket\\.close\\s*\\("
 
 realtime_patterns:
   description: "Real-time communication patterns"
@@ -40,3 +67,67 @@ realtime_patterns:
     - "text/event-stream"
     - "addEventListener\\s*\\(['\"`]message['\"`]"
     - "onmessage\\s*="
+    - "sse"
+    - "server[_-]?sent[_-]?events"
+
+websocket_libraries:
+  description: "WebSocket library patterns"
+  flags: "gi"
+  patterns:
+    - "socket\\.io"
+    - "sockjs"
+    - "ws"
+    - "uws"
+    - "websockets"
+    - "pusher"
+    - "pubnub"
+    - "ably"
+    - "signalr"
+
+websocket_protocols:
+  description: "WebSocket protocol patterns"
+  flags: "gi"
+  patterns:
+    - "Sec-WebSocket-Protocol"
+    - "Sec-WebSocket-Version"
+    - "Sec-WebSocket-Key"
+    - "Sec-WebSocket-Accept"
+    - "Upgrade:\\s*websocket"
+    - "Connection:\\s*Upgrade"
+
+websocket_security:
+  description: "WebSocket security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "wss://"
+    - "secure:\\s*true"
+    - "rejectUnauthorized"
+    - "websocket[_-]?origin"
+    - "cors[_-]?origin"
+    - "auth[_-]?token"
+
+chat_patterns:
+  description: "Chat and messaging patterns"
+  flags: "gi"
+  patterns:
+    - "chat"
+    - "message"
+    - "room"
+    - "channel"
+    - "broadcast"
+    - "private[_-]?message"
+    - "group[_-]?chat"
+    - "direct[_-]?message"
+
+notification_patterns:
+  description: "Real-time notification patterns"
+  flags: "gi"
+  patterns:
+    - "notification"
+    - "alert"
+    - "push"
+    - "live[_-]?update"
+    - "real[_-]?time"
+    - "instant"
+    - "notify"

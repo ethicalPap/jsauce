@@ -1,0 +1,86 @@
+info:
+  name: Debug Endpoints Detection
+  author: JSauce
+  severity: high
+  description: Detect debug endpoints and development tools
+  tags:
+    - debug
+    - dev
+    - testing
+
+debug_endpoints:
+  description: "Debug and development endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/debug/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/dev/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/development/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/test/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/testing/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/staging/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+error_debug_files:
+  description: "Error and debug files"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.log"
+    - "\\.debug"
+    - "\\.trace"
+    - "\\.dump"
+    - "\\.stack"
+    - "error\\.log"
+    - "debug\\.log"
+    - "access\\.log"
+    - "console\\.log"
+
+debug_modes:
+  description: "Debug mode patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "debug[_-]?mode"
+    - "debug[_-]?flag"
+    - "debug[_-]?enabled"
+    - "verbose[_-]?mode"
+    - "trace[_-]?mode"
+    - "development[_-]?mode"
+    - "dev[_-]?mode"
+
+profiler_endpoints:
+  description: "Profiler and performance endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/profiler/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/profile/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/performance/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/memory/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/cpu/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+test_endpoints:
+  description: "Test and QA endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/phpunit)[\\'\"``]"
+    - "[\\'\"``](/jest)[\\'\"``]"
+    - "[\\'\"``](/mocha)[\\'\"``]"
+    - "[\\'\"``](/cypress)[\\'\"``]"
+    - "[\\'\"``](/selenium)[\\'\"``]"
+    - "[\\'\"``](/qa/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+source_maps:
+  description: "Source map and development files"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.map"
+    - "\\.js\\.map"
+    - "\\.css\\.map"
+    - "sourcemap"
+    - "source-map"
+    - "\\.ts"
+    - "\\.tsx"
+    - "\\.jsx"

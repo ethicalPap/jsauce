@@ -1,0 +1,80 @@
+info:
+  name: Configuration Endpoints Detection
+  author: JSauce
+  severity: high
+  description: Detect configuration endpoints and settings management
+  tags:
+    - config
+    - admin
+    - settings
+
+config_endpoints:
+  description: "Configuration endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/config/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/configuration/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/settings/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/preferences/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/env/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/environment/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+config_files:
+  description: "Configuration file patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.env"
+    - "\\.config"
+    - "\\.ini"
+    - "\\.properties"
+    - "\\.yaml"
+    - "\\.yml"
+    - "\\.toml"
+    - "\\.json"
+    - "config\\.js"
+    - "settings\\.js"
+
+database_config:
+  description: "Database configuration patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "database[_-]?url"
+    - "db[_-]?host"
+    - "db[_-]?port"
+    - "db[_-]?name"
+    - "db[_-]?user"
+    - "db[_-]?password"
+    - "connection[_-]?string"
+    - "mongodb[_-]?uri"
+    - "redis[_-]?url"
+
+app_config:
+  description: "Application configuration patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "app[_-]?key"
+    - "app[_-]?secret"
+    - "app[_-]?id"
+    - "app[_-]?token"
+    - "debug[_-]?mode"
+    - "production[_-]?mode"
+    - "log[_-]?level"
+    - "cache[_-]?driver"
+
+server_config:
+  description: "Server configuration patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "server[_-]?port"
+    - "server[_-]?host"
+    - "base[_-]?url"
+    - "api[_-]?url"
+    - "cors[_-]?origin"
+    - "ssl[_-]?cert"
+    - "ssl[_-]?key"
+    - "timeout[_-]?value"

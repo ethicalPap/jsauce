@@ -1,45 +1,133 @@
 info:
-  name: AJAX Endpoints Detection
+  name: REST API Detection
   author: JSauce
-  severity: info
-  description: Detect AJAX endpoints and asynchronous requests
+  severity: medium
+  description: Detect RESTful API patterns and endpoints
   tags:
-    - ajax
-    - async
+    - rest
+    - restful
     - api
 
-ajax_endpoints:
-  description: "AJAX endpoint patterns"
+rest_endpoints:
+  description: "RESTful API endpoint patterns"
   flags: "gi"
   patterns:
-    - "/ajax/[\\w\\d/-_.?=&%]+"
-    - "_ajax\\.php"
-    - "ajax_callback"
-    - "/si/ajax/"
-    - "[\\'\"``](/ajax/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/rest/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/restapi/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/api/rest/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/v\\d+/rest/[\\w\\d/-_.?=&%]+)[\\'\"``]"
 
-jquery_ajax:
-  description: "jQuery AJAX patterns"
+rest_resources:
+  description: "REST resource patterns"
   flags: "gi"
   patterns:
-    - "\\$\\.ajax\\s*\\("
-    - "\\$\\.get\\s*\\("
-    - "\\$\\.post\\s*\\("
-    - "\\$\\.load\\s*\\("
-    - "\\$\\.getJSON\\s*\\("
-    - "\\$\\.getScript\\s*\\("
-    - "jQuery\\.ajax\\s*\\("
-    - "jQuery\\.get\\s*\\("
-    - "jQuery\\.post\\s*\\("
+    - "[\\'\"``](/users/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/posts/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/articles/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/products/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/orders/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/customers/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/items/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/resources/[\\w\\d\\-]+)[\\'\"``]"
 
-xhr_patterns:
-  description: "XMLHttpRequest patterns"
+rest_collections:
+  description: "REST collection endpoints"
   flags: "gi"
   patterns:
-    - "new\\s+XMLHttpRequest\\s*\\("
-    - "XMLHttpRequest\\s*\\(\\)"
-    - "\\.open\\s*\\(['\"`]\\w+['\"`]\\s*,\\s*['\"`][^'\"``]+['\"`]"
-    - "\\.send\\s*\\("
-    - "\\.responseText"
-    - "\\.responseXML"
-    - "\\.onreadystatechange"
+    - "[\\'\"``](/users)[\\'\"``]"
+    - "[\\'\"``](/posts)[\\'\"``]"
+    - "[\\'\"``](/articles)[\\'\"``]"
+    - "[\\'\"``](/products)[\\'\"``]"
+    - "[\\'\"``](/orders)[\\'\"``]"
+    - "[\\'\"``](/customers)[\\'\"``]"
+    - "[\\'\"``](/items)[\\'\"``]"
+
+rest_actions:
+  description: "REST action patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/search)[\\'\"``]"
+    - "[\\'\"``](/filter)[\\'\"``]"
+    - "[\\'\"``](/sort)[\\'\"``]"
+    - "[\\'\"``](/paginate)[\\'\"``]"
+    - "[\\'\"``](/bulk)[\\'\"``]"
+    - "[\\'\"``](/batch)[\\'\"``]"
+
+rest_nested_resources:
+  description: "REST nested resource patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/users/[\\w\\d\\-]+/posts)[\\'\"``]"
+    - "[\\'\"``](/posts/[\\w\\d\\-]+/comments)[\\'\"``]"
+    - "[\\'\"``](/categories/[\\w\\d\\-]+/products)[\\'\"``]"
+    - "[\\'\"``](/orders/[\\w\\d\\-]+/items)[\\'\"``]"
+    - "[\\'\"``](/users/[\\w\\d\\-]+/profile)[\\'\"``]"
+
+rest_http_methods:
+  description: "REST HTTP method usage"
+  flags: "gi"
+  patterns:
+    - "GET\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "POST\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "PUT\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "DELETE\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "PATCH\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "HEAD\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "OPTIONS\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+rest_content_types:
+  description: "REST content type patterns"
+  flags: "gi"
+  patterns:
+    - "application/json"
+    - "application/xml"
+    - "text/xml"
+    - "application/hal\\+json"
+    - "application/vnd\\.api\\+json"
+    - "Content-Type"
+    - "Accept"
+
+rest_status_codes:
+  description: "REST status code patterns"
+  flags: "gi"
+  patterns:
+    - "200"
+    - "201"
+    - "204"
+    - "400"
+    - "401"
+    - "403"
+    - "404"
+    - "405"
+    - "409"
+    - "422"
+    - "500"
+
+rest_pagination:
+  description: "REST pagination patterns"
+  flags: "gi"
+  patterns:
+    - "page="
+    - "limit="
+    - "offset="
+    - "per_page="
+    - "size="
+    - "cursor="
+    - "next="
+    - "prev="
+    - "total="
+    - "count="
+
+rest_filtering:
+  description: "REST filtering and query patterns"
+  flags: "gi"
+  patterns:
+    - "filter="
+    - "search="
+    - "q="
+    - "query="
+    - "sort="
+    - "order="
+    - "fields="
+    - "include="
+    - "exclude="

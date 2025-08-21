@@ -10,73 +10,72 @@ info:
     - "clickjacking"
     - "security"
 
-patterns:
-  open_redirect_sinks:
-    description: "Open redirect sinks - dangerous URL redirections"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "window\\.location\\s*=\\s*[^;]+"
-      - "window\\.location\\.href\\s*=\\s*[^;]+"
-      - "window\\.location\\.replace\\s*\\([^)]*\\)"
-      - "window\\.location\\.assign\\s*\\([^)]*\\)"
-      - "document\\.location\\s*=\\s*[^;]+"
-      - "document\\.location\\.href\\s*=\\s*[^;]+"
-      - "window\\.open\\s*\\([^)]*\\)"
-      - "location\\.href\\s*=\\s*[^;]+"
-      - "top\\.location\\s*=\\s*[^;]+"
-      - "parent\\.location\\s*=\\s*[^;]+"
+open_redirect_sinks:
+  description: "Open redirect sinks - dangerous URL redirections"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.location\\s*=\\s*[^;]+"
+    - "window\\.location\\.href\\s*=\\s*[^;]+"
+    - "window\\.location\\.replace\\s*\\([^)]*\\)"
+    - "window\\.location\\.assign\\s*\\([^)]*\\)"
+    - "document\\.location\\s*=\\s*[^;]+"
+    - "document\\.location\\.href\\s*=\\s*[^;]+"
+    - "window\\.open\\s*\\([^)]*\\)"
+    - "location\\.href\\s*=\\s*[^;]+"
+    - "top\\.location\\s*=\\s*[^;]+"
+    - "parent\\.location\\s*=\\s*[^;]+"
 
-  ssrf_sinks:
-    description: "SSRF (Server-Side Request Forgery) sinks - unsafe HTTP requests"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "fetch\\s*\\([^)]*\\)"
-      - "XMLHttpRequest.*\\.open\\s*\\([^)]*\\)"
-      - "\\$\\.ajax\\s*\\([^)]*url\\s*:[^}]*\\)"
-      - "\\$\\.get\\s*\\([^)]*\\)"
-      - "\\$\\.post\\s*\\([^)]*\\)"
-      - "axios\\.(get|post|put|delete|patch)\\s*\\([^)]*\\)"
-      - "request\\s*\\([^)]*\\)"
-      - "http\\.get\\s*\\([^)]*\\)"
-      - "https\\.get\\s*\\([^)]*\\)"
-      - "superagent\\.get\\s*\\([^)]*\\)"
+ssrf_sinks:
+  description: "SSRF (Server-Side Request Forgery) sinks - unsafe HTTP requests"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "fetch\\s*\\([^)]*\\)"
+    - "XMLHttpRequest.*\\.open\\s*\\([^)]*\\)"
+    - "\\$\\.ajax\\s*\\([^)]*url\\s*:[^}]*\\)"
+    - "\\$\\.get\\s*\\([^)]*\\)"
+    - "\\$\\.post\\s*\\([^)]*\\)"
+    - "axios\\.(get|post|put|delete|patch)\\s*\\([^)]*\\)"
+    - "request\\s*\\([^)]*\\)"
+    - "http\\.get\\s*\\([^)]*\\)"
+    - "https\\.get\\s*\\([^)]*\\)"
+    - "superagent\\.get\\s*\\([^)]*\\)"
 
-  csrf_sinks:
-    description: "CSRF vulnerability sinks - missing CSRF protection"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "\\$\\.post\\s*\\([^)]*\\)"
-      - "\\$\\.ajax\\s*\\([^)]*type\\s*:\\s*['\"`]POST['\"`]"
-      - "fetch\\s*\\([^)]*method\\s*:\\s*['\"`]POST['\"`]"
-      - "XMLHttpRequest.*\\.open\\s*\\(['\"`]POST['\"`]"
-      - "axios\\.post\\s*\\([^)]*\\)"
-      - "form\\.submit\\s*\\(\\)"
-      - "document\\.forms\\[.*\\]\\.submit\\s*\\(\\)"
+csrf_sinks:
+  description: "CSRF vulnerability sinks - missing CSRF protection"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$\\.post\\s*\\([^)]*\\)"
+    - "\\$\\.ajax\\s*\\([^)]*type\\s*:\\s*['\"`]POST['\"`]"
+    - "fetch\\s*\\([^)]*method\\s*:\\s*['\"`]POST['\"`]"
+    - "XMLHttpRequest.*\\.open\\s*\\(['\"`]POST['\"`]"
+    - "axios\\.post\\s*\\([^)]*\\)"
+    - "form\\.submit\\s*\\(\\)"
+    - "document\\.forms\\[.*\\]\\.submit\\s*\\(\\)"
 
-  clickjacking_sinks:
-    description: "Clickjacking vulnerability sinks - unsafe iframe usage"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "document\\.createElement\\s*\\(['\"`]iframe['\"`]\\)"
-      - "\\<iframe[^>]*\\>"
-      - "window\\.frames"
-      - "parent\\.frames"
-      - "top\\.frames"
-      - "frameElement"
-      - "contentWindow"
-      - "contentDocument"
+clickjacking_sinks:
+  description: "Clickjacking vulnerability sinks - unsafe iframe usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.createElement\\s*\\(['\"`]iframe['\"`]\\)"
+    - "\\<iframe[^>]*\\>"
+    - "window\\.frames"
+    - "parent\\.frames"
+    - "top\\.frames"
+    - "frameElement"
+    - "contentWindow"
+    - "contentDocument"
 
-  cors_sinks:
-    description: "CORS misconfiguration sinks - unsafe cross-origin requests"
-    flags: "gi"
-    sensitive: true
-    patterns:
-      - "Access-Control-Allow-Origin.*\\*"
-      - "Access-Control-Allow-Credentials.*true"
-      - "XMLHttpRequest.*withCredentials\\s*=\\s*true"
-      - "fetch\\s*\\([^)]*credentials\\s*:\\s*['\"`]include['\"`]"
-      - "\\$\\.ajax\\s*\\([^)]*xhrFields\\s*:\\s*\\{[^}]*withCredentials\\s*:\\s*true"
+cors_sinks:
+  description: "CORS misconfiguration sinks - unsafe cross-origin requests"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Access-Control-Allow-Origin.*\\*"
+    - "Access-Control-Allow-Credentials.*true"
+    - "XMLHttpRequest.*withCredentials\\s*=\\s*true"
+    - "fetch\\s*\\([^)]*credentials\\s*:\\s*['\"`]include['\"`]"
+    - "\\$\\.ajax\\s*\\([^)]*xhrFields\\s*:\\s*\\{[^}]*withCredentials\\s*:\\s*true"

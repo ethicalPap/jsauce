@@ -1,0 +1,112 @@
+info:
+  name: Media Content Detection
+  author: JSauce
+  severity: low
+  description: Detect media content endpoints and multimedia processing
+  tags:
+    - media
+    - multimedia
+    - content
+
+media_endpoints:
+  description: "Media content endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/media/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/images?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/photos?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/videos?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/audio/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/thumbnails?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+image_processing:
+  description: "Image processing operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/resize/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/crop/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/rotate/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/filter/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/optimize/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/convert/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+video_processing:
+  description: "Video processing operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/encode/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/transcode/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/compress/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/stream/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/preview/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+streaming_endpoints:
+  description: "Media streaming endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/stream/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/live/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/broadcast/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/rtmp/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/hls/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/dash/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+cdn_patterns:
+  description: "CDN and media delivery patterns"
+  flags: "gi"
+  patterns:
+    - "cloudfront\\.net"
+    - "cloudflare\\.com"
+    - "fastly\\.com"
+    - "jsdelivr\\.net"
+    - "unpkg\\.com"
+    - "[\\'\"``](https?://[\\w\\d.-]+\\.cloudfront\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+image_formats:
+  description: "Image format patterns"
+  flags: "gi"
+  patterns:
+    - "\\.(jpg|jpeg|png|gif|bmp|svg|webp|ico|tiff)"
+    - "image/jpeg"
+    - "image/png"
+    - "image/gif"
+    - "image/svg+xml"
+    - "image/webp"
+
+video_formats:
+  description: "Video format patterns"
+  flags: "gi"
+  patterns:
+    - "\\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)"
+    - "video/mp4"
+    - "video/webm"
+    - "video/ogg"
+    - "video/quicktime"
+
+audio_formats:
+  description: "Audio format patterns"
+  flags: "gi"
+  patterns:
+    - "\\.(mp3|wav|ogg|aac|flac|m4a|wma)"
+    - "audio/mp3"
+    - "audio/wav"
+    - "audio/ogg"
+    - "audio/aac"
+
+gallery_endpoints:
+  description: "Gallery and album endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/gallery/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/album/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/slideshow/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/portfolio/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+media_upload:
+  description: "Media upload endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/upload-image/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/upload-video/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/upload-audio/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/media-upload/[\\w\\d/-_.?=&%]*)[\\'\"``]"

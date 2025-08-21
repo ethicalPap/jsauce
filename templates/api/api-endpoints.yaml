@@ -1,7 +1,7 @@
 info:
   name: API Endpoints Detection
   author: JSauce
-  severity: info
+  severity: high
   description: Detect API endpoints and RESTful services
   tags:
     - api
@@ -11,12 +11,14 @@ info:
 api_endpoints:
   description: "API endpoint patterns with quoted strings"
   flags: "gi"
+  sensitive: true
   patterns:
     - "[\\'\"``](/api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/v\\d+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/rest/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/api/v\\d+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/endpoints?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/service/[\\w\\d/-_.?=&%]+)[\\'\"``]"
 
 version_endpoints:
   description: "Versioning endpoints"
@@ -24,6 +26,9 @@ version_endpoints:
   patterns:
     - "[\\'\"``](/v[0-9]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/version/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/api/v[0-9]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "api[_-]?version"
+    - "version[_-]?info"
 
 rest_patterns:
   description: "RESTful API patterns"
@@ -32,11 +37,8 @@ rest_patterns:
     - "[\\'\"``](/users/[\\w\\d\\-]+)[\\'\"``]"
     - "[\\'\"``](/posts/[\\w\\d\\-]+)[\\'\"``]"
     - "[\\'\"``](/comments/[\\w\\d\\-]+)[\\'\"``]"
-    - "[\\'\"``](/refresh)[\\'\"``]"
-    - "[\\'\"``](/search)[\\'\"``]"
-    - "[\\'\"``](/health)[\\'\"``]"
-    - "[\\'\"``](/status)[\\'\"``]"
-    - "[\\'\"``](/metrics)[\\'\"``]"
+    - "[\\'\"``](/items/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/resources/[\\w\\d\\-]+)[\\'\"``]"
 
 crud_operations:
   description: "CRUD operation endpoints"
@@ -73,5 +75,29 @@ http_methods:
   description: "HTTP method patterns"
   flags: "gi"
   patterns:
-    - "(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
-    - "method:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``].*url:\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)"
+    - "method:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``]"
+    - "type:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``]"
+
+api_response_patterns:
+  description: "API response handling patterns"
+  flags: "gi"
+  patterns:
+    - "\\.then\\s*\\([^)]*response[^)]*\\)"
+    - "\\.catch\\s*\\([^)]*error[^)]*\\)"
+    - "response\\.json\\s*\\(\\)"
+    - "response\\.data"
+    - "response\\.status"
+
+api_authentication:
+  description: "API authentication patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Authorization"
+    - "Bearer\\s+"
+    - "api[_-]?key"
+    - "access[_-]?token"
+    - "auth[_-]?header"
+    - "X-API-Key"
+    - "X-Auth-Token"

@@ -1,0 +1,95 @@
+info:
+  name: Google Cloud Platform Detection
+  author: JSauce
+  severity: medium
+  description: Detect GCP service patterns and potential misconfigurations
+  tags:
+    - gcp
+    - google-cloud
+    - cloud
+
+gcp_endpoints:
+  description: "GCP service endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.googleapis\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.googleapi\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.appspot\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.cloudfunctions\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+gcp_api_keys:
+  description: "GCP API key patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "AIza[0-9A-Za-z\\-_]{35}"
+    - "AIzaSy[0-9A-Za-z\\-_]{33}"
+    - "[\\'\"``]api_key[\\'\"``]\\s*[:=]\\s*[\\'\"``]AIza[^'\"``]*[\\'\"``]"
+    - "GOOGLE_API_KEY"
+    - "GCLOUD_API_KEY"
+
+gcp_storage:
+  description: "Google Cloud Storage patterns"
+  flags: "gi"
+  patterns:
+    - "storage\\.googleapis\\.com"
+    - "[\\'\"``](https?://storage\\.googleapis\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "gs://[\\w\\d.-]+/"
+    - "GoogleCloudStorage"
+    - "gcs\\.bucket"
+    - "cloud-storage"
+
+gcp_functions:
+  description: "Google Cloud Functions patterns"
+  flags: "gi"
+  patterns:
+    - "cloudfunctions\\.net"
+    - "[\\'\"``](https?://[\\w\\d-]+\\.[\\w\\d-]+\\.cloudfunctions\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "functions\\.googleapis\\.com"
+    - "exports\\.\\w+\\s*="
+    - "functions\\."
+
+gcp_firestore:
+  description: "Google Firestore patterns"
+  flags: "gi"
+  patterns:
+    - "firestore\\.googleapis\\.com"
+    - "firebase\\.google\\.com"
+    - "firebaseapp\\.com"
+    - "firebase\\."
+    - "firestore\\."
+    - "collection\\s*\\(['\"`][^'\"``]+['\"`]\\)"
+
+gcp_bigquery:
+  description: "Google BigQuery patterns"
+  flags: "gi"
+  patterns:
+    - "bigquery\\.googleapis\\.com"
+    - "BigQuery"
+    - "bq\\.query\\s*\\("
+    - "SELECT.*FROM.*\\."
+    - "bigquery\\."
+
+gcp_compute:
+  description: "Google Compute Engine patterns"
+  flags: "gi"
+  patterns:
+    - "compute\\.googleapis\\.com"
+    - "googlecompute"
+    - "gce\\."
+    - "instances\\."
+    - "zones\\/"
+
+gcp_auth:
+  description: "GCP authentication patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "oauth2\\.googleapis\\.com"
+    - "accounts\\.google\\.com"
+    - "gapi\\.auth"
+    - "gapi\\.client"
+    - "GoogleAuth"
+    - "service_account"
+    - "client_email"
+    - "private_key"
