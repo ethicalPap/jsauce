@@ -4,7 +4,7 @@ from src.packages.MermaidConverter import JSONToMermaidConverter
 from src.packages.MermaidCLI import MermaidCLI
 from src.packages.UrlProcessor import URLProcessor
 from src.packages.WebRequests import WebRequests
-from src.handlers.InputFileHandler import InputFileHandler
+from src.handlers.InputHandler import InputHandler
 from src.handlers.OutFileHandler import OutFileHandler
 from src.utils.Banner import Banner
 from src.handlers.ArgumentHandler import ArgumentHandler
@@ -30,7 +30,7 @@ class JSauceApp:
         self.logger = get_logger()
         
         # Initialize dependencies that depend on basic ones
-        self.input_file_handler = InputFileHandler(self.web_requests)
+        self.input_file_handler = InputHandler(self.web_requests)
         self.mermaid_cli = MermaidCLI(self.banner)
         self.category_processor = CategoryProcessor(self.banner, self.domain_handler)
         self.jsprocessor = JsProcessor(self.banner, self.category_processor)
@@ -124,8 +124,8 @@ class JSauceApp:
             # Initialize banner with persistent display
             self.banner.initialize_persistent_display()
 
-            if not args.input:
-                self.banner.show_error("No input file specified. Use -i <input_file>")
+            if not args.input and not args.url:
+                self.banner.show_error("No input specified. Use -i <input_file> or -u <single_url>")
                 return False
             
             # add args to self.converter
@@ -157,10 +157,19 @@ class JSauceApp:
 
             # Load URLs and patterns
             self.banner.update_progress(0, 4, "Initializing")
-            self.banner.add_status("Loading input URLs...")
-            urls = self.input_file_handler.get_input_urls(args.input)
-            self.logger.info(f"Loaded {len(urls)} URLs for processing", "success")
-            self.logger.debug(f"Loaded URLs: {urls}")
+
+
+            # load URL(s)
+            if args.url:
+                self.banner.add_status(f"Processing single URL: {args.url}")
+                urls = self.input_file_handler.get_input_urls(single_url=args.url)
+                self.logger.info(f"Processing single URL: {args.url}", "success")
+            else:
+                self.banner.add_status("Loading input URLs from file...")
+                urls = self.input_file_handler.get_input_urls(input_file=args.input)
+                self.logger.info(f"Loaded {len(urls)} URLs for processing", "success")
+            
+            self.logger.debug(f"URLs to process: {urls}")
 
             # Load templates
             self.banner.update_progress(1, 4, "Loading templates")

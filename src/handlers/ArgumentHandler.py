@@ -30,14 +30,24 @@ class ArgumentHandler:
             epilog='''
         Usage:
             python3 jsauce.py -i <inputfile>.txt -t <template> 
+            python3 jsauce.py -u <single_url> -t <template>
         Examples:
             python3 jsauce.py -i url_list.txt -t endpoints
+            python3 jsauce.py -u https://example.com -t security
             ''' # syntax maybe -i for input file and -t for template
         )
 
-        parser.add_argument(
+        # mutually exclusive group for input options (mandatory)
+        input_group = parser.add_mutually_exclusive_group(required=True)
+
+        input_group.add_argument(
             '-i', '--input',
             help='Text file containing URLs to scan (one URL per line)'
+        )
+
+        input_group.add_argument(
+            '-u', '--url',
+            help='Single URL to scan'
         )
 
         parser.add_argument(

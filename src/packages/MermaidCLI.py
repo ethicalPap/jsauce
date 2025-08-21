@@ -13,9 +13,10 @@ class MermaidCLI:
                 check=True,
                 shell=True if platform.system() == 'Windows' else False
             )
+            return True
         except subprocess.CalledProcessError as e:
             self.banner.show_error(f"Error rendering Mermaid file: {e}")
-            raise
+            return False
 
     def is_available(self):
         try:
