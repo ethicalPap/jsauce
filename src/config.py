@@ -11,9 +11,11 @@ DEFAULT_TEMPLATE = ENDPOINTS_TEMPLATES
 # Output directory
 OUTPUT_DIR = "./output"
 
-#template directory
+# template directory
 TEMPLATES = "./templates"
 
+# log directory
+LOG_DIR = "./logs"
 
 # Data directory for storing intermediate files
 DATA_DIR = "./data"

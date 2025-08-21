@@ -27,7 +27,7 @@ class JSauceApp:
         self.argument_handler = ArgumentHandler()
 
         # logger function (should be after argument handling)
-        self.logger = None
+        self.logger = get_logger()
         
         # Initialize dependencies that depend on basic ones
         self.input_file_handler = InputFileHandler(self.web_requests)
@@ -109,7 +109,8 @@ class JSauceApp:
             args = self.argument_handler.parse_arguments()
 
             # init loggers with verbosity levels
-            self.logger = initialize_logger(args.verbose, self.banner)
+            log_file = f"{config.LOG_DIR}/jsauce.log"
+            self.logger = initialize_logger(args.verbose, self.banner, log_file)
             self.logger.debug(f"Verbosity level: {args.verbose}")
 
             # Load template arg
