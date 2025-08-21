@@ -21,17 +21,19 @@ A Python tool for discovering and extracting contents and patterns (via template
 - **Visual Reporting**: Creates flowchart diagrams showing content relationships
 - **Domain-Aware Processing**: Handles multiple domains with organized output structure
 - **Prioritized Results**: Focuses on high-impact security findings first
+- **Single URL Support**: Process individual URLs without creating input files
+- **Verbose Logging**: Multiple verbosity levels for debugging and monitoring
 
 ## Prerequisites
 
 - Python 3.6+
 - pip package manager
-- Mermaid CLI for diagram rendering
+- Mermaid CLI for diagram rendering (optional but recommended)
 
 ## Installation
 
 ### Quick Setup
-```
+```bash
 # Clone the repository
 git clone https://github.com/ethicalPap/jsauce.git
 cd jsauce
@@ -49,8 +51,28 @@ mmdc --version
 ## Usage
 
 ### Basic Usage
+
+**Process a single URL:**
+```bash
+python3 jsauce.py -u example.com
+```
+
+**Process multiple URLs from file:**
 ```bash
 python3 jsauce.py -i input_file.txt 
+```
+
+**Use specific templates:**
+```bash
+python3 jsauce.py -u example.com -t security
+python3 jsauce.py -i targets.txt -t endpoints
+```
+
+**Enable verbose logging:**
+```bash
+python3 jsauce.py -u example.com -v    # Basic verbose
+python3 jsauce.py -u example.com -vv   # More verbose  
+python3 jsauce.py -u example.com -vvv  # Debug level
 ```
 
 ### Input File Format
@@ -63,15 +85,29 @@ walmart.com
 facebook.com
 ```
 
-### Example Workflow
+### Example Workflows
+
+**Single URL Analysis:**
+```bash
+# Quick endpoint discovery
+python3 jsauce.py -u https://facebook.com -t endpoints
+
+# Security-focused analysis
+python3 jsauce.py -u https://app.starbucks.com -t security -v
+
+# Custom template
+python3 jsauce.py -u https://example.com -tf templates/custom/my_template.yaml
+```
+
+**Bulk Analysis:**
 ```bash
 # Create your target list
 echo -e "https://facebook.com\nhttps://walmart.com" > targets.txt
 
-# Run JSauce
-python jsauce.py -i targets.txt -t endpoints
-pyhton jsauce.py -i targets.txt -t security
-python jsauce.py -i targets.txt
+# Run different template types
+python3 jsauce.py -i targets.txt -t endpoints
+python3 jsauce.py -i targets.txt -t security
+python3 jsauce.py -i targets.txt -tf custom_template.yaml
 
 # View results
 ls output/facebook.com/
@@ -81,22 +117,65 @@ ls output/facebook.com/
 # facebook.com_flowchart.png
 ```
 
+## Command Line Options
+
+```
+Usage:
+  python3 jsauce.py -i <inputfile>.txt -t <template> 
+  python3 jsauce.py -u <single_url> -t <template>
+
+Required (choose one):
+  -i, --input FILE      Text file containing URLs to scan (one URL per line)
+  -u, --url URL         Single URL to scan
+
+Optional:
+  -t, --template TYPE   Template to use: endpoints, security, custom (default: endpoints)
+  -tf, --templatefile   Path to custom YAML template file
+  -v, --verbose         Increase verbosity (-v, -vv, -vvv for more detail)
+  -h, --help           Show help message
+
+Examples:
+  python3 jsauce.py -u https://example.com -t endpoints
+  python3 jsauce.py -i url_list.txt -t security -v
+  python3 jsauce.py -u facebook.com -tf custom.yaml -vv
+```
+
 ## Output Files
 
 JSauce generates results in the `./output/{domain}/` directory:
 
 ### 1. Quick Reference
-- `{domain}_endpoints_found.txt` - Clean list of all discovered endpoints
+- `{domain}_{template}_found.txt` - Clean list of all discovered endpoints
 
 ### 2. Detailed Analysis
-- `{domain}_endpoints_detailed.json` - Complete results with source tracking and categorization
-- `{domain}_endpoints_for_db.json` - Flat structure optimized for database import
-- `{domain}_endpoint_stats.json` - Summary statistics and category breakdowns
+- `{domain}_{template}_detailed.json` - Complete results with source tracking and categorization
+- `{domain}_{template}_for_db.json` - Flat structure optimized for database import
+- `{domain}_{template}_stats.json` - Summary statistics and category breakdowns
 
 ### 3. Visual Reports
-- `{domain}_flowchart.mmd` - Mermaid diagram source
-- `{domain}_flowchart.svg` - Vector graphic flowchart
-- `{domain}_flowchart.png` - Raster image flowchart
+- `{domain}_{template}_flowchart.mmd` - Mermaid diagram source
+- `{domain}_{template}_flowchart.svg` - Vector graphic flowchart
+- `{domain}_{template}_flowchart.png` - Raster image flowchart
+
+## Templates
+
+JSauce includes two main template categories:
+
+### Endpoints Template (`-t endpoints`)
+Focuses on discovering API endpoints and URL patterns:
+- API endpoints and versioning
+- Authentication and user management
+- File operations and content management
+- Framework-specific patterns
+- External API integrations
+
+### Security Template (`-t security`)
+Focuses on security vulnerabilities and sensitive data:
+- XSS and injection sinks
+- Authentication bypass patterns
+- Sensitive data exposure
+- Weak cryptography usage
+- Security misconfigurations
 
 ## Security Categories
 
@@ -118,7 +197,7 @@ JSauce categorizes findings into security-focused groups:
 ## Configuration
 
 ### Template Customization
-Edit `templates/default_template.yaml` to add custom patterns:
+Create custom templates in YAML format:
 
 ```yaml
 custom_endpoints:
@@ -127,10 +206,28 @@ custom_endpoints:
   patterns:
     - "[\\'\"``](/my-api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
     - "[\\'\"``](/custom/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+sensitive_data:
+  description: "Sensitive information patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]secret[\\'\"``]\\s*:\\s*[\\'\"``]([^'\"``]+)[\\'\"``]"
 ```
 
 ### Settings
 Modify `src/config.py` for custom behavior:
+
+```python
+# Timeout for web requests (seconds)
+REQUEST_TIMEOUT = 10
+
+# Output directory
+OUTPUT_DIR = "./output"
+
+# Template directories
+TEMPLATES = "./templates"
+```
 
 ## Architecture
 
@@ -141,16 +238,18 @@ Modify `src/config.py` for custom behavior:
 - **`WebRequests`** - HTTP client with error handling and retry logic
 - **`MermaidConverter`** - Visual diagram generation
 - **`DomainHandler`** - URL parsing and domain management
+- **`ArgumentHandler`** - Command line argument processing
+- **`Logger`** - Verbose logging and debugging support
 
 ### Processing Pipeline
-1. **URL Input** → Parse and validate target URLs
-2. **HTML Fetch** → Download main page content
-3. **JS Discovery** → Extract JavaScript file references
-4. **JS Analysis** → Download and analyze each JS file
-5. **Pattern Matching** → Apply YAML templates to find endpoints
-6. **Categorization** → Organize results by security impact
-7. **Output Generation** → Create multiple report formats
-8. **Visualization** → Generate Mermaid flowcharts
+1. **URL Input** - Parse and validate target URLs (single or file)
+2. **HTML Fetch** - Download main page content with user-agent rotation
+3. **JS Discovery** - Extract JavaScript file references from HTML
+4. **JS Analysis** - Download and analyze each JavaScript file
+5. **Pattern Matching** - Apply YAML templates to find endpoints/vulnerabilities
+6. **Categorization** - Organize results by security impact and type
+7. **Output Generation** - Create multiple report formats (TXT, JSON)
+8. **Visualization** - Generate Mermaid flowcharts and render to SVG/PNG
 
 ## Security & Ethics
 
@@ -183,8 +282,9 @@ curl -I https://target.com
 **Empty endpoint results:**
 ```bash
 # Verify template file exists and is valid
-python -c "import yaml; yaml.safe_load(open('templates/default_template.yaml'))"
-# Check if JS files are accessible
+python -c "import yaml; yaml.safe_load(open('templates/endpoints/Endpoints.yaml'))"
+# Test with verbose mode to see processing details
+python3 jsauce.py -u https://example.com -vv
 ```
 
 **Mermaid diagrams not generating:**
@@ -193,6 +293,8 @@ python -c "import yaml; yaml.safe_load(open('templates/default_template.yaml'))"
 npm install -g @mermaid-js/mermaid-cli
 # Verify installation
 mmdc --version
+# Check for diagram generation errors in verbose mode
+python3 jsauce.py -u https://example.com -v
 ```
 
 **Connection timeouts:**
@@ -201,13 +303,26 @@ mmdc --version
 REQUEST_TIMEOUT = 30
 ```
 
-### Debug Mode
-Enable verbose output by modifying the banner updates in the code: (verbosity flag coming soon..)
+**Permission denied errors:**
+```bash
+# Ensure proper permissions for output directory
+chmod 755 output/
+# Run with elevated permissions if needed
+sudo python3 jsauce.py -u https://example.com
+```
 
-```python
-# In src/packages/UrlProcessor.py, uncomment debug lines:
-jsauce_banner.update_status(f"Processing: {url}")
-jsauce_banner.update_status(f"Found {len(js_links)} JS links")
+### Debug Mode
+Enable verbose output for debugging:
+
+```bash
+# Basic verbose - shows main processing steps
+python3 jsauce.py -u https://example.com -v
+
+# More verbose - shows detailed HTTP requests and pattern matching
+python3 jsauce.py -u https://example.com -vv
+
+# Debug level - shows all internal processing details
+python3 jsauce.py -u https://example.com -vvv
 ```
 
 ## Sample Output
@@ -221,6 +336,13 @@ jsauce_banner.update_status(f"Found {len(js_links)} JS links")
      ╚════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝
                        JSauce: .js Content Mapping Tool
 ================================================================================
+[23:45:12] • Processing single URL: https://app.starbucks.com
+[23:45:13] ✓ Found 11 JavaScript files in app.starbucks.com
+[23:45:15] ✓ Found endpoints in shared.96f751177f25d4cbdab6.js
+[23:45:16] ✓ Saved 28 endpoints for app.starbucks.com
+[23:45:17] ✓ Analysis files saved for app.starbucks.com
+[23:45:18] ✓ Successfully rendered SVG: flowchart.svg (2.1 MB)
+================================================================================
 ALL PROCESSING COMPLETED!
 ================================================================================
 ```
@@ -229,7 +351,7 @@ ALL PROCESSING COMPLETED!
 
 ### Adding New Patterns
 1. Fork the repository
-2. Edit `templates/default_template.yaml`
+2. Edit template files in `templates/endpoints/` or `templates/security/`
 3. Add new categories or patterns:
 ```yaml
 new_category:
@@ -254,7 +376,7 @@ git checkout -b feature/new-patterns
 pip install -r requirements.txt
 
 # Test your changes
-python jsauce.py testing/input_test.txt
+python3 jsauce.py -u https://example.com -vv
 ```
 
 ## License
