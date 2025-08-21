@@ -10,6 +10,7 @@ from src.utils.Banner import Banner
 from src.handlers.ArgumentHandler import ArgumentHandler
 from src.packages.JsProcessor import JsProcessor
 from src.packages.CategoryProcessor import CategoryProcessor
+from src.utils.Logger import initialize_logger, get_logger
 import os
 from src import config
 
@@ -24,6 +25,9 @@ class JSauceApp:
         self.web_requests = WebRequests()
         self.domain_handler = DomainHandler()
         self.argument_handler = ArgumentHandler()
+
+        # logger function (should be after argument handling)
+        self.logger = None
         
         # Initialize dependencies that depend on basic ones
         self.input_file_handler = InputFileHandler(self.web_requests)
@@ -60,7 +64,7 @@ class JSauceApp:
                 name_mappings[clean_name] = folder_name
 
                 if template_files:
-                    self.banner.add_status(f"Found {len(template_files)} templates in {folder_name}/: {', '.join(template_files)}")
+                    self.logger.verbose(f"Found {len(template_files)} templates in {folder_name}/: {', '.join(template_files)}")
 
         # Add some common fallbacks ---> may be able to remove later but just for fallback for now
         fallback_mappings = {
@@ -104,12 +108,17 @@ class JSauceApp:
             # Parse command line args
             args = self.argument_handler.parse_arguments()
 
+            # init loggers with verbosity levels
+            self.logger = initialize_logger(args.verbose, self.banner)
+            self.logger.debug(f"Verbosity level: {args.verbose}")
+
             # Load template arg
             template_file = self.argument_handler.get_templates(args.template)
             load_template = LoadTemplate(template_file, self.banner, self.category_processor)
 
             # grab template name
             template_name = self._extract_template_name(template_file)
+            self.logger.verbose(f"Using template name {template_name} from file {template_file}")
 
             # Initialize banner with persistent display
             self.banner.initialize_persistent_display()
@@ -142,12 +151,15 @@ class JSauceApp:
             
             # Ensure base directories exist
             self.output_handler.ensure_base_directories()
+            self.logger.debug("Base directories ensured")
+
 
             # Load URLs and patterns
             self.banner.update_progress(0, 4, "Initializing")
             self.banner.add_status("Loading input URLs...")
             urls = self.input_file_handler.get_input_urls(args.input)
-            self.banner.add_status(f"Loaded {len(urls)} URLs for processing", "success")
+            self.logger.info(f"Loaded {len(urls)} URLs for processing", "success")
+            self.logger.debug(f"Loaded URLs: {urls}")
 
             # Load templates
             self.banner.update_progress(1, 4, "Loading templates")
@@ -158,7 +170,9 @@ class JSauceApp:
                 self.banner.show_error("No patterns loaded. Cannot proceed.")
                 return False
             
-            self.banner.add_status(f"Loaded {len(templates)} template categories", "success")
+            self.logger.log_template_loading(template_file, len(templates))
+            self.banner.add_status(f"Template categories: {list(templates.keys())}")
+
 
             # Process URLs
             successful_domains = self._process_urls(urls, templates)
@@ -170,13 +184,16 @@ class JSauceApp:
                 self.banner.add_status("No successful domains to post-process", "warning")
             
             self.banner.update_progress(4, 4, "Finalizing")
+            self.logger.info(f"processing completed. Successful fomainsL {len(successful_domains)}", "success")
             return True
             
         except KeyboardInterrupt:
             self.banner.add_status("Process interrupted by user", "warning")
+            self.logger.warning("Process interrupted by user")
             return False
         except Exception as e:
             self.banner.show_error(f"Unexpected error: {e}")
+            self.logger.error(f"Unexpected error: {e}")
             return False
         finally:
             self._cleanup()
@@ -191,7 +208,7 @@ class JSauceApp:
         for i, url in enumerate(urls, 1):
             # Update sub-progress for URL processing
             self.banner.update_progress(i, len(urls), f"Processing URLs ({i}/{len(urls)})")
-            self.banner.add_status(f"Processing URL {i}/{len(urls)}: {url}")
+            self.logger.info(f"Processing URL {i}/{len(urls)}: {url}")
             
             domain = self.domain_handler.extract_domain(url)
 
@@ -199,6 +216,7 @@ class JSauceApp:
             if domain and domain not in processed_domains:
                 self.output_handler.clear_domain_files(domain)  # Only clears if directory exists
                 processed_domains.add(domain)
+                self.logger.debug(f"Cleared domain files for {domain}")
             
             # Process the URL and check if we got results
             success = self.url_processor.process_url(url, templates)
@@ -206,26 +224,32 @@ class JSauceApp:
             if success and domain:
                 if domain not in successful_domains:
                     successful_domains.append(domain)
+                    self.logger.success(f"Successfully processed domain: {domain}")
             elif domain:
                 if domain not in skipped_domains and domain not in successful_domains:
                     skipped_domains.append(domain)
+                    self.logger.warning(f"Skipped domain: {domain}")
         
+        self.logger.info(f"Processing summary - Successful Domains: {len(successful_domains)}, Skipped Domains: {len(skipped_domains)}")
         return successful_domains
     
     def _post_process(self, urls):
         """Handle post-processing tasks"""
         self.banner.update_progress(3, 4, "Post-processing")
+        self.logger.info("Starting post-processing tasks")
+        
         self.banner.add_status("Cleaning up JSON files...")
         self.converter.clean_json_files(urls)  # This will only process existing files
-        self.banner.add_status("JSON cleanup completed", "success")
+        self.logger.verbose("JSON cleanup completed", "success")
         
         self.converter.generate_mermaid(urls)  # This will only process domains with data
+        self.logger.verbose("Mermaid generation completed", "success")
     
     def _cleanup(self):
         """Clean up resources"""
         self.banner.add_status("Cleaning up resources...")
         self.web_requests.close_session()
-        self.banner.add_status("Session closed", "success")
+        self.logger.debug("Session closed", "success")
 
 def main():
     """Entry point - create and run the application"""

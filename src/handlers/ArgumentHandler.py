@@ -52,6 +52,14 @@ class ArgumentHandler:
             help='Path to custom YAML Template file'
         )
 
+        # verbose logging
+        parser.add_argument(
+            '-v', '--verbose',
+            action='count',
+            default=0,
+            help='Increate verbosity level (use -v -vv -vvv for more logging detail)'
+        )
+
         self.parser = parser
         self.args = parser.parse_args()
         return self.args
@@ -67,7 +75,11 @@ class ArgumentHandler:
             return config.SECURITY_TEMPLATES
         elif self.args.template.lower().rstrip('/') == 'endpoints':
             return config.ENDPOINTS_TEMPLATES
-        elif self.args.template.lower().rstrip('/') == 'custom':
+        elif self.args.template.lower().rstrip('/') == 'custom': # this will for sure change
             return config.CUSTOM_TEMPLATES # need to add logic for scanning a folder for templates
         else:
             return config.ENDPOINTS_TEMPLATES # if nothing specified, default to Endpoint Template
+        
+    # get logging selection from args
+    def get_verbosity_level(self):
+        return getattr(self.args, 'verbose', 0)
