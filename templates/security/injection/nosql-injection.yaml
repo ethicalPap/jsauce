@@ -1,0 +1,101 @@
+info:
+  name: "NoSQL Injection Vulnerability Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect NoSQL injection vulnerabilities in MongoDB and other NoSQL databases"
+  tags:
+    - "injection"
+    - "nosql"
+    - "mongodb"
+    - "security"
+
+mongodb_injection_sinks:
+  description: "MongoDB injection sinks - unsafe MongoDB queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.find\\s*\\(\\{.*\\$.*\\}"
+    - "\\.findOne\\s*\\(\\{.*\\$.*\\}"
+    - "\\.update\\s*\\(\\{.*\\$.*\\}"
+    - "\\.remove\\s*\\(\\{.*\\$.*\\}"
+    - "\\.deleteOne\\s*\\(\\{.*\\$.*\\}"
+    - "\\.deleteMany\\s*\\(\\{.*\\$.*\\}"
+    - "\\.aggregate\\s*\\([^)]*\\$.*\\)"
+
+mongodb_operators:
+  description: "MongoDB operator injection patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$where\\s*:"
+    - "\\$regex\\s*:"
+    - "\\$ne\\s*:"
+    - "\\$gt\\s*:"
+    - "\\$lt\\s*:"
+    - "\\$gte\\s*:"
+    - "\\$lte\\s*:"
+    - "\\$in\\s*:"
+    - "\\$nin\\s*:"
+    - "\\$exists\\s*:"
+    - "\\$or\\s*:"
+    - "\\$and\\s*:"
+    - "\\$nor\\s*:"
+
+javascript_execution_sinks:
+  description: "JavaScript execution in NoSQL queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$where.*function\\s*\\("
+    - "eval\\s*\\([^)]*\\)"
+    - "Function\\s*\\([^)]*\\)"
+    - "new\\s+Function\\s*\\([^)]*\\)"
+    - "\\$where.*this\\."
+    - "mapReduce.*function\\s*\\("
+
+couchdb_injection_sinks:
+  description: "CouchDB injection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "nano\\."
+    - "couchdb\\."
+    - "_design/"
+    - "_view/"
+    - "map\\s*:\\s*function"
+    - "reduce\\s*:\\s*function"
+    - "_all_docs"
+
+cassandra_injection_sinks:
+  description: "Cassandra injection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "cassandra-driver"
+    - "client\\.execute\\s*\\([^)]*\\)"
+    - "client\\.stream\\s*\\([^)]*\\)"
+    - "prepared\\s*statement"
+    - "SELECT.*\\+.*FROM"
+    - "INSERT.*\\+.*INTO"
+
+redis_injection_sinks:
+  description: "Redis injection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "redis\\.get\\s*\\([^)]*\\)"
+    - "redis\\.set\\s*\\([^)]*\\)"
+    - "redis\\.eval\\s*\\([^)]*\\)"
+    - "redis\\.call\\s*\\([^)]*\\)"
+    - "EVAL\\s*['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+
+dynamic_query_construction:
+  description: "Dynamic NoSQL query construction"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "query\\s*=\\s*\\{.*\\+.*\\}"
+    - "filter\\s*=\\s*\\{.*\\+.*\\}"
+    - "criteria\\s*=\\s*\\{.*\\+.*\\}"
+    - "condition\\s*=\\s*\\{.*\\+.*\\}"
+    - "\\{.*['\"`][^'\"``]*['\"`]\\s*:\\s*.*\\+.*\\}"

@@ -64,8 +64,8 @@ python3 jsauce.py -i input_file.txt
 
 **Use specific templates:**
 ```bash
-python3 jsauce.py -u example.com -t security
-python3 jsauce.py -i targets.txt -t endpoints
+python3 jsauce.py -u example.com -t api/
+python3 jsauce.py -i targets.txt -t admin/
 ```
 
 **Enable verbose logging:**
@@ -89,14 +89,14 @@ facebook.com
 
 **Single URL Analysis:**
 ```bash
-# Quick endpoint discovery
-python3 jsauce.py -u https://facebook.com -t endpoints
+# All templates discovery
+python3 jsauce.py -u https://facebook.com -t
 
 # Security-focused analysis
-python3 jsauce.py -u https://app.starbucks.com -t security -v
+python3 jsauce.py -u https://app.starbucks.com -t security/ -v
 
 # Custom template
-python3 jsauce.py -u https://example.com -tf templates/custom/my_template.yaml
+python3 jsauce.py -u https://example.com -t templates/custom/my_template.yaml
 ```
 
 **Bulk Analysis:**
@@ -105,9 +105,9 @@ python3 jsauce.py -u https://example.com -tf templates/custom/my_template.yaml
 echo -e "https://facebook.com\nhttps://walmart.com" > targets.txt
 
 # Run different template types
-python3 jsauce.py -i targets.txt -t endpoints
-python3 jsauce.py -i targets.txt -t security
-python3 jsauce.py -i targets.txt -tf custom_template.yaml
+python3 jsauce.py -i targets.txt -t api/
+python3 jsauce.py -i targets.txt -t security/
+python3 jsauce.py -i targets.txt -t custom_templates/
 
 # View results
 ls output/facebook.com/

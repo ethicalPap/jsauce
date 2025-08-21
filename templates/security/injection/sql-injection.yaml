@@ -1,0 +1,72 @@
+info:
+  name: "SQL Injection Vulnerability Sinks"
+  author: "jsauce"
+  severity: "critical"
+  description: "Detect SQL injection vulnerabilities in database queries"
+  tags:
+    - "injection"
+    - "sql"
+    - "database"
+    - "security"
+
+sql_injection_sinks:
+  description: "SQL injection sinks - unsafe database queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.query\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "\\.execute\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "SELECT\\s+.*\\+.*FROM"
+    - "INSERT\\s+.*\\+.*INTO"
+    - "UPDATE\\s+.*\\+.*SET"
+    - "DELETE\\s+.*\\+.*FROM"
+    - "UNION\\s+.*\\+.*SELECT"
+    - "mysql\\.query\\s*\\([^)]*\\)"
+    - "pg\\.query\\s*\\([^)]*\\)"
+    - "sqlite3\\.run\\s*\\([^)]*\\)"
+
+dynamic_sql_construction:
+  description: "Dynamic SQL query construction"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]SELECT[^'\"``]*['\"`]\\s*\\+\\s*[^;]+"
+    - "['\"`]INSERT[^'\"``]*['\"`]\\s*\\+\\s*[^;]+"
+    - "['\"`]UPDATE[^'\"``]*['\"`]\\s*\\+\\s*[^;]+"
+    - "['\"`]DELETE[^'\"``]*['\"`]\\s*\\+\\s*[^;]+"
+    - "sql\\s*=\\s*['\"`][^'\"``]*['\"`]\\s*\\+\\s*[^;]+"
+    - "query\\s*=\\s*['\"`][^'\"``]*['\"`]\\s*\\+\\s*[^;]+"
+
+sql_keywords:
+  description: "SQL keywords in concatenated strings"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "WHERE\\s+.*\\+.*="
+    - "ORDER\\s+BY\\s+.*\\+"
+    - "GROUP\\s+BY\\s+.*\\+"
+    - "HAVING\\s+.*\\+.*"
+    - "JOIN\\s+.*\\+.*"
+    - "ON\\s+.*\\+.*="
+
+orm_injection:
+  description: "ORM injection patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.find\\s*\\(\\{.*\\$.*\\}"
+    - "\\.where\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "\\.raw\\s*\\(['\"`][^'\"``]*\\+[^'\"``]*['\"`]"
+    - "sequelize\\.query\\s*\\([^)]*\\)"
+    - "knex\\.raw\\s*\\([^)]*\\)"
+
+stored_procedure_calls:
+  description: "Stored procedure and function calls"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "EXEC\\s+.*\\+"
+    - "EXECUTE\\s+.*\\+"
+    - "CALL\\s+.*\\+"
+    - "sp_\\w+\\s*\\([^)]*\\+[^)]*\\)"
+    - "fn_\\w+\\s*\\([^)]*\\+[^)]*\\)"

@@ -1,0 +1,77 @@
+info:
+  name: "Reflected XSS Vulnerability Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect reflected XSS vulnerabilities in URL parameters and form inputs"
+  tags:
+    - "xss"
+    - "reflected"
+    - "parameters"
+    - "security"
+
+reflected_xss_sinks:
+  description: "Reflected XSS sinks - URL parameter reflection"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "location\\.search"
+    - "location\\.hash"
+    - "location\\.href"
+    - "window\\.location\\.search"
+    - "window\\.location\\.hash"
+    - "window\\.location\\.href"
+    - "URLSearchParams\\s*\\([^)]*\\)"
+    - "new\\s+URL\\s*\\([^)]*\\)\\.searchParams"
+    - "decodeURIComponent\\s*\\([^)]*\\)"
+    - "decodeURI\\s*\\([^)]*\\)"
+
+url_parameter_sinks:
+  description: "URL parameter processing sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.search\\.substring\\s*\\(1\\)"
+    - "\\.hash\\.substring\\s*\\(1\\)"
+    - "\\.split\\s*\\(['\"`]&['\"`]\\)"
+    - "\\.split\\s*\\(['\"`]=['\"`]\\)"
+    - "getParameter\\s*\\([^)]*\\)"
+    - "getUrlParameter\\s*\\([^)]*\\)"
+    - "parseQueryString\\s*\\([^)]*\\)"
+
+form_reflection_sinks:
+  description: "Form input reflection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.getElementById\\s*\\([^)]*\\)\\.value"
+    - "document\\.querySelector\\s*\\([^)]*\\)\\.value"
+    - "\\$\\([^)]*\\)\\.val\\s*\\(\\)"
+    - "formData\\.get\\s*\\([^)]*\\)"
+    - "FormData\\s*\\([^)]*\\)"
+    - "input\\.value"
+    - "textarea\\.value"
+
+referrer_sinks:
+  description: "Referrer-based reflection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.referrer"
+    - "document\\.domain"
+    - "location\\.hostname"
+    - "location\\.origin"
+    - "window\\.name"
+    - "document\\.baseURI"
+
+ajax_reflection_sinks:
+  description: "AJAX response reflection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.responseText"
+    - "\\.responseXML"
+    - "\\.response"
+    - "xhr\\.response"
+    - "ajax.*success.*function\\s*\\([^)]*\\)"
+    - "fetch\\s*\\([^)]*\\)\\.then\\s*\\([^)]*\\)"
+    - "\\$\\.get\\s*\\([^)]*function\\s*\\([^)]*\\)"

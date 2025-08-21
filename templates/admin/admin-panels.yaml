@@ -1,0 +1,93 @@
+info:
+  name: Admin Panel Detection
+  author: JSauce
+  severity: critical
+  description: Detect administrative interfaces and control panels
+  tags:
+    - admin
+    - panel
+    - management
+
+admin_endpoints:
+  description: "Administrative endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/administrator/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/management/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/control/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/console/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/admin)[\\'\"``]"
+    - "[\\'\"``](/administrator)[\\'\"``]"
+
+dashboard_endpoints:
+  description: "Dashboard and control panel endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/dashboard/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/panel/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/cp/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/control-panel/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/dashboard)[\\'\"``]"
+    - "[\\'\"``](/panel)[\\'\"``]"
+
+admin_login_endpoints:
+  description: "Admin login and authentication"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/admin/login)[\\'\"``]"
+    - "[\\'\"``](/admin/signin)[\\'\"``]"
+    - "[\\'\"``](/admin/auth)[\\'\"``]"
+    - "[\\'\"``](/administrator/login)[\\'\"``]"
+    - "[\\'\"``](/panel/login)[\\'\"``]"
+    - "[\\'\"``](/console/login)[\\'\"``]"
+
+admin_settings:
+  description: "Admin settings and configuration"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "admin[_-]?settings"
+    - "admin[_-]?config"
+    - "admin[_-]?panel"
+    - "isAdmin"
+    - "admin[_-]?access"
+    - "admin[_-]?role"
+    - "super[_-]?admin"
+    - "root[_-]?access"
+    - "administrator[_-]?role"
+
+backend_admin:
+  description: "Backend administration patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/backend/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/backoffice/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/staff/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/manager/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/supervisor/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+cms_admin:
+  description: "CMS admin interfaces"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/wp-admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/drupal/admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/joomla/administrator/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/ghost/admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/strapi/admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+admin_api_endpoints:
+  description: "Admin API endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/admin/api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/api/admin/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/admin-api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/management/api/[\\w\\d/-_.?=&%]+)[\\'\"``]"

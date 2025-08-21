@@ -1,0 +1,99 @@
+info:
+  name: E-commerce Patterns Detection
+  author: JSauce
+  severity: medium
+  description: Detect e-commerce functionality and shopping cart operations
+  tags:
+    - ecommerce
+    - shopping
+    - retail
+
+shopping_cart_endpoints:
+  description: "Shopping cart and basket endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/cart/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/basket/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/bag/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/add-to-cart/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/remove-from-cart/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/update-cart/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+product_endpoints:
+  description: "Product catalog endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/products/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/product/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/catalog/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/items/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/category/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/categories/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+order_management:
+  description: "Order management endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/orders/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/order/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/order-history/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/place-order/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/track-order/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/cancel-order/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+inventory_management:
+  description: "Inventory management endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/inventory/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/stock/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/availability/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/warehouse/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/fulfillment/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+wishlist_endpoints:
+  description: "Wishlist and favorites endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/wishlist/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/favorites/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/saved-items/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/add-to-wishlist/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+discount_endpoints:
+  description: "Discount and coupon endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/coupon/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/discount/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/promo/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/promotion/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/voucher/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+shipping_endpoints:
+  description: "Shipping and delivery endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/shipping/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/delivery/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/tracking/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/logistics/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+review_endpoints:
+  description: "Review and rating endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/reviews/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/review/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/ratings/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/feedback/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/testimonials/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+vendor_endpoints:
+  description: "Vendor and marketplace endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/vendor/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/seller/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/marketplace/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/merchant/[\\w\\d/-_.?=&%]*)[\\'\"``]"

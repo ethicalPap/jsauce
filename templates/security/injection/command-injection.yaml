@@ -1,0 +1,87 @@
+info:
+  name: "Command Injection Vulnerability Sinks"
+  author: "jsauce"
+  severity: "critical"
+  description: "Detect command injection vulnerabilities in system command execution"
+  tags:
+    - "injection"
+    - "command"
+    - "rce"
+    - "security"
+
+command_execution_sinks:
+  description: "Command execution sinks - unsafe system commands"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "child_process\\.exec\\s*\\([^)]*\\)"
+    - "child_process\\.spawn\\s*\\([^)]*\\)"
+    - "child_process\\.execFile\\s*\\([^)]*\\)"
+    - "child_process\\.fork\\s*\\([^)]*\\)"
+    - "child_process\\.execSync\\s*\\([^)]*\\)"
+    - "child_process\\.spawnSync\\s*\\([^)]*\\)"
+    - "child_process\\.execFileSync\\s*\\([^)]*\\)"
+
+process_execution_sinks:
+  description: "Process execution sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "process\\.exec\\s*\\([^)]*\\)"
+    - "Runtime\\.getRuntime\\s*\\(\\)\\.exec\\s*\\([^)]*\\)"
+    - "ProcessBuilder\\s*\\([^)]*\\)"
+    - "shell\\.exec\\s*\\([^)]*\\)"
+    - "system\\s*\\([^)]*\\)"
+    - "popen\\s*\\([^)]*\\)"
+
+shell_command_sinks:
+  description: "Shell command construction sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`][^'\"``]*\\$\\{[^}]*\\}[^'\"``]*['\"`]"
+    - "['\"`][^'\"``]*\\+[^'\"``]*['\"`].*exec"
+    - "cmd\\s*\\+\\s*['\"`]"
+    - "command\\s*\\+\\s*['\"`]"
+    - "['\"`]/bin/[^'\"``]*['\"`]"
+    - "['\"`]/usr/bin/[^'\"``]*['\"`]"
+    - "['\"`]sh\\s+-c['\"`]"
+    - "['\"`]bash\\s+-c['\"`]"
+
+dangerous_commands:
+  description: "Dangerous command patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "['\"`]rm\\s+[^'\"``]*['\"`]"
+    - "['\"`]rm\\s+-rf['\"`]"
+    - "['\"`]cat\\s+/etc/passwd['\"`]"
+    - "['\"`]cat\\s+/etc/shadow['\"`]"
+    - "['\"`]wget\\s+[^'\"``]*['\"`]"
+    - "['\"`]curl\\s+[^'\"``]*['\"`]"
+    - "['\"`]nc\\s+[^'\"``]*['\"`]"
+    - "['\"`]netcat\\s+[^'\"``]*['\"`]"
+
+path_injection_sinks:
+  description: "Path injection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "path\\.join\\s*\\([^)]*\\)"
+    - "path\\.resolve\\s*\\([^)]*\\)"
+    - "fs\\.readFile\\s*\\([^)]*\\)"
+    - "fs\\.writeFile\\s*\\([^)]*\\)"
+    - "fs\\.stat\\s*\\([^)]*\\)"
+    - "fs\\.access\\s*\\([^)]*\\)"
+    - "require\\s*\\([^)]*\\)"
+
+command_substitution_sinks:
+  description: "Command substitution sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$\\([^)]*\\)"
+    - "\\`[^`]*\\`"
+    - "\\$\\{[^}]*\\}"
+    - "eval\\s*\\(['\"`][^'\"``]*\\$[^'\"``]*['\"`]\\)"
+    - "sh\\s*-c\\s*['\"`][^'\"``]*\\$[^'\"``]*['\"`]"

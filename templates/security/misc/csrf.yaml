@@ -1,0 +1,82 @@
+info:
+  name: "CSRF Vulnerability Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect Cross-Site Request Forgery vulnerabilities and missing CSRF protection"
+  tags:
+    - "csrf"
+    - "cross-site"
+    - "request-forgery"
+    - "security"
+
+csrf_vulnerable_requests:
+  description: "CSRF vulnerable request patterns - missing CSRF protection"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\$\\.post\\s*\\([^)]*\\)"
+    - "\\$\\.ajax\\s*\\([^)]*type\\s*:\\s*['\"`]POST['\"`]"
+    - "fetch\\s*\\([^)]*method\\s*:\\s*['\"`]POST['\"`]"
+    - "XMLHttpRequest.*\\.open\\s*\\(['\"`]POST['\"`]"
+    - "axios\\.post\\s*\\([^)]*\\)"
+    - "axios\\.put\\s*\\([^)]*\\)"
+    - "axios\\.delete\\s*\\([^)]*\\)"
+
+form_submission_sinks:
+  description: "Form submission without CSRF protection"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "form\\.submit\\s*\\(\\)"
+    - "document\\.forms\\[.*\\]\\.submit\\s*\\(\\)"
+    - "\\$\\([^)]*\\)\\.submit\\s*\\(\\)"
+    - "submitForm\\s*\\([^)]*\\)"
+    - "formSubmit\\s*\\([^)]*\\)"
+    - "document\\.getElementById\\s*\\([^)]*\\)\\.submit\\s*\\(\\)"
+
+state_changing_operations:
+  description: "State-changing operations vulnerable to CSRF"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/delete/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/remove/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/update/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/edit/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/create/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/add/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/modify/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+csrf_token_patterns:
+  description: "CSRF token implementation patterns (good practices)"
+  flags: "gi"
+  patterns:
+    - "csrf[_-]?token"
+    - "_token"
+    - "authenticity[_-]?token"
+    - "anti[_-]?forgery[_-]?token"
+    - "xsrf[_-]?token"
+    - "X-CSRF-TOKEN"
+    - "X-XSRF-TOKEN"
+
+json_csrf_sinks:
+  description: "JSON-based CSRF vulnerable endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Content-Type\\s*:\\s*['\"`]application/json['\"`]"
+    - "contentType\\s*:\\s*['\"`]application/json['\"`]"
+    - "JSON\\.stringify\\s*\\([^)]*\\)"
+    - "data\\s*:\\s*JSON\\.stringify"
+    - "\\$\\.postJSON\\s*\\([^)]*\\)"
+
+cors_csrf_sinks:
+  description: "CORS-related CSRF vulnerabilities"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "withCredentials\\s*:\\s*true"
+    - "credentials\\s*:\\s*['\"`]include['\"`]"
+    - "Access-Control-Allow-Credentials\\s*:\\s*true"
+    - "Access-Control-Allow-Origin\\s*:\\s*['\"`]\\*['\"`]"
+    - "crossDomain\\s*:\\s*true"

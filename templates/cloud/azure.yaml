@@ -1,0 +1,93 @@
+info:
+  name: Microsoft Azure Detection
+  author: JSauce
+  severity: medium
+  description: Detect Azure service patterns and potential misconfigurations
+  tags:
+    - azure
+    - microsoft
+    - cloud
+
+azure_endpoints:
+  description: "Azure service endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.azure\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.azurewebsites\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.azurehdinsight\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.windows\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+azure_storage:
+  description: "Azure Storage patterns"
+  flags: "gi"
+  patterns:
+    - "blob\\.core\\.windows\\.net"
+    - "table\\.core\\.windows\\.net"
+    - "queue\\.core\\.windows\\.net"
+    - "file\\.core\\.windows\\.net"
+    - "[\\'\"``](https?://[\\w\\d]+\\.blob\\.core\\.windows\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "azure-storage"
+
+azure_functions:
+  description: "Azure Functions patterns"
+  flags: "gi"
+  patterns:
+    - "azurewebsites\\.net"
+    - "[\\'\"``](https?://[\\w\\d-]+\\.azurewebsites\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "azure-functions"
+    - "function\\.json"
+    - "module\\.exports\\s*="
+
+azure_auth:
+  description: "Azure authentication patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "login\\.microsoftonline\\.com"
+    - "graph\\.microsoft\\.com"
+    - "outlook\\.office365\\.com"
+    - "AzureAD"
+    - "azure-ad"
+    - "client_id"
+    - "client_secret"
+    - "tenant_id"
+
+azure_databases:
+  description: "Azure database patterns"
+  flags: "gi"
+  patterns:
+    - "database\\.windows\\.net"
+    - "documents\\.azure\\.com"
+    - "CosmosDB"
+    - "Azure[_-]?SQL"
+    - "azure[_-]?cosmos"
+
+azure_api_management:
+  description: "Azure API Management patterns"
+  flags: "gi"
+  patterns:
+    - "azure-api\\.net"
+    - "management\\.azure\\.com"
+    - "Ocp-Apim-Subscription-Key"
+    - "apim\\."
+    - "api[_-]?management"
+
+azure_cognitive:
+  description: "Azure Cognitive Services patterns"
+  flags: "gi"
+  patterns:
+    - "cognitiveservices\\.azure\\.com"
+    - "api\\.cognitive\\.microsoft\\.com"
+    - "azure[_-]?cognitive"
+    - "text[_-]?analytics"
+    - "computer[_-]?vision"
+
+azure_devops:
+  description: "Azure DevOps patterns"
+  flags: "gi"
+  patterns:
+    - "dev\\.azure\\.com"
+    - "visualstudio\\.com"
+    - "azure[_-]?devops"
+    - "vstfs"
+    - "tfs"

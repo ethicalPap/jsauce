@@ -1,0 +1,111 @@
+info:
+  name: File Operations Detection
+  author: JSauce
+  severity: medium
+  description: Detect file operations, uploads, downloads, and file management
+  tags:
+    - files
+    - upload
+    - download
+    - storage
+
+file_operations:
+  description: "File upload/download operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/upload/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/download/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/files?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/documents?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/attachments?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/assets/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_storage:
+  description: "File storage and CDN patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/storage/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/cdn/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/static/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/media/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/resources/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_management:
+  description: "File management operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/create-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/delete-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/rename-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/move-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/copy-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+directory_operations:
+  description: "Directory and folder operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/directory/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/folder/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/browse/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/list-files/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/tree/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_types:
+  description: "Common file type patterns"
+  flags: "gi"
+  patterns:
+    - "\\.(pdf|doc|docx|xls|xlsx|ppt|pptx)"
+    - "\\.(jpg|jpeg|png|gif|bmp|svg|webp)"
+    - "\\.(mp3|mp4|avi|mov|wmv|flv|webm)"
+    - "\\.(zip|rar|tar|gz|7z)"
+    - "\\.(txt|csv|json|xml|yaml|yml)"
+
+backup_files:
+  description: "Backup and temporary file patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.bak"
+    - "\\.backup"
+    - "\\.old"
+    - "\\.tmp"
+    - "\\.temp"
+    - "~\\$"
+    - "\\.swp"
+    - "\\.save"
+
+sensitive_files:
+  description: "Sensitive file patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.env"
+    - "\\.config"
+    - "\\.key"
+    - "\\.pem"
+    - "\\.p12"
+    - "\\.pfx"
+    - "\\.crt"
+    - "\\.cert"
+    - "id_rsa"
+    - "private[_-]?key"
+
+archive_operations:
+  description: "Archive and compression operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/archive/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/compress/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/extract/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/unzip/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/decompress/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_sharing:
+  description: "File sharing operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/share/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/shared/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/public/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/private/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/link/[\\w\\d/-_.?=&%]*)[\\'\"``]"

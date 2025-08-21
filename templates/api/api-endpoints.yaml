@@ -1,0 +1,103 @@
+info:
+  name: API Endpoints Detection
+  author: JSauce
+  severity: high
+  description: Detect API endpoints and RESTful services
+  tags:
+    - api
+    - endpoints
+    - rest
+
+api_endpoints:
+  description: "API endpoint patterns with quoted strings"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/api/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/v\\d+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/rest/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/api/v\\d+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/endpoints?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/service/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+version_endpoints:
+  description: "Versioning endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/v[0-9]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/version/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/api/v[0-9]+/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "api[_-]?version"
+    - "version[_-]?info"
+
+rest_patterns:
+  description: "RESTful API patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/users/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/posts/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/comments/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/items/[\\w\\d\\-]+)[\\'\"``]"
+    - "[\\'\"``](/resources/[\\w\\d\\-]+)[\\'\"``]"
+
+crud_operations:
+  description: "CRUD operation endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/create/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/read/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/update/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/delete/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/edit/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/remove/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/add/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+http_api_calls:
+  description: "HTTP API function calls (fetch, axios, jQuery)"
+  flags: "gi"
+  patterns:
+    - "fetch\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "fetch\\s*\\(\\s*[\\'\"``](https?://[^'\"``\\s]+/api/[^'\"``\\s]*)[\\'\"``]"
+    - "axios\\.(get|post|put|delete|patch|head|options)\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "\\$\\.ajax\\s*\\(\\s*\\{\\s*url:\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "\\$\\.(get|post)\\s*\\(\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "XMLHttpRequest.*\\.open\\s*\\(\\s*[\\'\"``]\\w+[\\'\"``]\\s*,\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+http_methods_with_urls:
+  description: "HTTP methods with URL patterns"
+  flags: "gi"
+  patterns:
+    - "(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\\s+[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "method:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``].*url:\\s*[\\'\"``](/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``]method[\\'\"``]:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``]"
+
+http_methods:
+  description: "HTTP method patterns"
+  flags: "gi"
+  patterns:
+    - "(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)"
+    - "method:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``]"
+    - "type:\\s*[\\'\"``](GET|POST|PUT|DELETE|PATCH)[\\'\"``]"
+
+api_response_patterns:
+  description: "API response handling patterns"
+  flags: "gi"
+  patterns:
+    - "\\.then\\s*\\([^)]*response[^)]*\\)"
+    - "\\.catch\\s*\\([^)]*error[^)]*\\)"
+    - "response\\.json\\s*\\(\\)"
+    - "response\\.data"
+    - "response\\.status"
+
+api_authentication:
+  description: "API authentication patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Authorization"
+    - "Bearer\\s+"
+    - "api[_-]?key"
+    - "access[_-]?token"
+    - "auth[_-]?header"
+    - "X-API-Key"
+    - "X-Auth-Token"

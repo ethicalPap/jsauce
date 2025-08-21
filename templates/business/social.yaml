@@ -1,0 +1,123 @@
+info:
+  name: Social Media Features Detection
+  author: JSauce
+  severity: medium
+  description: Detect social media functionality and user interaction features
+  tags:
+    - social
+    - social-media
+    - interaction
+
+social_endpoints:
+  description: "Social media platform endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/social/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/share/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/follow/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/unfollow/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/like/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/unlike/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+facebook_patterns:
+  description: "Facebook integration patterns"
+  flags: "gi"
+  patterns:
+    - "graph\\.facebook\\.com"
+    - "connect\\.facebook\\.net"
+    - "[\\'\"``](https?://graph\\.facebook\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "FB\\."
+    - "facebook\\."
+    - "fb[_-]?app[_-]?id"
+    - "facebook[_-]?app"
+
+twitter_patterns:
+  description: "Twitter/X integration patterns"
+  flags: "gi"
+  patterns:
+    - "api\\.twitter\\.com"
+    - "api\\.x\\.com"
+    - "[\\'\"``](https?://api\\.twitter\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "twitter\\."
+    - "tweet"
+    - "retweet"
+    - "twitter[_-]?api"
+
+instagram_patterns:
+  description: "Instagram integration patterns"
+  flags: "gi"
+  patterns:
+    - "api\\.instagram\\.com"
+    - "graph\\.instagram\\.com"
+    - "[\\'\"``](https?://api\\.instagram\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "instagram\\."
+    - "ig[_-]?api"
+    - "instagram[_-]?basic"
+
+linkedin_patterns:
+  description: "LinkedIn integration patterns"
+  flags: "gi"
+  patterns:
+    - "api\\.linkedin\\.com"
+    - "[\\'\"``](https?://api\\.linkedin\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "linkedin\\."
+    - "li[_-]?api"
+    - "linkedin[_-]?share"
+
+youtube_patterns:
+  description: "YouTube integration patterns"
+  flags: "gi"
+  patterns:
+    - "www\\.googleapis\\.com/youtube"
+    - "youtube\\.googleapis\\.com"
+    - "[\\'\"``](https?://www\\.googleapis\\.com/youtube[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "youtube\\."
+    - "yt[_-]?api"
+
+tiktok_patterns:
+  description: "TikTok integration patterns"
+  flags: "gi"
+  patterns:
+    - "open-api\\.tiktok\\.com"
+    - "[\\'\"``](https?://open-api\\.tiktok\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "tiktok\\."
+    - "tt[_-]?api"
+
+discord_patterns:
+  description: "Discord integration patterns"
+  flags: "gi"
+  patterns:
+    - "discord\\.com/api"
+    - "discordapp\\.com/api"
+    - "[\\'\"``](https?://discord\\.com/api[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "discord\\."
+    - "bot[_-]?token"
+
+social_features:
+  description: "General social feature patterns"
+  flags: "gi"
+  patterns:
+    - "friends"
+    - "followers"
+    - "following"
+    - "connections"
+    - "timeline"
+    - "feed"
+    - "posts"
+    - "comments"
+    - "mentions"
+    - "hashtags"
+    - "trending"
+
+sharing_features:
+  description: "Social sharing functionality"
+  flags: "gi"
+  patterns:
+    - "share[_-]?button"
+    - "social[_-]?share"
+    - "share[_-]?url"
+    - "og:"
+    - "twitter:card"
+    - "fb:app_id"
+    - "addthis"
+    - "sharethis"

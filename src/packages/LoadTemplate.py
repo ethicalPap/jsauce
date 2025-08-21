@@ -6,79 +6,82 @@ import time
 from src.utils.Logger import get_logger
 
 class LoadTemplate:
-    def __init__(self, file_path, banner, category_processor):
-        self.file_path = file_path
-        self.lines = []
+
+    # init a list of files or single fiel (YAML)
+    def __init__(self, template_paths, banner, category_processor):
+        if isinstance(template_paths, str):
+            self.template_paths = [template_paths]
+        else:
+            self.template_paths = template_paths
+        
         self.banner = banner
         self.category_processor = category_processor
         self.logger = get_logger()
         
-        self.logger.debug(f"Initializing LoadTemplate with file: {file_path}")
-        self.read_file()
+        self.logger.debug(f"Initializing LoadTemplate with {len(self.template_paths)} template files")
+        for path in self.template_paths:
+            self.logger.debug(f"Template path: {path}")
 
-    def read_file(self):
-        """Read template file and store lines"""
-        self.logger.debug(f"Reading template file: {self.file_path}")
-        
-        try:
-            with open(self.file_path, 'r', encoding='utf-8') as file:
-                self.lines = file.readlines()
-            
-            self.logger.info(f"Successfully read template file: {len(self.lines)} lines from {self.file_path}")
-            self.logger.debug(f"File size: {os.path.getsize(self.file_path)} bytes")
-            
-        except FileNotFoundError:
-            self.logger.error(f"Template file not found: {self.file_path}")
-            self.banner.show_error(f"Template file not found: {self.file_path}")
-            self.lines = []
-        except PermissionError:
-            self.logger.error(f"Permission denied reading template file: {self.file_path}")
-            self.banner.show_error(f"Permission denied: {self.file_path}")
-            self.lines = []
-        except Exception as e:
-            self.logger.error(f"Error reading template file {self.file_path}: {e}")
-            self.banner.show_error(f"Error reading template: {e}")
-            self.lines = []
-
-    def get_lines(self):
-        """Return loaded template lines"""
-        self.logger.debug(f"Returning {len(self.lines)} template lines")
-        return self.lines
-    
+    # load patterns from templates
     def load_patterns(self):
-        """Load patterns from YAML or text format"""
-        self.logger.debug("Starting pattern loading process")
+        self.logger.debug("Starting pattern loading process for multiple templates")
         
-        # Try YAML format first
-        yaml_path = self.file_path.replace('.txt', '.yaml')
+        all_templates = {}
+        loaded_files = 0
+        failed_files = 0
+        total_patterns = 0
         
-        if os.path.exists(yaml_path):
-            self.logger.info(f"Found YAML template file: {yaml_path}")
-            self.banner.add_status(f"Loading YAML: {yaml_path}")
+        for template_path in self.template_paths:
+            self.logger.debug(f"Loading template file: {template_path}")
             
-            templates = self.load_patterns_from_yaml(yaml_path)
+            if not os.path.exists(template_path):
+                self.logger.warning(f"Template file not found: {template_path}")
+                failed_files += 1
+                continue
+            
+            templates = self.load_patterns_from_yaml(template_path)
+            
             if templates:
-                self.logger.success(f"Successfully loaded {len(templates)} template categories from YAML")
-                return templates, self.category_processor
+                # Merge templates with conflict resolution
+                for category, patterns in templates.items():
+                    if category in all_templates:
+                        # Merge patterns for existing category
+                        all_templates[category].update(patterns)
+                        self.logger.debug(f"Merged {len(patterns)} patterns into existing category '{category}'")
+                    else:
+                        # New category
+                        all_templates[category] = patterns
+                        self.logger.debug(f"Added new category '{category}' with {len(patterns)} patterns")
+                
+                file_pattern_count = sum(len(patterns) for patterns in templates.values())
+                total_patterns += file_pattern_count
+                loaded_files += 1
+                
+                self.logger.success(f"Loaded {len(templates)} categories, {file_pattern_count} patterns from {os.path.basename(template_path)}")
             else:
-                self.logger.warning("YAML loading failed, falling back to text format")
-        else:
-            self.logger.debug(f"YAML file not found: {yaml_path}, trying text format")
+                self.logger.error(f"Failed to load patterns from {template_path}")
+                failed_files += 1
         
-        # Fallback to text format
-        self.logger.info(f"Loading patterns from text file: {self.file_path}")
-        loader = LoadTemplate(self.file_path, self.banner, self.category_processor)
-        templates = self.category_processor.parse_templates_by_category(loader.get_lines())
+        # Log summary
+        self.logger.info(f"Template loading summary:")
+        self.logger.info(f"  - Files loaded: {loaded_files}")
+        self.logger.info(f"  - Files failed: {failed_files}")
+        self.logger.info(f"  - Total categories: {len(all_templates)}")
+        self.logger.info(f"  - Total patterns: {total_patterns}")
         
-        if templates:
-            self.logger.success(f"Successfully loaded {len(templates)} template categories from text file")
-        else:
-            self.logger.error("Failed to load any templates from text file")
+        if not all_templates:
+            self.logger.error("No templates were loaded successfully")
+            self.banner.show_error("No templates were loaded successfully")
+            return {}, self.category_processor
         
-        return templates, self.category_processor
+        self.logger.success(f"Successfully loaded {len(all_templates)} template categories from {loaded_files} files")
+        self.banner.add_status(f"Loaded {len(all_templates)} categories from {loaded_files} template files")
+        
+        return all_templates, self.category_processor
     
+    # load regex patterns from YAML
     def load_patterns_from_yaml(self, yaml_file_path):
-        """Load regex patterns from YAML file"""
+        """Load regex patterns from a single YAML file"""
         self.logger.debug(f"Loading YAML patterns from: {yaml_file_path}")
         
         try:
@@ -95,20 +98,29 @@ class LoadTemplate:
             
             self.logger.debug("Successfully parsed YAML content")
             
-            if not data or not isinstance(data, dict):
+            if not data:
+                self.logger.warning(f"Empty or invalid YAML file: {yaml_file_path}")
+                return {}
+            
+            if not isinstance(data, dict):
                 self.logger.warning(f"Invalid YAML structure in {yaml_file_path}: expected dict, got {type(data)}")
-                self.banner.show_error(f"Warning: Invalid YAML file {yaml_file_path}")
-                time.sleep(2)
                 return {}
             
             templates = {}
-            total_patterns = 0
+            file_patterns = 0
             
+            # Process template data
             for category, cat_data in data.items():
+                # Skip metadata sections
+                if category in ['info', 'id', 'variables', 'requests']:
+                    self.logger.debug(f"Skipping metadata section: {category}")
+                    continue
+                
+                # Only process valid pattern categories
                 if isinstance(cat_data, dict) and 'patterns' in cat_data:
                     pattern_count = len(cat_data['patterns'])
                     templates[category] = {p: p for p in cat_data['patterns']}
-                    total_patterns += pattern_count
+                    file_patterns += pattern_count
                     
                     self.logger.verbose(f"Loaded category '{category}': {pattern_count} patterns")
                     
@@ -120,89 +132,77 @@ class LoadTemplate:
                     if cat_data.get('sensitive', False):
                         self.logger.debug(f"Category '{category}' marked as sensitive")
                 else:
-                    self.logger.warning(f"Skipping invalid category '{category}': missing 'patterns' key or invalid structure")
+                    # Only warn about unexpected categories (not metadata)
+                    if category not in ['info', 'id', 'variables', 'requests']:
+                        self.logger.warning(f"Skipping invalid category '{category}': missing 'patterns' key or invalid structure")
+                    else:
+                        self.logger.debug(f"Skipping known metadata section: {category}")
             
-            self.templates_by_category = templates
-            
-            self.logger.info(f"Successfully loaded {len(templates)} categories with {total_patterns} total patterns")
-            self.banner.add_status(f"Total categories: {len(templates)}")
-            
-            # Log summary of top categories by pattern count
-            if templates:
-                sorted_categories = sorted(templates.items(), key=lambda x: len(x[1]), reverse=True)
-                top_5 = sorted_categories[:5]
-                self.logger.verbose(f"Top categories by pattern count: {[(cat, len(patterns)) for cat, patterns in top_5]}")
-            
+            self.logger.verbose(f"Loaded {len(templates)} categories with {file_patterns} patterns from {os.path.basename(yaml_file_path)}")
             return templates
             
         except yaml.YAMLError as e:
             self.logger.error(f"YAML parsing error in {yaml_file_path}: {e}")
-            self.banner.show_error(f"YAML parsing error: {e}")
-            time.sleep(2)
             return {}
         except FileNotFoundError:
             self.logger.error(f"YAML file not found: {yaml_file_path}")
-            self.banner.show_error(f"YAML file not found: {yaml_file_path}")
-            time.sleep(2)
             return {}
         except PermissionError:
             self.logger.error(f"Permission denied reading YAML file: {yaml_file_path}")
-            self.banner.show_error(f"Permission denied: {yaml_file_path}")
-            time.sleep(2)
             return {}
         except Exception as e:
             self.logger.error(f"Unexpected error loading YAML {yaml_file_path}: {e}")
-            self.banner.show_error(f"Error loading YAML: {e}")
-            time.sleep(2)
             return {}
     
-    # def parse_templates_by_category(self, template_lines):
-    #     """Legacy text file parser"""
-    #     self.logger.debug(f"Parsing {len(template_lines)} lines from text template")
+    def _parse_template(self, data, file_path):
+        """Parse nuclei-style template format"""
+        self.logger.debug(f"Parsing nuclei-style template: {file_path}")
         
-    #     templates = {}
-    #     current_category = None
-    #     total_patterns = 0
-    #     skipped_lines = 0
+        templates = {}
+        info = data.get('info', {})
         
-    #     for line_num, line in enumerate(template_lines, 1):
-    #         line = line.strip()
-            
-    #         if not line:
-    #             continue
-            
-    #         if line.startswith('#[') and line.endswith(']'):
-    #             current_category = line[2:-1]
-    #             templates[current_category] = {}
-    #             self.logger.debug(f"Found category at line {line_num}: '{current_category}'")
-                
-    #         elif current_category and line:
-    #             # Skip comment lines
-    #             if line.startswith('#'):
-    #                 skipped_lines += 1
-    #                 self.logger.debug(f"Skipping comment at line {line_num}: {line[:50]}...")
-    #                 continue
-                
-    #             templates[current_category][line] = line
-    #             total_patterns += 1
-    #             self.logger.debug(f"Added pattern to '{current_category}': {line[:50]}...")
-                
-    #         elif line and not current_category:
-    #             self.logger.warning(f"Pattern outside category at line {line_num}: {line[:50]}...")
-    #             skipped_lines += 1
+        # Get template info
+        template_name = info.get('name', os.path.basename(file_path).replace('.yaml', ''))
+        template_category = info.get('tags', ['misc'])[0] if info.get('tags') else 'misc'
         
-    #     # Log summary statistics
-    #     self.logger.info(f"Text template parsing complete:")
-    #     self.logger.info(f"  - Categories: {len(templates)}")
-    #     self.logger.info(f"  - Total patterns: {total_patterns}")
-    #     self.logger.info(f"  - Skipped lines: {skipped_lines}")
+        # Extract patterns from requests
+        patterns = []
+        requests = data.get('requests', [])
         
-    #     # Log category breakdown
-    #     for category, patterns in templates.items():
-    #         self.logger.verbose(f"Category '{category}': {len(patterns)} patterns")
+        for request in requests:
+            # Look for patterns in different places
+            if 'matchers' in request:
+                for matcher in request['matchers']:
+                    if matcher.get('type') == 'regex':
+                        patterns.extend(matcher.get('regex', []))
+                    elif matcher.get('type') == 'word':
+                        # Convert word matchers to regex patterns
+                        words = matcher.get('words', [])
+                        for word in words:
+                            # Escape special regex characters and create pattern
+                            escaped_word = word.replace('.', '\\.').replace('/', '\\/')
+                            patterns.append(f"[\\'\"``]({escaped_word})[\\'\"``]")
         
-    #     if not templates:
-    #         self.logger.error("No templates were parsed from text file")
+        if patterns:
+            templates[template_category] = {p: p for p in patterns}
+            self.logger.debug(f"Nuclei template '{template_name}' -> category '{template_category}': {len(patterns)} patterns")
         
-    #     self.templates_by_category = templates
-    #     return templates
+        return templates
+    
+    def get_template_info(self):
+        """Get information about loaded templates"""
+        info = {
+            'total_files': len(self.template_paths),
+            'files': []
+        }
+        
+        for path in self.template_paths:
+            file_info = {
+                'path': path,
+                'exists': os.path.exists(path),
+                'size': os.path.getsize(path) if os.path.exists(path) else 0,
+                'basename': os.path.basename(path)
+            }
+            info['files'].append(file_info)
+        
+        return info

@@ -1,0 +1,97 @@
+info:
+  name: "Clickjacking Vulnerability Sinks"
+  author: "jsauce"
+  severity: "medium"
+  description: "Detect clickjacking vulnerabilities and unsafe iframe usage"
+  tags:
+    - "clickjacking"
+    - "iframe"
+    - "ui-redressing"
+    - "security"
+
+iframe_creation_sinks:
+  description: "Iframe creation and manipulation sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "document\\.createElement\\s*\\(['\"`]iframe['\"`]\\)"
+    - "\\<iframe[^>]*\\>"
+    - "new\\s+HTMLIFrameElement\\s*\\(\\)"
+    - "iframe\\.src\\s*="
+    - "iframe\\.contentWindow"
+    - "iframe\\.contentDocument"
+
+frame_navigation_sinks:
+  description: "Frame navigation and targeting sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.frames"
+    - "parent\\.frames"
+    - "top\\.frames"
+    - "self\\.frames"
+    - "frameElement"
+    - "window\\.frameElement"
+    - "parent\\.frameElement"
+
+target_frame_sinks:
+  description: "Target frame manipulation sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "target\\s*=\\s*['\"`]_blank['\"`]"
+    - "target\\s*=\\s*['\"`]_self['\"`]"
+    - "target\\s*=\\s*['\"`]_parent['\"`]"
+    - "target\\s*=\\s*['\"`]_top['\"`]"
+    - "formtarget\\s*="
+    - "window\\.open\\s*\\([^)]*['\"`]_blank['\"`]"
+
+frame_busting_bypass:
+  description: "Frame busting bypass techniques"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "if\\s*\\(\\s*top\\s*!=\\s*self\\s*\\)"
+    - "if\\s*\\(\\s*top\\s*!==\\s*self\\s*\\)"
+    - "if\\s*\\(\\s*parent\\s*!=\\s*self\\s*\\)"
+    - "if\\s*\\(\\s*window\\s*!=\\s*top\\s*\\)"
+    - "top\\.location\\s*=\\s*self\\.location"
+    - "top\\.location\\.href\\s*=\\s*self\\.location\\.href"
+
+x_frame_options_bypass:
+  description: "X-Frame-Options bypass attempts"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "X-Frame-Options"
+    - "frame-options"
+    - "Content-Security-Policy.*frame-ancestors"
+    - "sandbox\\s*="
+    - "allow-top-navigation"
+    - "allow-forms"
+
+postmessage_frame_sinks:
+  description: "PostMessage frame communication sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "postMessage\\s*\\([^)]*\\)"
+    - "addEventListener\\s*\\(['\"`]message['\"`]"
+    - "onmessage\\s*="
+    - "event\\.origin"
+    - "event\\.source"
+    - "message\\.origin"
+    - "message\\.source"
+
+overlay_attack_sinks:
+  description: "Overlay and UI redressing attack patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "z-index\\s*:\\s*[0-9]+"
+    - "position\\s*:\\s*absolute"
+    - "position\\s*:\\s*fixed"
+    - "opacity\\s*:\\s*0"
+    - "visibility\\s*:\\s*hidden"
+    - "pointer-events\\s*:\\s*none"
+    - "filter\\s*:\\s*alpha\\s*\\(\\s*opacity\\s*="

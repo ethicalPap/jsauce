@@ -1,0 +1,130 @@
+info:
+  name: Error and Debug Files Detection
+  author: JSauce
+  severity: high
+  description: Detect error files, debug information, and sensitive logs
+  tags:
+    - errors
+    - debug
+    - logs
+
+error_debug_files:
+  description: "Error and debug files"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.log"
+    - "\\.debug"
+    - "\\.trace"
+    - "\\.dump"
+    - "\\.stack"
+    - "error\\.log"
+    - "debug\\.log"
+    - "access\\.log"
+    - "console\\.log"
+    - "app\\.log"
+
+log_files:
+  description: "Various log file patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "error\\.log"
+    - "access\\.log"
+    - "application\\.log"
+    - "system\\.log"
+    - "server\\.log"
+    - "web\\.log"
+    - "audit\\.log"
+    - "security\\.log"
+    - "admin\\.log"
+
+debug_endpoints:
+  description: "Debug and error endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/error/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/errors/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/debug/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/trace/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/stacktrace/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/exception/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+crash_dumps:
+  description: "Crash dump and core dump files"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.dmp"
+    - "\\.core"
+    - "\\.crash"
+    - "core\\."
+    - "crash\\.log"
+    - "memory\\.dump"
+    - "heap\\.dump"
+
+source_maps:
+  description: "Source map files (development info)"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.map"
+    - "\\.js\\.map"
+    - "\\.css\\.map"
+    - "sourcemap"
+    - "source-map"
+    - "sourceURL"
+    - "sourceMappingURL"
+
+temporary_files:
+  description: "Temporary and backup files"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.tmp"
+    - "\\.temp"
+    - "\\.bak"
+    - "\\.backup"
+    - "\\.old"
+    - "\\.orig"
+    - "~\\$"
+    - "\\.swp"
+    - "\\.swo"
+
+development_files:
+  description: "Development and build files"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "package-lock\\.json"
+    - "yarn\\.lock"
+    - "composer\\.lock"
+    - "Gemfile\\.lock"
+    - "Pipfile\\.lock"
+    - "\\.env\\.local"
+    - "\\.env\\.development"
+    - "webpack\\.config"
+
+error_pages:
+  description: "Error page endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/404)[\\'\"``]"
+    - "[\\'\"``](/500)[\\'\"``]"
+    - "[\\'\"``](/error-page)[\\'\"``]"
+    - "[\\'\"``](/not-found)[\\'\"``]"
+    - "[\\'\"``](/server-error)[\\'\"``]"
+    - "[\\'\"``](/maintenance)[\\'\"``]"
+
+exception_handlers:
+  description: "Exception handling patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "try\\s*\\{[^}]*catch\\s*\\([^)]*\\)"
+    - "catch\\s*\\([^)]*Exception[^)]*\\)"
+    - "finally\\s*\\{"
+    - "throw\\s+new\\s+\\w*Exception"
+    - "printStackTrace\\s*\\(\\)"
+    - "console\\.error\\s*\\("

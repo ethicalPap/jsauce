@@ -1,0 +1,136 @@
+info:
+  name: API Keys and Tokens Detection
+  author: JSauce
+  severity: critical
+  description: Detect API keys, tokens, and secrets in JavaScript
+  tags:
+    - tokens
+    - secrets
+    - api-keys
+
+api_keys_tokens:
+  description: "API keys, tokens, and secrets"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]api_key[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{16,})[\\'\"``]"
+    - "[\\'\"``]apiKey[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{16,})[\\'\"``]"
+    - "[\\'\"``]token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{20,})[\\'\"``]"
+    - "[\\'\"``]access_token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{20,})[\\'\"``]"
+    - "[\\'\"``]client_id[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{10,})[\\'\"``]"
+    - "[\\'\"``]secret[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.]{16,})[\\'\"``]"
+
+jwt_tokens:
+  description: "JWT token patterns"
+  flags: "g"
+  sensitive: true
+  patterns:
+    - "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9._-]+\\.[A-Za-z0-9._-]+"
+    - "[\\'\"``]jwt[\\'\"``]\\s*:\\s*[\\'\"``]eyJ[^'\"``]+[\\'\"``]"
+    - "[\\'\"``]id_token[\\'\"``]\\s*:\\s*[\\'\"``]eyJ[^'\"``]+[\\'\"``]"
+
+bearer_tokens:
+  description: "Bearer token patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Bearer\\s+([A-Za-z0-9\\-_.+=\\/]{20,})"
+    - "[\\'\"``]Bearer\\s+[A-Za-z0-9\\-_.+=\\/]{20,}[\\'\"``]"
+    - "Authorization:\\s*Bearer\\s+[A-Za-z0-9\\-_.+=\\/]{20,}"
+
+cloud_keys:
+  description: "Cloud service API keys"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]aws_secret_access_key[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\/+=]{40})[\\'\"``]"
+    - "[\\'\"``]aws_access_key_id[\\'\"``]\\s*:\\s*[\\'\"``](AKIA[0-9A-Z]{16})[\\'\"``]"
+    - "AKIA[0-9A-Z]{16}"
+    - "AIza[0-9A-Za-z\\-_]{35}"
+    - "AIzaSy[0-9A-Za-z\\-_]{33}"
+
+service_keys:
+  description: "Service-specific API keys"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "sk_live_[0-9a-zA-Z]{24,}"
+    - "sk_test_[0-9a-zA-Z]{24,}"
+    - "pk_live_[0-9a-zA-Z]{24,}"
+    - "pk_test_[0-9a-zA-Z]{24,}"
+    - "xox[baprs]-[0-9A-Za-z]{10,48}"
+    - "SG\\.[A-Za-z0-9_\\-]{22}\\.[A-Za-z0-9_\\-]{43}"
+    - "key-[0-9a-zA-Z]{32}"
+    - "ya29\\.[0-9A-Za-z\\-_]+"
+
+github_tokens:
+  description: "GitHub token patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "ghp_[A-Za-z0-9]{36}"
+    - "gho_[A-Za-z0-9]{36}"
+    - "ghu_[A-Za-z0-9]{36}"
+    - "ghs_[A-Za-z0-9]{36}"
+    - "ghr_[A-Za-z0-9]{36}"
+    - "github_pat_[A-Za-z0-9_]{82}"
+
+slack_tokens:
+  description: "Slack token patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "xoxb-[0-9A-Za-z\\-]+"
+    - "xoxa-[0-9A-Za-z\\-]+"
+    - "xoxp-[0-9A-Za-z\\-]+"
+    - "xoxr-[0-9A-Za-z\\-]+"
+    - "xoxs-[0-9A-Za-z\\-]+"
+
+discord_tokens:
+  description: "Discord token patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[A-Za-z0-9]{24}\\.[A-Za-z0-9]{6}\\.[A-Za-z0-9_\\-]{27}"
+    - "mfa\\.[A-Za-z0-9_\\-]{84}"
+
+environment_vars:
+  description: "Environment variable patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "process\\.env\\.([A-Z_]+_API_KEY)"
+    - "process\\.env\\.([A-Z_]+_SECRET)"
+    - "process\\.env\\.([A-Z_]+_TOKEN)"
+    - "process\\.env\\.([A-Z_]+_CLIENT_ID)"
+    - "process\\.env\\.([A-Z_]+_CLIENT_SECRET)"
+
+database_tokens:
+  description: "Database connection tokens"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "mongodb\\+srv://[^'\"``\\s]+"
+    - "mysql://[^'\"``\\s]+"
+    - "postgresql://[^'\"``\\s]+"
+    - "redis://[^'\"``\\s]+"
+    - "[\\'\"``]database_url[\\'\"``]\\s*:\\s*[\\'\"``][^'\"``]+[\\'\"``]"
+
+session_tokens:
+  description: "Session and CSRF tokens"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]csrf_token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.+=\\/]{20,})[\\'\"``]"
+    - "[\\'\"``]session_id[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.+=\\/]{20,})[\\'\"``]"
+    - "[\\'\"``]authenticity_token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.+=\\/]{20,})[\\'\"``]"
+    - "[\\'\"``]_token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.+=\\/]{20,})[\\'\"``]"
+
+refresh_tokens:
+  description: "Refresh token patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``]refresh_token[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.+=\\/]{20,})[\\'\"``]"
+    - "[\\'\"``]refreshToken[\\'\"``]\\s*:\\s*[\\'\"``]([A-Za-z0-9\\-_.+=\\/]{20,})[\\'\"``]"
+    - "refresh[_-]?token"

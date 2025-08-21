@@ -1,0 +1,115 @@
+info:
+  name: "Cryptographic Misuse Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect misuse and misconfiguration of cryptographic APIs"
+  tags:
+    - "crypto"
+    - "misuse"
+    - "misconfiguration"
+    - "security"
+
+improper_iv_usage:
+  description: "Improper initialization vector usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "iv\\s*=\\s*['\"`][0]{16,}['\"`]"
+    - "iv\\s*=\\s*['\"`][1]{16,}['\"`]"
+    - "iv\\s*=\\s*['\"`][A-Fa-f0-9]{32}['\"`]"
+    - "createCipher\\s*\\([^)]*\\)"
+    - "crypto\\.createCipher\\s*\\([^)]*\\)"
+    - "CryptoJS\\.AES\\.encrypt\\s*\\([^)]*\\)\\s*\\.toString\\s*\\(\\)"
+
+ecb_mode_usage:
+  description: "ECB mode encryption usage (insecure)"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "AES-ECB"
+    - "DES-ECB"
+    - "3DES-ECB"
+    - "mode\\s*:\\s*CryptoJS\\.mode\\.ECB"
+    - "CryptoJS\\.mode\\.ECB"
+    - "\\.ECB\\s*\\("
+
+static_salt_usage:
+  description: "Static salt usage in password hashing"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "salt\\s*=\\s*['\"`][A-Za-z0-9]{8,}['\"`]"
+    - "pbkdf2\\s*\\([^,]*,\\s*['\"`][^'\"``]+['\"`]"
+    - "scrypt\\s*\\([^,]*,\\s*['\"`][^'\"``]+['\"`]"
+    - "bcrypt\\s*\\([^,]*,\\s*['\"`][^'\"``]+['\"`]"
+
+insufficient_key_length:
+  description: "Insufficient cryptographic key lengths"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "RSA\\s*\\([^)]*512[^)]*\\)"
+    - "RSA\\s*\\([^)]*768[^)]*\\)"
+    - "RSA\\s*\\([^)]*1024[^)]*\\)"
+    - "generateKeyPair\\s*\\([^)]*512[^)]*\\)"
+    - "AES-128"
+    - "keySize\\s*:\\s*(128|64|56)"
+
+predictable_tokens:
+  description: "Predictable token and ID generation"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Math\\.random\\s*\\(\\)\\s*\\.toString\\s*\\(36\\)"
+    - "Date\\.now\\s*\\(\\)\\s*\\.toString\\s*\\(\\)"
+    - "new\\s+Date\\s*\\(\\)\\.getTime\\s*\\(\\)"
+    - "\\(\\s*new\\s+Date\\s*\\(\\)\\s*\\)\\.valueOf\\s*\\(\\)"
+    - "Math\\.floor\\s*\\(\\s*Math\\.random\\s*\\(\\)"
+
+timing_attack_vulnerable:
+  description: "Operations vulnerable to timing attacks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "password\\s*===\\s*[^;]+"
+    - "token\\s*===\\s*[^;]+"
+    - "secret\\s*===\\s*[^;]+"
+    - "signature\\s*===\\s*[^;]+"
+    - "hmac\\s*===\\s*[^;]+"
+    - "hash\\s*===\\s*[^;]+"
+
+insecure_comparison:
+  description: "Insecure cryptographic comparisons"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "==\\s*[^=].*hash"
+    - "!=\\s*[^=].*hash"
+    - "===\\s*[^=].*hash"
+    - "!==\\s*[^=].*hash"
+    - "strcmp\\s*\\([^)]*hash[^)]*\\)"
+    - "\\.equals\\s*\\([^)]*hash[^)]*\\)"
+
+weak_jwt_signing:
+  description: "Weak JWT signing configurations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "algorithm\\s*:\\s*['\"`]none['\"`]"
+    - "alg\\s*:\\s*['\"`]none['\"`]"
+    - "jwt\\.sign\\s*\\([^)]*['\"`]none['\"`]"
+    - "jwt\\.verify\\s*\\([^)]*false[^)]*\\)"
+    - "HS256.*['\"`][^'\"``]{1,10}['\"`]"
+
+crypto_downgrade_attacks:
+  description: "Cryptographic downgrade attack patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "TLS_RSA_WITH_NULL"
+    - "SSL_NULL"
+    - "EXPORT_"
+    - "DH_anon"
+    - "ECDH_anon"
+    - "ADH-"
+    - "AECDH-"

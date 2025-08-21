@@ -1,0 +1,105 @@
+info:
+  name: "Weak Cryptography Sinks"
+  author: "jsauce"
+  severity: "high"
+  description: "Detect weak cryptographic implementations and insecure algorithms"
+  tags:
+    - "crypto"
+    - "weak"
+    - "insecure"
+    - "security"
+
+weak_hash_algorithms:
+  description: "Weak hashing algorithms - insecure hash functions"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "md5\\s*\\([^)]*\\)"
+    - "sha1\\s*\\([^)]*\\)"
+    - "MD5\\s*\\([^)]*\\)"
+    - "SHA1\\s*\\([^)]*\\)"
+    - "CryptoJS\\.MD5\\s*\\([^)]*\\)"
+    - "CryptoJS\\.SHA1\\s*\\([^)]*\\)"
+    - "crypto\\.createHash\\s*\\(['\"`]md5['\"`]\\)"
+    - "crypto\\.createHash\\s*\\(['\"`]sha1['\"`]\\)"
+
+weak_random_generation:
+  description: "Weak random number generation"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Math\\.random\\s*\\(\\)"
+    - "new\\s+Date\\s*\\(\\)\\.getTime\\s*\\(\\)"
+    - "Date\\.now\\s*\\(\\)"
+    - "performance\\.now\\s*\\(\\)"
+    - "Math\\.floor\\s*\\(\\s*Math\\.random\\s*\\(\\)"
+
+weak_encryption_algorithms:
+  description: "Weak encryption algorithms"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "DES\\s*\\([^)]*\\)"
+    - "3DES\\s*\\([^)]*\\)"
+    - "RC4\\s*\\([^)]*\\)"
+    - "RC2\\s*\\([^)]*\\)"
+    - "Blowfish\\s*\\([^)]*\\)"
+    - "CryptoJS\\.DES\\s*\\([^)]*\\)"
+    - "CryptoJS\\.TripleDES\\s*\\([^)]*\\)"
+    - "CryptoJS\\.RC4\\s*\\([^)]*\\)"
+
+insecure_padding:
+  description: "Insecure padding schemes"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "PKCS1\\s*\\([^)]*\\)"
+    - "NoPadding\\s*\\([^)]*\\)"
+    - "ZeroPadding\\s*\\([^)]*\\)"
+    - "ISO10126\\s*\\([^)]*\\)"
+    - "AnsiX923\\s*\\([^)]*\\)"
+
+weak_key_derivation:
+  description: "Weak key derivation functions"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "pbkdf2\\s*\\([^)]*,\\s*[0-9]{1,4}\\s*[,)]"
+    - "scrypt\\s*\\([^)]*\\)"
+    - "bcrypt\\s*\\([^)]*,\\s*[0-9]{1,2}\\s*[,)]"
+    - "argon2\\s*\\([^)]*\\)"
+    - "PBKDF2WithHmacSHA1"
+
+hardcoded_crypto_values:
+  description: "Hardcoded cryptographic values"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "key\\s*=\\s*['\"`][A-Za-z0-9+/=]{16,}['\"`]"
+    - "secret\\s*=\\s*['\"`][A-Za-z0-9+/=]{16,}['\"`]"
+    - "password\\s*=\\s*['\"`][^'\"``]{8,}['\"`]"
+    - "salt\\s*=\\s*['\"`][A-Za-z0-9+/=]{8,}['\"`]"
+    - "iv\\s*=\\s*['\"`][A-Za-z0-9+/=]{16,}['\"`]"
+    - "nonce\\s*=\\s*['\"`][A-Za-z0-9+/=]{8,}['\"`]"
+
+insecure_random_seeds:
+  description: "Insecure random seed usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Math\\.random\\s*\\(\\)\\s*\\*"
+    - "parseInt\\s*\\(\\s*Math\\.random\\s*\\(\\)"
+    - "Math\\.floor\\s*\\(\\s*Math\\.random\\s*\\(\\)"
+    - "seedrandom\\s*\\(['\"`][^'\"``]*['\"`]\\)"
+    - "Random\\s*\\([0-9]+\\)"
+
+base64_obfuscation:
+  description: "Base64 encoding misused as encryption"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "btoa\\s*\\([^)]*\\)"
+    - "atob\\s*\\([^)]*\\)"
+    - "Buffer\\.from\\s*\\([^)]*\\)\\.toString\\s*\\(['\"`]base64['\"`]\\)"
+    - "Base64\\.encode\\s*\\([^)]*\\)"
+    - "Base64\\.decode\\s*\\([^)]*\\)"

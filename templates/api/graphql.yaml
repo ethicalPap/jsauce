@@ -1,0 +1,108 @@
+info:
+  name: GraphQL Endpoints Detection
+  author: JSauce
+  severity: medium
+  description: Detect GraphQL endpoints and operations
+  tags:
+    - graphql
+    - api
+    - query
+
+graphql_endpoints:
+  description: "GraphQL endpoints and operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/graphql/?)[\\'\"``]"
+    - "[\\'\"``](/graphiql/?)[\\'\"``]"
+    - "[\\'\"``](/api/graphql/?)[\\'\"``]"
+    - "[\\'\"``](/v\\d+/graphql/?)[\\'\"``]"
+    - "[\\'\"``](https?://[^'\"``\\s]+/graphql)[\\'\"``]"
+
+graphql_queries:
+  description: "GraphQL query patterns"
+  flags: "gi"
+  patterns:
+    - "query\\s*[\\w\\d_]+\\s*\\{"
+    - "mutation\\s*[\\w\\d_]+\\s*\\{"
+    - "subscription\\s*[\\w\\d_]+\\s*\\{"
+    - "\\{\\s*query\\s*:"
+    - "\\{\\s*mutation\\s*:"
+    - "\\{\\s*subscription\\s*:"
+
+graphql_introspection:
+  description: "GraphQL introspection queries"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "__schema"
+    - "__type"
+    - "__typename"
+    - "__field"
+    - "__directive"
+    - "IntrospectionQuery"
+    - "getIntrospectionQuery"
+    - "introspection"
+
+graphql_operations:
+  description: "Common GraphQL operations"
+  flags: "gi"
+  patterns:
+    - "query\\s+\\w+\\s*\\{"
+    - "mutation\\s+\\w+\\s*\\{"
+    - "subscription\\s+\\w+\\s*\\{"
+    - "fragment\\s+\\w+\\s+on\\s+\\w+"
+    - "\\$\\w+:\\s*\\w+"
+
+graphql_clients:
+  description: "GraphQL client libraries"
+  flags: "gi"
+  patterns:
+    - "new\\s+ApolloClient\\s*\\("
+    - "apollo[_-]?client"
+    - "graphql[_-]?request"
+    - "relay"
+    - "urql"
+    - "graphql[_-]?tag"
+    - "gql\\s*\\`"
+
+graphql_config:
+  description: "GraphQL configuration patterns"
+  flags: "gi"
+  patterns:
+    - "graphqlEndpoint"
+    - "uri:\\s*[\\'\"``][^'\"``]*graphql[^'\"``]*[\\'\"``]"
+    - "endpoint:\\s*[\\'\"``][^'\"``]*graphql[^'\"``]*[\\'\"``]"
+    - "GraphQL\\s*\\("
+    - "createClient\\s*\\("
+
+graphql_variables:
+  description: "GraphQL variables and parameters"
+  flags: "gi"
+  patterns:
+    - "variables\\s*:"
+    - "\\$[\\w\\d_]+:"
+    - "operationName"
+    - "extensions\\s*:"
+
+graphql_subscriptions:
+  description: "GraphQL subscription patterns"
+  flags: "gi"
+  patterns:
+    - "subscription\\s*\\{"
+    - "subscriptions-transport-ws"
+    - "graphql-ws"
+    - "graphql-subscriptions"
+    - "PubSub"
+    - "withFilter"
+
+graphql_security:
+  description: "GraphQL security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "depth[_-]?limit"
+    - "query[_-]?complexity"
+    - "rate[_-]?limit"
+    - "query[_-]?whitelist"
+    - "persisted[_-]?queries"
+    - "disable[_-]?introspection"

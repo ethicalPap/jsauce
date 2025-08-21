@@ -1,0 +1,135 @@
+info:
+  name: File Operations Detection
+  author: JSauce
+  severity: medium
+  description: Detect file upload, download, and manipulation operations
+  tags:
+    - files
+    - upload
+    - download
+    - operations
+
+file_operations:
+  description: "File upload/download operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/upload/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/download/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/files?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/documents?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/attachments?/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/assets/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_upload_sinks:
+  description: "File upload sinks - unsafe file handling"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "FileReader\\s*\\(\\)"
+    - "readAsText\\s*\\([^)]*\\)"
+    - "readAsDataURL\\s*\\([^)]*\\)"
+    - "readAsBinaryString\\s*\\([^)]*\\)"
+    - "readAsArrayBuffer\\s*\\([^)]*\\)"
+    - "FormData\\s*\\(\\)"
+    - "files\\[\\d+\\]"
+    - "input\\[type=['\"`]file['\"`]\\]"
+
+file_storage:
+  description: "File storage and CDN patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/storage/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/assets/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/cdn/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/static/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/media/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/resources/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+media_endpoints:
+  description: "Media content endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/photos?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/videos?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/images?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/thumbnails?/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+    - "[\\'\"``](/gallery/[\\w\\d/-_.?=&%]+)[\\'\"``]"
+
+path_traversal_sinks:
+  description: "Path traversal sinks - unsafe file operations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "fs\\.readFile\\s*\\([^)]*\\)"
+    - "fs\\.writeFile\\s*\\([^)]*\\)"
+    - "fs\\.createReadStream\\s*\\([^)]*\\)"
+    - "fs\\.createWriteStream\\s*\\([^)]*\\)"
+    - "require\\s*\\([^)]*\\)"
+    - "import\\s*\\([^)]*\\)"
+    - "fetch\\s*\\(['\"`]\\.\\./[^'\"``]*['\"`]"
+    - "XMLHttpRequest.*\\.open\\s*\\([^,]*,\\s*['\"`]\\.\\./[^'\"``]*['\"`]"
+
+file_management:
+  description: "File management operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/create-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/delete-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/rename-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/move-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/copy-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/edit-file/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+directory_operations:
+  description: "Directory and folder operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/directory/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/folder/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/browse/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/list-files/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/tree/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/mkdir/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+archive_operations:
+  description: "Archive and compression operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/archive/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/compress/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/extract/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/unzip/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/decompress/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/tar/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+backup_operations:
+  description: "Backup and restore operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/backup/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/restore/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/export/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/import/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/snapshot/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+file_sharing:
+  description: "File sharing operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/share/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/shared/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/public/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/private/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/link/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/permalink/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+sync_operations:
+  description: "File synchronization operations"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/sync/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/synchronize/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/mirror/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/replicate/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/pull/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/push/[\\w\\d/-_.?=&%]*)[\\'\"``]"

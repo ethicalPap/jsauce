@@ -1,0 +1,76 @@
+info:
+  name: "Storage and Cryptography Vulnerability Sinks"
+  author: "jsauce"
+  severity: "medium"
+  description: "Detect insecure storage practices, weak cryptography, and prototype pollution"
+  tags:
+    - "storage"
+    - "crypto"
+    - "prototype-pollution"
+    - "security"
+
+storage_sinks:
+  description: "Client-side storage sinks - sensitive data in storage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "localStorage\\.setItem\\s*\\([^)]*\\)"
+    - "sessionStorage\\.setItem\\s*\\([^)]*\\)"
+    - "localStorage\\[.*\\]\\s*="
+    - "sessionStorage\\[.*\\]\\s*="
+    - "document\\.cookie\\s*="
+    - "\\$\\.cookie\\s*\\([^)]*\\)"
+    - "Cookies\\.set\\s*\\([^)]*\\)"
+
+web_crypto_sinks:
+  description: "Weak cryptography sinks - insecure crypto usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "Math\\.random\\s*\\(\\)"
+    - "crypto\\.getRandomValues\\s*\\([^)]*\\)"
+    - "md5\\s*\\([^)]*\\)"
+    - "sha1\\s*\\([^)]*\\)"
+    - "CryptoJS\\.MD5\\s*\\([^)]*\\)"
+    - "CryptoJS\\.SHA1\\s*\\([^)]*\\)"
+    - "btoa\\s*\\([^)]*\\)"
+    - "atob\\s*\\([^)]*\\)"
+
+prototype_pollution_sinks:
+  description: "Prototype pollution sinks - dangerous object manipulation"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "__proto__"
+    - "constructor\\.prototype"
+    - "Object\\.prototype"
+    - "\\[\\s*['\"`]__proto__['\"`]\\s*\\]"
+    - "\\[\\s*['\"`]constructor['\"`]\\s*\\]\\s*\\[\\s*['\"`]prototype['\"`]\\s*\\]"
+    - "Object\\.assign\\s*\\([^)]*\\)"
+    - "\\$\\.extend\\s*\\(true,"
+    - "lodash\\.merge\\s*\\("
+    - "_\\.merge\\s*\\("
+
+unsafe_deserialization_sinks:
+  description: "Unsafe deserialization sinks - dangerous object deserialization"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "JSON\\.parse\\s*\\([^)]*\\)"
+    - "pickle\\.loads\\s*\\([^)]*\\)"
+    - "yaml\\.load\\s*\\([^)]*\\)"
+    - "serialize\\.unserialize\\s*\\([^)]*\\)"
+    - "node-serialize\\.unserialize\\s*\\([^)]*\\)"
+    - "serialize-javascript\\s*\\([^)]*\\)"
+
+websocket_sinks:
+  description: "WebSocket security sinks - unsafe WebSocket usage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "new\\s+WebSocket\\s*\\([^)]*\\)"
+    - "websocket\\.send\\s*\\([^)]*\\)"
+    - "ws\\.send\\s*\\([^)]*\\)"
+    - "socket\\.emit\\s*\\([^)]*\\)"
+    - "io\\.emit\\s*\\([^)]*\\)"
+    - "socket\\.on\\s*\\(['\"`]message['\"`]"

@@ -1,0 +1,85 @@
+info:
+  name: "Open Redirect Vulnerability Sinks"
+  author: "jsauce"
+  severity: "medium"
+  description: "Detect open redirect vulnerabilities in URL redirection logic"
+  tags:
+    - "redirect"
+    - "open-redirect"
+    - "url"
+    - "security"
+
+url_redirect_sinks:
+  description: "URL redirection sinks - dangerous URL redirections"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.location\\s*=\\s*[^;]+"
+    - "window\\.location\\.href\\s*=\\s*[^;]+"
+    - "window\\.location\\.replace\\s*\\([^)]*\\)"
+    - "window\\.location\\.assign\\s*\\([^)]*\\)"
+    - "document\\.location\\s*=\\s*[^;]+"
+    - "document\\.location\\.href\\s*=\\s*[^;]+"
+    - "location\\.href\\s*=\\s*[^;]+"
+    - "top\\.location\\s*=\\s*[^;]+"
+    - "parent\\.location\\s*=\\s*[^;]+"
+
+window_open_sinks:
+  description: "Window.open redirection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "window\\.open\\s*\\([^)]*\\)"
+    - "open\\s*\\([^)]*['\"`]_blank['\"`][^)]*\\)"
+    - "window\\.open\\s*\\([^)]*['\"`]_self['\"`][^)]*\\)"
+    - "window\\.open\\s*\\([^)]*['\"`]_parent['\"`][^)]*\\)"
+    - "window\\.open\\s*\\([^)]*['\"`]_top['\"`][^)]*\\)"
+
+parameter_based_redirects:
+  description: "Parameter-based redirect patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "redirect\\s*=\\s*[^&;]*"
+    - "url\\s*=\\s*[^&;]*"
+    - "next\\s*=\\s*[^&;]*"
+    - "return\\s*=\\s*[^&;]*"
+    - "goto\\s*=\\s*[^&;]*"
+    - "target\\s*=\\s*[^&;]*"
+    - "destination\\s*=\\s*[^&;]*"
+
+meta_refresh_sinks:
+  description: "Meta refresh redirection sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "http-equiv\\s*=\\s*['\"`]refresh['\"`]"
+    - "content\\s*=\\s*['\"`][0-9]*;\\s*url\\s*=[^'\"``]*['\"`]"
+    - "meta.*refresh.*url\\s*="
+    - "setTimeout\\s*\\([^)]*location[^)]*\\)"
+    - "setInterval\\s*\\([^)]*location[^)]*\\)"
+
+javascript_redirect_sinks:
+  description: "JavaScript-based redirect patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "history\\.pushState\\s*\\([^)]*\\)"
+    - "history\\.replaceState\\s*\\([^)]*\\)"
+    - "history\\.go\\s*\\([^)]*\\)"
+    - "history\\.back\\s*\\(\\)"
+    - "history\\.forward\\s*\\(\\)"
+    - "router\\.push\\s*\\([^)]*\\)"
+    - "router\\.replace\\s*\\([^)]*\\)"
+
+unsafe_url_construction:
+  description: "Unsafe URL construction patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "new\\s+URL\\s*\\([^)]*\\)"
+    - "URL\\.createObjectURL\\s*\\([^)]*\\)"
+    - "URL\\.revokeObjectURL\\s*\\([^)]*\\)"
+    - "['\"`]https?://['\"`]\\s*\\+\\s*[^;]+"
+    - "['\"`]//['\"`]\\s*\\+\\s*[^;]+"
+    - "protocol\\s*\\+\\s*['\"`]//['\"`]\\s*\\+\\s*[^;]+"

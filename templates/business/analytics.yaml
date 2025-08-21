@@ -1,0 +1,126 @@
+info:
+  name: Analytics Tracking Detection
+  author: JSauce
+  severity: medium
+  description: Detect analytics tracking code and data collection patterns
+  tags:
+    - analytics
+    - tracking
+    - data-collection
+
+analytics_tracking:
+  description: "Analytics tracking endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/analytics/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/track/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/tracking/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/events/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/metrics/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/telemetry/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+google_analytics:
+  description: "Google Analytics patterns"
+  flags: "gi"
+  patterns:
+    - "google-analytics\\.com"
+    - "googletagmanager\\.com"
+    - "[\\'\"``](https?://www\\.google-analytics\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://www\\.googletagmanager\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "GA_TRACKING_ID"
+    - "gtag\\s*\\("
+    - "ga\\s*\\("
+    - "GoogleAnalytics"
+    - "_gaq"
+    - "_ga"
+
+google_tag_manager:
+  description: "Google Tag Manager patterns"
+  flags: "gi"
+  patterns:
+    - "GTM-[A-Z0-9]+"
+    - "dataLayer"
+    - "google_tag_manager"
+    - "gtm\\.js"
+    - "googletagmanager"
+
+facebook_pixel:
+  description: "Facebook Pixel tracking"
+  flags: "gi"
+  patterns:
+    - "connect\\.facebook\\.net.*fbevents"
+    - "fbq\\s*\\("
+    - "_fbp"
+    - "facebook[_-]?pixel"
+    - "fb[_-]?pixel"
+
+adobe_analytics:
+  description: "Adobe Analytics patterns"
+  flags: "gi"
+  patterns:
+    - "omniture"
+    - "adobe[_-]?analytics"
+    - "s_code"
+    - "s\\.t\\s*\\(\\)"
+    - "s\\.tl\\s*\\("
+    - "sitecatalyst"
+
+mixpanel_patterns:
+  description: "Mixpanel analytics patterns"
+  flags: "gi"
+  patterns:
+    - "api\\.mixpanel\\.com"
+    - "[\\'\"``](https?://api\\.mixpanel\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "mixpanel\\."
+    - "mp[_-]?track"
+
+amplitude_patterns:
+  description: "Amplitude analytics patterns"
+  flags: "gi"
+  patterns:
+    - "api\\.amplitude\\.com"
+    - "[\\'\"``](https?://api\\.amplitude\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "amplitude\\."
+    - "logEvent"
+
+hotjar_patterns:
+  description: "Hotjar heatmap and session recording"
+  flags: "gi"
+  patterns:
+    - "static\\.hotjar\\.com"
+    - "[\\'\"``](https?://static\\.hotjar\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "hotjar\\."
+    - "hj\\s*\\("
+
+segment_patterns:
+  description: "Segment analytics patterns"
+  flags: "gi"
+  patterns:
+    - "api\\.segment\\.io"
+    - "[\\'\"``](https?://api\\.segment\\.io[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "analytics\\."
+    - "segment"
+
+custom_tracking:
+  description: "Custom tracking patterns"
+  flags: "gi"
+  patterns:
+    - "track[_-]?event"
+    - "send[_-]?event"
+    - "log[_-]?event"
+    - "page[_-]?view"
+    - "click[_-]?tracking"
+    - "conversion[_-]?tracking"
+    - "user[_-]?tracking"
+
+privacy_tracking:
+  description: "Privacy and consent tracking"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "consent[_-]?tracking"
+    - "cookie[_-]?consent"
+    - "gdpr[_-]?tracking"
+    - "opt[_-]?out"
+    - "do[_-]?not[_-]?track"
+    - "privacy[_-]?mode"

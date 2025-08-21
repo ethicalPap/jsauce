@@ -1,0 +1,92 @@
+info:
+  name: "Stored XSS Vulnerability Sinks"
+  author: "jsauce"
+  severity: "critical"
+  description: "Detect stored XSS vulnerabilities in database storage and persistent data"
+  tags:
+    - "xss"
+    - "stored"
+    - "persistent"
+    - "security"
+
+stored_xss_sinks:
+  description: "Stored XSS sinks - database and persistent storage"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "localStorage\\.setItem\\s*\\([^)]*\\)"
+    - "sessionStorage\\.setItem\\s*\\([^)]*\\)"
+    - "localStorage\\[.*\\]\\s*="
+    - "sessionStorage\\[.*\\]\\s*="
+    - "document\\.cookie\\s*="
+    - "IndexedDB.*put\\s*\\([^)]*\\)"
+    - "WebSQL.*executeSql\\s*\\([^)]*\\)"
+
+database_storage_sinks:
+  description: "Database storage sinks for user content"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "\\.save\\s*\\([^)]*\\)"
+    - "\\.insert\\s*\\([^)]*\\)"
+    - "\\.update\\s*\\([^)]*\\)"
+    - "\\.create\\s*\\([^)]*\\)"
+    - "\\.store\\s*\\([^)]*\\)"
+    - "db\\.collection\\s*\\([^)]*\\)\\.insert"
+    - "db\\.collection\\s*\\([^)]*\\)\\.save"
+    - "Model\\.create\\s*\\([^)]*\\)"
+
+user_content_sinks:
+  description: "User-generated content storage sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "comment[_-]?content"
+    - "post[_-]?content"
+    - "message[_-]?content"
+    - "description"
+    - "bio"
+    - "profile[_-]?text"
+    - "user[_-]?input"
+    - "form[_-]?data"
+
+cms_content_sinks:
+  description: "CMS and content management sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "rich[_-]?text[_-]?editor"
+    - "wysiwyg[_-]?editor"
+    - "content[_-]?editor"
+    - "text[_-]?area"
+    - "markdown[_-]?editor"
+    - "html[_-]?editor"
+    - "tinymce"
+    - "ckeditor"
+    - "quill"
+
+template_sinks:
+  description: "Template and rendering sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "template[_-]?render"
+    - "view[_-]?render"
+    - "partial[_-]?render"
+    - "compile[_-]?template"
+    - "render[_-]?html"
+    - "mustache\\.render"
+    - "handlebars\\.compile"
+
+file_upload_sinks:
+  description: "File upload content sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "file[_-]?upload"
+    - "image[_-]?upload"
+    - "avatar[_-]?upload"
+    - "document[_-]?upload"
+    - "attachment[_-]?upload"
+    - "multipart[_-]?form"
+    - "FormData\\s*\\([^)]*\\)"

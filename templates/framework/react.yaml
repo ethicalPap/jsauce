@@ -1,0 +1,60 @@
+info:
+  name: React Framework Detection
+  author: JSauce
+  severity: info
+  description: Detect React.js specific patterns and potential security issues
+  tags:
+    - react
+    - framework
+    - javascript
+
+react_sinks:
+  description: "React-specific security sinks"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "dangerouslySetInnerHTML\\s*:\\s*\\{"
+    - "React\\.createElement\\s*\\(['\"`]script['\"`]"
+    - "ReactDOM\\.render\\s*\\([^)]*\\)"
+    - "ref\\s*=\\s*\\{[^}]*\\}"
+
+react_patterns:
+  description: "React component and hook patterns"
+  flags: "gi"
+  patterns:
+    - "useState\\s*\\("
+    - "useEffect\\s*\\("
+    - "useContext\\s*\\("
+    - "useReducer\\s*\\("
+    - "useCallback\\s*\\("
+    - "useMemo\\s*\\("
+    - "useRef\\s*\\("
+    - "React\\.Component"
+    - "React\\.PureComponent"
+    - "createClass\\s*\\("
+
+react_router:
+  description: "React Router patterns"
+  flags: "gi"
+  patterns:
+    - "BrowserRouter"
+    - "HashRouter"
+    - "Route\\s"
+    - "Switch\\s"
+    - "useHistory\\s*\\("
+    - "useLocation\\s*\\("
+    - "useParams\\s*\\("
+    - "useRouteMatch\\s*\\("
+    - "history\\.push\\s*\\("
+    - "history\\.replace\\s*\\("
+
+react_api_calls:
+  description: "React API call patterns"
+  flags: "gi"
+  patterns:
+    - "axios\\."
+    - "fetch\\s*\\("
+    - "useQuery\\s*\\("
+    - "useMutation\\s*\\("
+    - "apollo"
+    - "graphql"

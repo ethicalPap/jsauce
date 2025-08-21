@@ -1,0 +1,97 @@
+info:
+  name: AWS Service Detection
+  author: JSauce
+  severity: medium
+  description: Detect AWS service patterns and potential misconfigurations
+  tags:
+    - aws
+    - cloud
+    - services
+
+aws_endpoints:
+  description: "AWS service endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.amazonaws\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://s3[\\w\\d.-]*\\.amazonaws\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://[\\w\\d.-]*\\.s3\\.amazonaws\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://lambda[\\w\\d.-]*\\.amazonaws\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+aws_credentials:
+  description: "AWS credential patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "AKIA[0-9A-Z]{16}"
+    - "[\\'\"``]aws_access_key_id[\\'\"``]\\s*[:=]\\s*[\\'\"``]([A-Z0-9]{20})[\\'\"``]"
+    - "[\\'\"``]aws_secret_access_key[\\'\"``]\\s*[:=]\\s*[\\'\"``]([A-Za-z0-9/+=]{40})[\\'\"``]"
+    - "[\\'\"``]aws_session_token[\\'\"``]\\s*[:=]"
+    - "AWS_ACCESS_KEY_ID"
+    - "AWS_SECRET_ACCESS_KEY"
+    - "AWS_SESSION_TOKEN"
+
+aws_s3_patterns:
+  description: "AWS S3 service patterns"
+  flags: "gi"
+  patterns:
+    - "s3\\.amazonaws\\.com"
+    - "s3-[\\w\\d-]+\\.amazonaws\\.com"
+    - "s3\\.getObject\\s*\\("
+    - "s3\\.putObject\\s*\\("
+    - "s3\\.deleteObject\\s*\\("
+    - "s3\\.listObjects\\s*\\("
+    - "aws-sdk.*S3"
+
+aws_lambda_patterns:
+  description: "AWS Lambda service patterns"
+  flags: "gi"
+  patterns:
+    - "lambda\\.invoke\\s*\\("
+    - "lambda\\.amazonaws\\.com"
+    - "aws-lambda"
+    - "exports\\.handler\\s*="
+    - "context\\.succeed\\s*\\("
+    - "context\\.fail\\s*\\("
+    - "callback\\s*\\([^)]*\\)"
+
+aws_api_gateway:
+  description: "AWS API Gateway patterns"
+  flags: "gi"
+  patterns:
+    - "execute-api\\.amazonaws\\.com"
+    - "apigateway\\.amazonaws\\.com"
+    - "[\\'\"``](https?://[\\w\\d]+\\.execute-api\\.[\\w\\d-]+\\.amazonaws\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "api\\.gateway"
+    - "x-api-key"
+
+aws_cloudfront:
+  description: "AWS CloudFront patterns"
+  flags: "gi"
+  patterns:
+    - "cloudfront\\.net"
+    - "[\\'\"``](https?://[\\w\\d]+\\.cloudfront\\.net[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "d[0-9a-z]+\\.cloudfront\\.net"
+    - "CloudFront-"
+
+aws_cognito:
+  description: "AWS Cognito patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "cognito-identity\\.amazonaws\\.com"
+    - "cognito-idp\\.amazonaws\\.com"
+    - "CognitoIdentityServiceProvider"
+    - "CognitoUserPool"
+    - "aws-cognito"
+    - "cognito[_-]?user[_-]?pool"
+
+aws_dynamodb:
+  description: "AWS DynamoDB patterns"
+  flags: "gi"
+  patterns:
+    - "dynamodb\\.amazonaws\\.com"
+    - "DynamoDB"
+    - "dynamo\\.getItem\\s*\\("
+    - "dynamo\\.putItem\\s*\\("
+    - "dynamo\\.query\\s*\\("
+    - "dynamo\\.scan\\s*\\("

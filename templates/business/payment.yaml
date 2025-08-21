@@ -1,0 +1,118 @@
+info:
+  name: Payment Processing Detection
+  author: JSauce
+  severity: critical
+  description: Detect payment processing endpoints and financial data handling
+  tags:
+    - payment
+    - financial
+    - ecommerce
+
+payment_endpoints:
+  description: "Payment processing endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/payment/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/checkout/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/billing/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/invoice/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/subscription/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/charge/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/transaction/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+
+stripe_patterns:
+  description: "Stripe payment service patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://api\\.stripe\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``]/stripe/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "sk_live_[0-9a-zA-Z]{24,}"
+    - "sk_test_[0-9a-zA-Z]{24,}"
+    - "pk_live_[0-9a-zA-Z]{24,}"
+    - "pk_test_[0-9a-zA-Z]{24,}"
+    - "stripe\\."
+    - "Stripe\\s*\\("
+
+paypal_patterns:
+  description: "PayPal payment service patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://api\\.paypal\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](https?://api\\.sandbox\\.paypal\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``]/paypal/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "paypal\\."
+    - "PayPal"
+    - "client_id"
+    - "client_secret"
+
+square_patterns:
+  description: "Square payment service patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](https?://connect\\.squareup\\.com[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``]/square/[\\w\\d/-_.?=&%]*[\\'\"``]"
+    - "square\\."
+    - "Square"
+    - "sq0[a-z]{3}-[0-9A-Za-z\\-_]{22,43}"
+
+credit_card_patterns:
+  description: "Credit card data patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "card[_-]?number"
+    - "cardnumber"
+    - "credit[_-]?card"
+    - "cc[_-]?number"
+    - "pan"
+    - "cvv"
+    - "cvc"
+    - "expiry[_-]?date"
+    - "exp[_-]?month"
+    - "exp[_-]?year"
+
+financial_data:
+  description: "Financial data patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "bank[_-]?account"
+    - "routing[_-]?number"
+    - "account[_-]?number"
+    - "swift[_-]?code"
+    - "iban"
+    - "sort[_-]?code"
+    - "bsb"
+    - "ach"
+
+cryptocurrency_patterns:
+  description: "Cryptocurrency payment patterns"
+  flags: "gi"
+  patterns:
+    - "bitcoin"
+    - "btc"
+    - "ethereum"
+    - "eth"
+    - "litecoin"
+    - "ltc"
+    - "wallet[_-]?address"
+    - "private[_-]?key"
+    - "public[_-]?key"
+    - "blockchain"
+
+subscription_patterns:
+  description: "Subscription and recurring payment patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "subscription[_-]?id"
+    - "plan[_-]?id"
+    - "recurring[_-]?payment"
+    - "monthly[_-]?billing"
+    - "annual[_-]?billing"
+    - "trial[_-]?period"
+    - "cancel[_-]?subscription"

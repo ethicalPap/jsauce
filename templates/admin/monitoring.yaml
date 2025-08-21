@@ -1,0 +1,82 @@
+info:
+  name: Monitoring Endpoints Detection
+  author: JSauce
+  severity: medium
+  description: Detect monitoring, health checks, and metrics endpoints
+  tags:
+    - monitoring
+    - health
+    - metrics
+
+health_endpoints:
+  description: "Health check endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/health)[\\'\"``]"
+    - "[\\'\"``](/health/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/healthcheck)[\\'\"``]"
+    - "[\\'\"``](/ping)[\\'\"``]"
+    - "[\\'\"``](/status)[\\'\"``]"
+    - "[\\'\"``](/alive)[\\'\"``]"
+    - "[\\'\"``](/ready)[\\'\"``]"
+    - "[\\'\"``](/readiness)[\\'\"``]"
+
+metrics_endpoints:
+  description: "Metrics and monitoring endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/metrics)[\\'\"``]"
+    - "[\\'\"``](/metrics/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/prometheus)[\\'\"``]"
+    - "[\\'\"``](/stats)[\\'\"``]"
+    - "[\\'\"``](/statistics)[\\'\"``]"
+    - "[\\'\"``](/monitoring)[\\'\"``]"
+    - "[\\'\"``](/telemetry)[\\'\"``]"
+
+performance_endpoints:
+  description: "Performance monitoring endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/performance)[\\'\"``]"
+    - "[\\'\"``](/perf)[\\'\"``]"
+    - "[\\'\"``](/uptime)[\\'\"``]"
+    - "[\\'\"``](/response-time)[\\'\"``]"
+    - "[\\'\"``](/load)[\\'\"``]"
+    - "[\\'\"``](/throughput)[\\'\"``]"
+
+logging_endpoints:
+  description: "Logging and audit endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/logs)[\\'\"``]"
+    - "[\\'\"``](/log/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/audit)[\\'\"``]"
+    - "[\\'\"``](/audit/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/events)[\\'\"``]"
+    - "[\\'\"``](/activity)[\\'\"``]"
+
+monitoring_tools:
+  description: "Monitoring tool patterns"
+  flags: "gi"
+  patterns:
+    - "grafana"
+    - "prometheus"
+    - "datadog"
+    - "newrelic"
+    - "splunk"
+    - "elastic"
+    - "kibana"
+    - "jaeger"
+    - "zipkin"
+
+alerting_endpoints:
+  description: "Alerting and notification endpoints"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/alerts)[\\'\"``]"
+    - "[\\'\"``](/alert/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/notifications)[\\'\"``]"
+    - "[\\'\"``](/notify/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/incidents)[\\'\"``]"
+    - "[\\'\"``](/pagerduty)[\\'\"``]"

@@ -1,0 +1,138 @@
+info:
+  name: OAuth Endpoints Detection
+  author: JSauce
+  severity: critical
+  description: Detect OAuth endpoints and SSO integrations
+  tags:
+    - oauth
+    - sso
+    - auth
+
+oauth_endpoints:
+  description: "OAuth and SSO endpoints"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "[\\'\"``](/oauth/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/oauth2/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/sso/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/saml/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/oidc/[\\w\\d/-_.?=&%]*)[\\'\"``]"
+    - "[\\'\"``](/authorize)[\\'\"``]"
+    - "[\\'\"``](/token)[\\'\"``]"
+    - "[\\'\"``](/callback)[\\'\"``]"
+
+oauth_flows:
+  description: "OAuth flow patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "client_id\\s*[:=]"
+    - "client_secret\\s*[:=]"
+    - "redirect_uri\\s*[:=]"
+    - "response_type\\s*[:=]"
+    - "grant_type\\s*[:=]"
+    - "authorization_code"
+    - "access_token"
+    - "refresh_token"
+    - "Bearer\\s+"
+    - "scope\\s*[:=]"
+
+oauth_grant_types:
+  description: "OAuth grant type patterns"
+  flags: "gi"
+  patterns:
+    - "authorization[_-]?code"
+    - "implicit"
+    - "password"
+    - "client[_-]?credentials"
+    - "refresh[_-]?token"
+    - "device[_-]?code"
+    - "urn:ietf:params:oauth"
+
+social_auth:
+  description: "Social authentication patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/auth/google)[\\'\"``]"
+    - "[\\'\"``](/auth/facebook)[\\'\"``]"
+    - "[\\'\"``](/auth/github)[\\'\"``]"
+    - "[\\'\"``](/auth/twitter)[\\'\"``]"
+    - "[\\'\"``](/auth/linkedin)[\\'\"``]"
+    - "[\\'\"``](/auth/microsoft)[\\'\"``]"
+    - "[\\'\"``](/auth/apple)[\\'\"``]"
+    - "[\\'\"``](/auth/discord)[\\'\"``]"
+    - "[\\'\"``](/auth/slack)[\\'\"``]"
+
+openid_connect:
+  description: "OpenID Connect patterns"
+  flags: "gi"
+  patterns:
+    - "[\\'\"``](/\\.well-known/openid_configuration)[\\'\"``]"
+    - "[\\'\"``](/userinfo)[\\'\"``]"
+    - "[\\'\"``](/jwks)[\\'\"``]"
+    - "[\\'\"``]/.well-known/jwks.json[\\'\"``]"
+    - "id_token"
+    - "openid"
+    - "profile"
+    - "email"
+
+oauth_providers:
+  description: "OAuth provider configurations"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "GOOGLE_CLIENT_ID"
+    - "FACEBOOK_APP_ID"
+    - "GITHUB_CLIENT_ID"
+    - "TWITTER_API_KEY"
+    - "LINKEDIN_CLIENT_ID"
+    - "MICROSOFT_CLIENT_ID"
+    - "APPLE_CLIENT_ID"
+
+oauth_scopes:
+  description: "OAuth scope patterns"
+  flags: "gi"
+  patterns:
+    - "scope.*read"
+    - "scope.*write"
+    - "scope.*admin"
+    - "scope.*user"
+    - "scope.*email"
+    - "scope.*profile"
+    - "scope.*openid"
+
+oauth_security:
+  description: "OAuth security patterns"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "state\\s*[:=]"
+    - "nonce\\s*[:=]"
+    - "code_challenge"
+    - "code_verifier"
+    - "pkce"
+    - "csrf[_-]?protection"
+
+jwt_patterns:
+  description: "JWT token patterns in OAuth context"
+  flags: "gi"
+  sensitive: true
+  patterns:
+    - "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9._-]+\\.[A-Za-z0-9._-]+"
+    - "jwt[_-]?decode"
+    - "jwt[_-]?verify"
+    - "jwt[_-]?sign"
+    - "jsonwebtoken"
+
+oauth_errors:
+  description: "OAuth error patterns"
+  flags: "gi"
+  patterns:
+    - "invalid_request"
+    - "invalid_client"
+    - "invalid_grant"
+    - "unauthorized_client"
+    - "unsupported_grant_type"
+    - "invalid_scope"
+    - "access_denied"
