@@ -1,4 +1,3 @@
-# jsauce.py - Updated with AI Integration
 from src.packages.LoadTemplate import LoadTemplate
 from src.handlers.DomainHandler import DomainHandler
 from src.packages.MermaidConverter import JSONToMermaidConverter  
@@ -12,6 +11,7 @@ from src.handlers.ArgumentHandler import ArgumentHandler
 from src.packages.JsProcessor import JsProcessor
 from src.packages.CategoryProcessor import CategoryProcessor
 from src.packages.AIAnalyzer import AISecurityAnalyzer
+from src.packages.HTMLConverter import HTMLReportConverter
 from src.utils.Logger import initialize_logger, get_logger
 import os
 from src import config
@@ -118,12 +118,19 @@ class JSauceApp:
                 self.web_requests  # Pass WebRequests instance
             )
             
+            # NEW: Initialize HTML Report Converter
+            self.html_converter = HTMLReportConverter(
+                self.banner,
+                self.domain_handler,
+                template_name
+            )
+            
             # Ensure base directories exist
             self.output_handler.ensure_base_directories()
             self.logger.debug("Base directories ensured")
 
             # Load URLs and patterns
-            self.banner.update_progress(0, 5, "Initializing")  # Updated progress steps
+            self.banner.update_progress(0, 6, "Initializing")  # Updated progress steps
 
             # load URL(s)
             if args.url:
@@ -138,7 +145,7 @@ class JSauceApp:
             self.logger.debug(f"URLs to process: {urls}")
 
             # Load templates
-            self.banner.update_progress(1, 5, "Loading templates")
+            self.banner.update_progress(1, 6, "Loading templates")
             self.banner.add_status("Loading endpoint templates...")
             templates, _ = load_template.load_patterns()
             
@@ -152,13 +159,13 @@ class JSauceApp:
             # Process URLs
             successful_domains = self._process_urls(urls, templates)
             
-            # Post-processing (including AI analysis)
+            # Post-processing (including AI analysis and HTML reports)
             if successful_domains:
                 self._post_process(urls)
             else:
                 self.banner.add_status("No successful domains to post-process", "warning")
             
-            self.banner.update_progress(5, 5, "Finalizing")
+            self.banner.update_progress(6, 6, "Finalizing")
             self.logger.info(f"Processing completed. Successful domains: {len(successful_domains)}", "success")
             return True
             
@@ -179,7 +186,7 @@ class JSauceApp:
         skipped_domains = []
         processed_domains = set()
         
-        self.banner.update_progress(2, 5, "Processing URLs")
+        self.banner.update_progress(2, 6, "Processing URLs")
         for i, url in enumerate(urls, 1):
             # Update sub-progress for URL processing
             self.banner.update_progress(i, len(urls), f"Processing URLs ({i}/{len(urls)})")
@@ -209,8 +216,8 @@ class JSauceApp:
         return successful_domains
     
     def _post_process(self, urls):
-        """Handle post-processing tasks including AI analysis"""
-        self.banner.update_progress(3, 5, "Post-processing")
+        """Handle post-processing tasks including AI analysis and HTML reports"""
+        self.banner.update_progress(3, 6, "Post-processing")
         self.logger.info("Starting post-processing tasks")
         
         self.banner.add_status("Cleaning up JSON files...")
@@ -221,8 +228,20 @@ class JSauceApp:
         self.converter.generate_mermaid(urls)  # This will only process domains with data
         self.logger.verbose("Mermaid generation completed", "success")
         
+        # NEW: HTML Report Generation
+        self.banner.update_progress(4, 6, "Generating HTML Reports")
+        self.banner.add_status("Generating HTML reports...")
+        self.logger.info("Starting HTML report generation")
+        html_success = self.html_converter.generate_html_reports(urls)
+        if html_success:
+            self.logger.success("HTML reports generated successfully")
+            self.banner.add_status("HTML reports completed", "success")
+        else:
+            self.logger.warning("No HTML reports generated")
+            self.banner.add_status("HTML report generation skipped", "warning")
+        
         # AI Security Analysis
-        self.banner.update_progress(4, 5, "AI Security Analysis")
+        self.banner.update_progress(5, 6, "AI Security Analysis")
         if self.ai_analyzer.is_available():
             self.banner.add_status("Starting AI security analysis...")
             self.logger.info("AI analysis available - starting security analysis")

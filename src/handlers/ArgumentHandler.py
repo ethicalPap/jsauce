@@ -10,22 +10,6 @@ class ArgumentHandler:
         self.args = None
         self.logger = get_logger()
 
-    """
-    arg brainstorm
-    -i --input
-    -t --template
-
-    - add timeout?
-    - add option to select output folder?
-    - add ratelimit option?
-    - user-agent modes [random, stealth, or none]?
-    - retries?
-    - proxy
-    - req/ps
-    - machine learning?
-
-    """
-
     def parse_arguments(self):
         parser = argparse.ArgumentParser(
             description='.js Content Mapping Tool',
@@ -41,7 +25,12 @@ class ArgumentHandler:
             python3 jsauce.py -u https://example.com -t templates/api/endpoints.yaml
             python3 jsauce.py -u https://example.com -t auth/
             python3 jsauce.py -u https://example.com -t admin/admin-panels.yaml
-            ''' # syntax maybe -i for input file and -t for template
+            
+        Output Examples:
+            python3 jsauce.py -u https://example.com --html          # Generate HTML reports
+            python3 jsauce.py -u https://example.com --no-html       # Skip HTML reports
+            python3 jsauce.py -u https://example.com --html-only     # Only generate HTML (skip Mermaid)
+            ''' 
         )
 
         # mutually exclusive group for input options (mandatory)
@@ -67,11 +56,57 @@ class ArgumentHandler:
             '-v', '--verbose',
             action='count',
             default=0,
-            help='Increate verbosity level (use -v -vv -vvv for more logging detail)'
+            help='Increase verbosity level (use -v -vv -vvv for more logging detail)'
+        )
+
+        # NEW: HTML report options
+        html_group = parser.add_mutually_exclusive_group()
+        
+        html_group.add_argument(
+            '--html',
+            action='store_true',
+            default=True,  # HTML reports enabled by default
+            help='Generate HTML reports (default: enabled)'
+        )
+
+        html_group.add_argument(
+            '--no-html',
+            action='store_true',
+            default=False,
+            help='Skip HTML report generation'
+        )
+
+        html_group.add_argument(
+            '--html-only',
+            action='store_true',
+            default=False,
+            help='Generate only HTML reports (skip Mermaid diagrams)'
+        )
+
+        # Additional output options
+        parser.add_argument(
+            '--no-mermaid',
+            action='store_true',
+            default=False,
+            help='Skip Mermaid diagram generation'
+        )
+
+        parser.add_argument(
+            '--output-dir',
+            default=config.OUTPUT_DIR,
+            help=f'Output directory for reports (default: {config.OUTPUT_DIR})'
         )
 
         self.parser = parser
         self.args = parser.parse_args()
+        
+        # Process HTML options logic
+        if self.args.no_html:
+            self.args.html = False
+        elif self.args.html_only:
+            self.args.html = True
+            self.args.no_mermaid = True
+        
         return self.args
 
     # get template files
@@ -164,6 +199,19 @@ class ArgumentHandler:
     # get logging selection from args
     def get_verbosity_level(self):
         return getattr(self.args, 'verbose', 0)
+    
+    # NEW: Get HTML report options
+    def should_generate_html(self):
+        """Check if HTML reports should be generated"""
+        return getattr(self.args, 'html', True)
+    
+    def should_generate_mermaid(self):
+        """Check if Mermaid diagrams should be generated"""
+        return not getattr(self.args, 'no_mermaid', False)
+    
+    def get_output_directory(self):
+        """Get the output directory"""
+        return getattr(self.args, 'output_dir', config.OUTPUT_DIR)
     
     # list available templates
     def list_available_templates(self):
