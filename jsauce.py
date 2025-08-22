@@ -110,11 +110,12 @@ class JSauceApp:
             # add args to outfileHandler
             self.output_handler = OutFileHandler(template_name)
 
-            # Initialize AI Security Analyzer
+            # Initialize AI Security Analyzer with WebRequests instance
             self.ai_analyzer = AISecurityAnalyzer(
                 self.banner,
                 self.domain_handler,
-                template_name
+                template_name,
+                self.web_requests  # Pass WebRequests instance
             )
             
             # Ensure base directories exist
