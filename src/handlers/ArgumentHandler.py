@@ -15,15 +15,14 @@ class ArgumentHandler:
     -i --input
     -t --template
 
-    --no-diagrams? --> possible but needed?
     - add timeout?
     - add option to select output folder?
     - add ratelimit option?
-    - add verbosity
     - user-agent modes [random, stealth, or none]?
     - retries?
-    - d domain?
-
+    - proxy
+    - req/ps
+    - machine learning?
 
     """
 
@@ -64,13 +63,6 @@ class ArgumentHandler:
             help='Template path: folder (api/), subfolder (security/injection/), or specific file (api/endpoints.yaml)'
         )
 
-        """legacy, not needed anymore"""
-        # parser.add_argument(
-        #     '-tf', '--templatefile',
-        #     help='Path to custom YAML Template file'
-        # )
-
-        # verbose logging
         parser.add_argument(
             '-v', '--verbose',
             action='count',

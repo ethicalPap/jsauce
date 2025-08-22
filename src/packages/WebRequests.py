@@ -1,3 +1,4 @@
+# src/packages/WebRequests.py - Updated with enhanced HTML content saving
 import requests
 import os
 from urllib.parse import urlparse
@@ -115,19 +116,92 @@ class WebRequests:
             return modified_url
         return url
 
-    # save url content to file
+    # save url content to file with enhanced naming for AI analysis
     def save_url_content(self, url, content):
-        filename = os.path.basename(urlparse(url).path) or f"un-named.html"
+        """Save URL content with enhanced naming scheme for AI analysis"""
+        parsed_url = urlparse(url)
+        domain = parsed_url.netloc.replace('www.', '')
+        
+        # Determine base filename based on URL structure
+        if parsed_url.path in ['/', '', None]:
+            # Main/index page
+            base_filename = f"{domain}_index"
+        else:
+            # Other pages - use path info
+            path_parts = parsed_url.path.strip('/').split('/')
+            if path_parts and path_parts[0]:
+                page_name = '_'.join(path_parts[:2])  # Use first 2 path components
+                # Clean filename
+                page_name = ''.join(c for c in page_name if c.isalnum() or c in '-_')
+                base_filename = f"{domain}_{page_name}"
+            else:
+                base_filename = f"{domain}_index"
+        
+        # Add .html extension if missing
+        if not base_filename.endswith(('.html', '.htm')):
+            base_filename += '.html'
+        
+        # Handle duplicates with counter
+        filename = base_filename
+        counter = 1
+        while os.path.exists(f"{config.URL_CONTENT_DIR}/{filename}"):
+            name, ext = os.path.splitext(base_filename)
+            filename = f"{name}_{counter}{ext}"
+            counter += 1
+        
         file_path = f"{config.URL_CONTENT_DIR}/{filename}"
 
         try:
+            # Ensure directory exists
+            os.makedirs(config.URL_CONTENT_DIR, exist_ok=True)
+            
             with open(file_path, 'w', encoding='utf-8') as file:
                 file.write(content)
+            
             self.logger.log_file_operation("Saved", file_path, True)
             self.logger.debug(f"Saved {len(content)} bytes to {file_path}")
+            
+            # Return filename for potential use by AI analyzer
+            return filename
+            
         except Exception as e:
             self.logger.log_file_operation("Failed to save", file_path, False)
             self.logger.error(f"Error saving content to {file_path}: {e}")
+            return None
+
+    def get_html_content_for_domain(self, domain):
+        """Get saved HTML content for a specific domain (for AI analysis)"""
+        try:
+            import glob
+            
+            # Clean domain name
+            clean_domain = domain.replace('www.', '')
+            
+            # Search patterns for HTML files belonging to this domain
+            search_patterns = [
+                f"{config.URL_CONTENT_DIR}/{clean_domain}_index.html",
+                f"{config.URL_CONTENT_DIR}/{clean_domain}_*.html",
+                f"{config.URL_CONTENT_DIR}/*{clean_domain}*.html"
+            ]
+            
+            for pattern in search_patterns:
+                files = glob.glob(pattern)
+                if files:
+                    # Return the most recent file
+                    latest_file = max(files, key=os.path.getmtime)
+                    
+                    with open(latest_file, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+                    
+                    self.logger.debug(f"Retrieved HTML content for {domain} from {latest_file}")
+                    return content
+            
+            self.logger.debug(f"No HTML content found for domain: {domain}")
+            return None
+            
+        except Exception as e:
+            self.logger.warning(f"Error retrieving HTML content for {domain}: {e}")
+            return None
 
     # close the session when done
     def close_session(self):
@@ -138,5 +212,3 @@ class WebRequests:
     # session cleanup
     def __del__(self):
         self.close_session()
-
-

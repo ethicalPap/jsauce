@@ -1,3 +1,4 @@
+# src/packages/UrlProcessor.py - Updated with HTML content integration
 import os
 from src import config
 from src.utils.Logger import get_logger
@@ -48,7 +49,14 @@ class URLProcessor:
                 self.banner.add_status(f"Failed to fetch content from {url} - skipping")
                 self.logger.error(f"Second fetch attempt failed for {url} - skipping")
                 return False
-           
+        
+        # Save HTML content for AI analysis (NEW)
+        self.banner.add_status(f"Saving HTML content for {domain}...")
+        saved_filename = self.webrequests.save_url_content(url, html_content)
+        if saved_filename:
+            self.logger.success(f"HTML content saved for AI analysis: {saved_filename}")
+        else:
+            self.logger.warning(f"Failed to save HTML content for {domain}")
         
         # Extract JS links
         js_links = self.jsprocessor.extract_js_links(html_content, url)
@@ -71,6 +79,7 @@ class URLProcessor:
                 js_content = self.webrequests.fetch_url_content(js_link)
                 if js_content:
                     self.logger.debug(f"Fetched {len(js_content)} bytes from {js_link}")
+                    js_files_processed += 1
 
                     findings = self.jsprocessor.search_js_content_by_category_with_context(
                         js_content, js_link, url, templates
@@ -84,7 +93,7 @@ class URLProcessor:
 
                         self.banner.add_status(f"Found endpoints in {js_link}", "success")
                         self.logger.success(f"Found endpoints in {js_link}")
-                        self.logger.debug(f"Found {total_findings} endpoints in")
+                        self.logger.debug(f"Found {total_findings} endpoints in {js_link}")
                 else:
                     self.banner.show_warning(f"Failed to fetch JS content from {js_link}")
                     self.logger.warning(f"Failed to fetch JS content from {js_link}")
@@ -126,9 +135,8 @@ class URLProcessor:
                 self.jsprocessor.save_js_links(js_links, f"{domain}_js_links.txt")
                 self.logger.debug(f"Saved {len(js_links)} JS links for {domain}")
             
-            # Save URL content for reference
-            self.webrequests.save_url_content(url, html_content)
-            self.logger.debug(f"Saved {len(html_content)} bytes for {url}")
+            # HTML content is already saved above for AI analysis
+            self.logger.debug(f"HTML content available for AI analysis: {bool(saved_filename)}")
             
             return True  # Successfully processed with findings
         else:

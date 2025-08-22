@@ -1,3 +1,4 @@
+# jsauce.py - Updated with AI Integration
 from src.packages.LoadTemplate import LoadTemplate
 from src.handlers.DomainHandler import DomainHandler
 from src.packages.MermaidConverter import JSONToMermaidConverter  
@@ -10,12 +11,12 @@ from src.utils.Banner import Banner
 from src.handlers.ArgumentHandler import ArgumentHandler
 from src.packages.JsProcessor import JsProcessor
 from src.packages.CategoryProcessor import CategoryProcessor
+from src.packages.AIAnalyzer import AISecurityAnalyzer
 from src.utils.Logger import initialize_logger, get_logger
 import os
 from src import config
 
 
-# All dependendencies should initialize here and used in other dependencies, so that they dont re-initialize and break things.
 class JSauceApp:
     """Main application class that manages all dependencies"""
     
@@ -109,15 +110,19 @@ class JSauceApp:
             # add args to outfileHandler
             self.output_handler = OutFileHandler(template_name)
 
+            # Initialize AI Security Analyzer
+            self.ai_analyzer = AISecurityAnalyzer(
+                self.banner,
+                self.domain_handler,
+                template_name
+            )
             
             # Ensure base directories exist
             self.output_handler.ensure_base_directories()
             self.logger.debug("Base directories ensured")
 
-
             # Load URLs and patterns
-            self.banner.update_progress(0, 4, "Initializing")
-
+            self.banner.update_progress(0, 5, "Initializing")  # Updated progress steps
 
             # load URL(s)
             if args.url:
@@ -132,7 +137,7 @@ class JSauceApp:
             self.logger.debug(f"URLs to process: {urls}")
 
             # Load templates
-            self.banner.update_progress(1, 4, "Loading templates")
+            self.banner.update_progress(1, 5, "Loading templates")
             self.banner.add_status("Loading endpoint templates...")
             templates, _ = load_template.load_patterns()
             
@@ -143,18 +148,17 @@ class JSauceApp:
             self.logger.log_template_loading(template_files, len(templates))
             self.banner.add_status(f"Template categories: {list(templates.keys())}")
 
-
             # Process URLs
             successful_domains = self._process_urls(urls, templates)
             
-            # Post-processing
+            # Post-processing (including AI analysis)
             if successful_domains:
                 self._post_process(urls)
             else:
                 self.banner.add_status("No successful domains to post-process", "warning")
             
-            self.banner.update_progress(4, 4, "Finalizing")
-            self.logger.info(f"processing completed. Successful fomainsL {len(successful_domains)}", "success")
+            self.banner.update_progress(5, 5, "Finalizing")
+            self.logger.info(f"Processing completed. Successful domains: {len(successful_domains)}", "success")
             return True
             
         except KeyboardInterrupt:
@@ -174,7 +178,7 @@ class JSauceApp:
         skipped_domains = []
         processed_domains = set()
         
-        self.banner.update_progress(2, 4, "Processing URLs")
+        self.banner.update_progress(2, 5, "Processing URLs")
         for i, url in enumerate(urls, 1):
             # Update sub-progress for URL processing
             self.banner.update_progress(i, len(urls), f"Processing URLs ({i}/{len(urls)})")
@@ -204,16 +208,29 @@ class JSauceApp:
         return successful_domains
     
     def _post_process(self, urls):
-        """Handle post-processing tasks"""
-        self.banner.update_progress(3, 4, "Post-processing")
+        """Handle post-processing tasks including AI analysis"""
+        self.banner.update_progress(3, 5, "Post-processing")
         self.logger.info("Starting post-processing tasks")
         
         self.banner.add_status("Cleaning up JSON files...")
         self.converter.clean_json_files(urls)  # This will only process existing files
         self.logger.verbose("JSON cleanup completed", "success")
         
+        self.banner.add_status("Generating Mermaid diagrams...")
         self.converter.generate_mermaid(urls)  # This will only process domains with data
         self.logger.verbose("Mermaid generation completed", "success")
+        
+        # AI Security Analysis
+        self.banner.update_progress(4, 5, "AI Security Analysis")
+        if self.ai_analyzer.is_available():
+            self.banner.add_status("Starting AI security analysis...")
+            self.logger.info("AI analysis available - starting security analysis")
+            self.ai_analyzer.analyze_findings(urls)
+        else:
+            self.banner.show_warning("AI analysis unavailable - set ANTHROPIC_API_KEY environment variable to enable")
+            self.logger.warning("AI analysis skipped - no API key found")
+            self.banner.add_status("To enable AI analysis:", "info")
+            self.banner.add_status("export ANTHROPIC_API_KEY='your-api-key-here'", "info")
     
     def _cleanup(self):
         """Clean up resources"""
