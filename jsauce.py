@@ -12,6 +12,7 @@ from src.packages.JsProcessor import JsProcessor
 from src.packages.CategoryProcessor import CategoryProcessor
 from src.packages.AIAnalyzer import AISecurityAnalyzer
 from src.packages.HTMLConverter import HTMLReportConverter
+from src.packages.BugBountyHTMLConverter import BugBountyHTMLConverter
 from src.utils.Logger import initialize_logger, get_logger
 import os
 from src import config
@@ -82,6 +83,12 @@ class JSauceApp:
             template_name = self._extract_template_name_from_paths(template_files)
             self.logger.verbose(f"Using template name {template_name} from file {template_files}")
 
+            self.bug_bounty_html_converter = BugBountyHTMLConverter(
+                self.banner,
+                self.domain_handler, 
+                template_name
+            )
+
             # Initialize banner with persistent display
             self.banner.initialize_persistent_display()
 
@@ -118,12 +125,15 @@ class JSauceApp:
                 self.web_requests  # Pass WebRequests instance
             )
             
-            # NEW: Initialize HTML Report Converter
+            # Initialize HTML Report Converter
             self.html_converter = HTMLReportConverter(
                 self.banner,
                 self.domain_handler,
                 template_name
             )
+
+            # bugbounty html converter
+            self.bug_bounty_html_converter = BugBountyHTMLConverter(self.banner, self.domain_handler, template_name)
             
             # Ensure base directories exist
             self.output_handler.ensure_base_directories()

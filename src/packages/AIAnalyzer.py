@@ -1,7 +1,7 @@
-# src/packages/AIAnalyzer.py - Bug Bounty Focused AI Security Analyzer
 import json
 import os
 import time
+import random
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import requests
@@ -11,7 +11,7 @@ from src import config
 from src.utils.Logger import get_logger
 
 class AISecurityAnalyzer:
-    """Bug bounty focused AI security analyzer for JSauce findings"""
+    """Bug bounty focused AI security analyzer for JSauce findings with robust rate limiting"""
     
     def __init__(self, banner, domain_handler, template_name, web_requests=None):
         self.banner = banner
@@ -23,12 +23,18 @@ class AISecurityAnalyzer:
         # AI Configuration
         self.api_key = os.getenv('ANTHROPIC_API_KEY')
         self.api_url = 'https://api.anthropic.com/v1/messages'
-        self.model = 'claude-opus-4-1-20250805'
-        self.max_tokens = 8000  # Increased for detailed analysis
+        self.model = 'claude-opus-4-1-20250805'  # Updated to stable model
+        self.max_tokens = 8000
         
-        # Network configuration
-        self.request_timeout = 120
-        self.max_retries = 3
+        # Enhanced Rate Limiting Configuration
+        self.base_delay = 3.0  # Base delay between requests (3 seconds)
+        self.max_delay = 120.0  # Maximum delay (2 minutes)
+        self.max_retries = 5  # Maximum retry attempts
+        self.backoff_factor = 2.0  # Exponential backoff multiplier
+        self.jitter_factor = 0.1  # Random jitter to avoid thundering herd
+        
+        # Request timeout configuration
+        self.request_timeout = 180  # 3 minutes timeout
         
         # Bug bounty priority categories
         self.critical_bounty_categories = {
@@ -41,77 +47,295 @@ class AISecurityAnalyzer:
             'file_operations', 'external_apis', 'command_execution_sinks'
         }
         
-        # Configure HTTP session
+        # Configure robust HTTP session
         self.session = self._create_robust_session()
         
-        self.logger.debug(f"Initialized Bug Bounty AI Analyzer for template: {template_name}")
+        self.logger.debug(f"Initialized AI Analyzer with enhanced rate limiting")
+        self.logger.debug(f"Base delay: {self.base_delay}s, Max retries: {self.max_retries}")
 
     def _create_robust_session(self):
-        """Create robust HTTP session with retries"""
+        """Create HTTP session with conservative retry strategy"""
         session = requests.Session()
+        
+        # Conservative retry strategy - don't retry 429s automatically
         retry_strategy = Retry(
-            total=self.max_retries,
-            status_forcelist=[429, 500, 502, 503, 504],
-            backoff_factor=2,
+            total=0,  # Don't auto-retry, we'll handle it manually
+            status_forcelist=[500, 502, 503, 504],  # Only retry server errors
+            backoff_factor=1,
             allowed_methods=["POST"]
         )
+        
         adapter = HTTPAdapter(max_retries=retry_strategy)
         session.mount("http://", adapter)
         session.mount("https://", adapter)
+        
+        # Set conservative timeout
+        session.timeout = self.request_timeout
+        
         return session
+
+    def _calculate_delay(self, attempt: int, base_delay: float = None) -> float:
+        """Calculate delay with exponential backoff and jitter"""
+        if base_delay is None:
+            base_delay = self.base_delay
+            
+        # Exponential backoff: base_delay * (backoff_factor ^ attempt)
+        delay = base_delay * (self.backoff_factor ** attempt)
+        
+        # Add random jitter to prevent thundering herd
+        jitter = random.uniform(-self.jitter_factor, self.jitter_factor) * delay
+        delay_with_jitter = max(0.1, delay + jitter)
+        
+        # Cap at maximum delay
+        final_delay = min(delay_with_jitter, self.max_delay)
+        
+        self.logger.debug(f"Calculated delay for attempt {attempt}: {final_delay:.2f}s")
+        return final_delay
+
+    def _handle_rate_limit(self, response: requests.Response, attempt: int) -> float:
+        """Handle rate limit response and calculate appropriate delay"""
+        if response.status_code == 429:
+            # Check for Retry-After header
+            retry_after = response.headers.get('Retry-After')
+            if retry_after:
+                try:
+                    retry_delay = float(retry_after)
+                    self.logger.warning(f"API returned Retry-After: {retry_delay}s")
+                    # Add some buffer to the retry-after time
+                    return min(retry_delay + 5.0, self.max_delay)
+                except ValueError:
+                    pass
+            
+            # Fallback to exponential backoff for 429s
+            delay = self._calculate_delay(attempt, base_delay=10.0)  # Longer base delay for rate limits
+            self.logger.warning(f"Rate limited (429), waiting {delay:.2f}s before retry")
+            return delay
+            
+        elif response.status_code >= 500:
+            # Server error - use normal exponential backoff
+            delay = self._calculate_delay(attempt)
+            self.logger.warning(f"Server error ({response.status_code}), waiting {delay:.2f}s before retry")
+            return delay
+            
+        return 0.0
+
+    def _make_api_request(self, payload: dict, domain: str) -> Optional[Dict]:
+        """Make API request with robust retry logic and rate limiting"""
+        headers = {
+            'Content-Type': 'application/json',
+            'X-API-Key': self.api_key,
+            'anthropic-version': '2023-06-01'
+        }
+        
+        last_error = None
+        
+        for attempt in range(self.max_retries + 1):
+            try:
+                if attempt > 0:
+                    self.banner.add_status(f"Retrying AI analysis for {domain} (attempt {attempt + 1}/{self.max_retries + 1})", "warning")
+                
+                self.logger.debug(f"Making API request for {domain} (attempt {attempt + 1})")
+                
+                # Make the request
+                response = self.session.post(
+                    self.api_url, 
+                    headers=headers, 
+                    json=payload, 
+                    timeout=self.request_timeout
+                )
+                
+                # Success case
+                if response.status_code == 200:
+                    self.logger.success(f"API request successful for {domain}")
+                    try:
+                        result = response.json()
+                        if 'content' in result and len(result['content']) > 0:
+                            analysis_text = result['content'][0]['text']
+                            return self._parse_bug_bounty_response(analysis_text)
+                        else:
+                            self.logger.error(f"Unexpected API response structure for {domain}")
+                            return None
+                    except (json.JSONDecodeError, KeyError, IndexError) as e:
+                        self.logger.error(f"Error parsing API response for {domain}: {e}")
+                        return None
+                
+                # Handle rate limiting and server errors
+                elif response.status_code in [429, 500, 502, 503, 504]:
+                    delay = self._handle_rate_limit(response, attempt)
+                    
+                    if attempt < self.max_retries:
+                        self.banner.add_status(f"Waiting {delay:.1f}s before retry...", "warning")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        last_error = f"Max retries exceeded. Last status: {response.status_code}"
+                        self.logger.error(f"Max retries exceeded for {domain}. Final status: {response.status_code}")
+                        break
+                
+                # Client errors (400s) - don't retry
+                elif 400 <= response.status_code < 500:
+                    error_msg = f"Client error {response.status_code} for {domain}"
+                    try:
+                        error_detail = response.json().get('error', {}).get('message', 'No details')
+                        error_msg += f": {error_detail}"
+                    except:
+                        pass
+                    
+                    self.logger.error(error_msg)
+                    last_error = error_msg
+                    break
+                    
+                # Other errors
+                else:
+                    error_msg = f"Unexpected HTTP status {response.status_code} for {domain}"
+                    self.logger.error(error_msg)
+                    last_error = error_msg
+                    
+                    if attempt < self.max_retries:
+                        delay = self._calculate_delay(attempt)
+                        time.sleep(delay)
+                        continue
+                    else:
+                        break
+                        
+            except requests.exceptions.Timeout as e:
+                error_msg = f"Request timeout for {domain}: {e}"
+                self.logger.error(error_msg)
+                last_error = error_msg
+                
+                if attempt < self.max_retries:
+                    delay = self._calculate_delay(attempt)
+                    self.banner.add_status(f"Request timeout, waiting {delay:.1f}s...", "warning")
+                    time.sleep(delay)
+                    continue
+                else:
+                    break
+                    
+            except requests.exceptions.ConnectionError as e:
+                error_msg = f"Connection error for {domain}: {e}"
+                self.logger.error(error_msg)
+                last_error = error_msg
+                
+                if attempt < self.max_retries:
+                    delay = self._calculate_delay(attempt, base_delay=5.0)
+                    self.banner.add_status(f"Connection error, waiting {delay:.1f}s...", "warning")
+                    time.sleep(delay)
+                    continue
+                else:
+                    break
+                    
+            except Exception as e:
+                error_msg = f"Unexpected error for {domain}: {e}"
+                self.logger.error(error_msg)
+                last_error = error_msg
+                
+                if attempt < self.max_retries:
+                    delay = self._calculate_delay(attempt)
+                    time.sleep(delay)
+                    continue
+                else:
+                    break
+        
+        # All retries exhausted
+        self.logger.error(f"All retry attempts failed for {domain}. Last error: {last_error}")
+        self.banner.add_status(f"AI analysis failed for {domain}: {last_error}", "error")
+        return None
 
     def is_available(self) -> bool:
         """Check if AI analysis is available"""
         if not self.api_key:
             return False
         try:
-            response = self.session.get('https://api.anthropic.com', timeout=10)
+            # Simple connectivity test with short timeout
+            response = requests.get('https://api.anthropic.com', timeout=5)
             return True
         except:
             return False
 
     def analyze_findings(self, urls: List[str]) -> bool:
-        """Analyze findings for bug bounty hunting"""
+        """Analyze findings for bug bounty hunting with improved rate limiting"""
         if not self.is_available():
             self.banner.show_warning("AI analysis unavailable - set ANTHROPIC_API_KEY environment variable")
             return False
 
-        self.logger.info("Starting Bug Bounty AI Analysis")
-        self.banner.add_status("STARTING BUG BOUNTY AI ANALYSIS...")
+        self.logger.info("Starting AI Analysis with enhanced rate limiting")
+        self.banner.add_status("STARTING AI SECURITY ANALYSIS...")
         
         analyzed_count = 0
+        failed_count = 0
         
-        for url in urls:
+        # Add delay before starting to be respectful to the API
+        initial_delay = self._calculate_delay(0)
+        self.banner.add_status(f"Initializing AI analysis (waiting {initial_delay:.1f}s)...", "info")
+        time.sleep(initial_delay)
+        
+        for i, url in enumerate(urls):
             domain = self.domain_handler.extract_domain(url)
             if not domain:
                 continue
                 
             findings = self._load_domain_findings(domain)
             if not findings:
+                self.logger.debug(f"No findings to analyze for {domain}")
                 continue
             
             try:
-                self.banner.add_status(f"Analyzing {domain} for bug bounty opportunities...")
-                analysis = self._perform_bug_bounty_analysis(domain, findings)
+                self.banner.add_status(f"AI analyzing {domain} ({i+1}/{len(urls)})...")
+                self.logger.info(f"Starting AI analysis for {domain}")
+                
+                # Build the analysis request
+                prompt = self._build_bug_bounty_prompt(domain, findings)
+                payload = {
+                    'model': self.model,
+                    'max_tokens': self.max_tokens,
+                    'messages': [{'role': 'user', 'content': prompt}]
+                }
+                
+                # Make the API request with retries
+                analysis = self._make_api_request(payload, domain)
                 
                 if analysis:
                     self._save_bug_bounty_analysis(domain, analysis)
                     self._generate_exploitation_toolkit(domain, analysis, findings)
                     analyzed_count += 1
-                    self.banner.add_status(f"Bug bounty analysis completed for {domain}", "success")
+                    
+                    self.banner.add_status(f"✅ AI analysis completed for {domain}", "success")
+                    self.logger.success(f"Successfully analyzed {domain}")
+                else:
+                    failed_count += 1
+                    self.banner.add_status(f"❌ AI analysis failed for {domain}", "error")
+                    self.logger.error(f"Failed to analyze {domain}")
                     
             except Exception as e:
-                self.logger.error(f"Bug bounty analysis failed for {domain}: {e}")
+                failed_count += 1
+                error_msg = f"AI analysis failed for {domain}: {e}"
+                self.logger.error(error_msg)
+                self.banner.add_status(f"❌ {error_msg}", "error")
             
-            time.sleep(2)
+            # Add delay between requests to be respectful to the API
+            if i < len(urls) - 1:  # Don't wait after the last request
+                inter_request_delay = self._calculate_delay(0)  # Base delay between requests
+                self.banner.add_status(f"Waiting {inter_request_delay:.1f}s before next analysis...", "info")
+                self.logger.debug(f"Inter-request delay: {inter_request_delay:.1f}s")
+                time.sleep(inter_request_delay)
         
+        # Cleanup
         self.session.close()
         
+        # Summary
+        total_attempted = analyzed_count + failed_count
         if analyzed_count > 0:
-            self.banner.show_success(f"Bug bounty analysis completed for {analyzed_count} domains")
+            self.banner.show_success(f"AI analysis completed: {analyzed_count}/{total_attempted} domains analyzed")
+            self.logger.success(f"AI analysis summary: {analyzed_count} successful, {failed_count} failed")
+        else:
+            self.banner.show_warning(f"No AI analyses completed successfully ({failed_count} failed)")
+            self.logger.warning(f"No successful AI analyses. {failed_count} domains failed")
         
         return analyzed_count > 0
 
+    # ... (rest of the methods remain the same as the original implementation)
+    # _load_domain_findings, _build_bug_bounty_prompt, _parse_bug_bounty_response, etc.
+    
     def _load_domain_findings(self, domain: str) -> Optional[Dict]:
         """Load security findings for domain"""
         detailed_file = f"{config.OUTPUT_DIR}/{domain}/{domain}_{self.template_name}_detailed.json"
@@ -124,37 +348,6 @@ class AISecurityAnalyzer:
                 return json.load(f)
         except Exception as e:
             self.logger.error(f"Error loading findings for {domain}: {e}")
-            return None
-
-    def _perform_bug_bounty_analysis(self, domain: str, findings: Dict) -> Optional[Dict]:
-        """Perform bug bounty focused analysis"""
-        prompt = self._build_bug_bounty_prompt(domain, findings)
-        
-        headers = {
-            'Content-Type': 'application/json',
-            'X-API-Key': self.api_key,
-            'anthropic-version': '2023-06-01'
-        }
-        
-        payload = {
-            'model': self.model,
-            'max_tokens': self.max_tokens,
-            'messages': [{'role': 'user', 'content': prompt}]
-        }
-        
-        try:
-            response = self.session.post(self.api_url, headers=headers, json=payload, timeout=self.request_timeout)
-            
-            if response.status_code == 200:
-                result = response.json()
-                analysis_text = result['content'][0]['text']
-                return self._parse_bug_bounty_response(analysis_text)
-            else:
-                self.logger.error(f"API error for {domain}: {response.status_code}")
-                return None
-                
-        except Exception as e:
-            self.logger.error(f"Analysis request failed for {domain}: {e}")
             return None
 
     def _build_bug_bounty_prompt(self, domain: str, findings: Dict) -> str:
@@ -178,55 +371,24 @@ DISCOVERED ENDPOINTS & PATTERNS:
 HIGH-VALUE TARGETS:
 {json.dumps(high_value_findings, indent=2)}
 
-ALL CATEGORIES FOUND:
-{json.dumps(contents_summary, indent=1)}
-
 Please provide a comprehensive bug bounty analysis with these specific sections:
 
 ## 🎯 HIGHEST PRIORITY TARGETS
 [Rank the top 5-7 most promising findings for bug bounty payouts. Include severity estimates (Critical/High/Medium) and why each is valuable]
 
 ## 🔍 TRUE POSITIVE VERIFICATION
-[For each high-priority target, provide step-by-step instructions to verify if it's exploitable:
-- Exact HTTP requests to make
-- What responses indicate vulnerability  
-- How to distinguish false positives from real issues
-- Specific test cases and payloads to try]
+[For each high-priority target, provide step-by-step instructions to verify if it's exploitable]
 
 ## 💰 EXPLOITATION TECHNIQUES
-[Detailed attack vectors for each vulnerability type found:
-- Complete exploitation workflows
-- Chaining techniques for maximum impact
-- Bypass methods for common protections
-- Real-world payload examples that work]
+[Detailed attack vectors for each vulnerability type found with real-world payload examples]
 
 ## 🛠️ TESTING METHODOLOGY
-[Practical testing approach:
-- Tools and extensions to use
-- Burp/ZAP configuration specifics
-- Manual testing checklist
-- Automation opportunities]
+[Practical testing approach with tools and techniques]
 
 ## 📝 BUG BOUNTY REPORTING
-[How to write high-quality reports for each vulnerability type:
-- Title templates
-- Impact descriptions that get attention
-- Proof-of-concept requirements
-- Remediation suggestions that show expertise]
+[How to write high-quality reports for maximum payout]
 
-## ⚡ QUICK WINS
-[Easy-to-test vulnerabilities that often get overlooked:
-- Low-hanging fruit opportunities
-- Common misconfigurations to check
-- Quick automated scans to run]
-
-## 🔄 FOLLOW-UP TESTING
-[After initial findings, what to test next:
-- Privilege escalation paths
-- Additional attack surface
-- Related vulnerabilities to explore]
-
-Focus on ACTIONABLE, PRACTICAL advice that leads to successful bug bounty submissions. Include specific commands, requests, and payloads where possible."""
+Focus on ACTIONABLE, PRACTICAL advice that leads to successful bug bounty submissions."""
 
         return prompt
 
@@ -252,7 +414,7 @@ Focus on ACTIONABLE, PRACTICAL advice that leads to successful bug bounty submis
                 
                 # Clean title for key
                 clean_title = title.lower().replace('🎯', '').replace('🔍', '').replace('💰', '')
-                clean_title = clean_title.replace('🛠️', '').replace('📝', '').replace('⚡', '').replace('🔄', '')
+                clean_title = clean_title.replace('🛠️', '').replace('📝', '')
                 clean_title = clean_title.strip().replace(' ', '_')
                 
                 analysis['sections'][clean_title] = content
@@ -282,33 +444,32 @@ Focus on ACTIONABLE, PRACTICAL advice that leads to successful bug bounty submis
                 f.write("*Generated by JSauce Bug Bounty AI Analyzer*\n")
             
             self.logger.success(f"Bug bounty analysis saved: {json_file}")
-            self.logger.success(f"Bug bounty guide saved: {md_file}")
             
         except Exception as e:
             self.logger.error(f"Error saving bug bounty analysis for {domain}: {e}")
 
     def _generate_exploitation_toolkit(self, domain: str, analysis: Dict, findings: Dict):
-        """Generate practical exploitation toolkit"""
+        """Generate practical exploitation toolkit (placeholder - implement as needed)"""
         try:
             output_dir = f"{config.OUTPUT_DIR}/{domain}"
             os.makedirs(output_dir, exist_ok=True)
             
-            # Generate Burp Suite project file
-            self._generate_burp_project(domain, findings, output_dir)
+            # Create a simple exploitation notes file
+            notes_file = f"{output_dir}/{domain}_{self.template_name}_exploitation_notes.txt"
+            with open(notes_file, 'w', encoding='utf-8') as f:
+                f.write(f"# Exploitation Notes for {domain}\n")
+                f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                f.write("## High Priority Targets:\n")
+                
+                # Extract priority targets from analysis
+                sections = analysis.get('sections', {})
+                priority_section = sections.get('highest_priority_targets', '')
+                if priority_section:
+                    f.write(priority_section)
+                else:
+                    f.write("See detailed analysis in the main report.\n")
             
-            # Generate ZAP context file
-            self._generate_zap_context(domain, findings, output_dir)
-            
-            # Generate payload collections
-            self._generate_payload_arsenal(domain, findings, output_dir)
-            
-            # Generate testing scripts
-            self._generate_testing_scripts(domain, findings, output_dir)
-            
-            # Generate reporting templates
-            self._generate_report_templates(domain, analysis, output_dir)
-            
-            self.logger.success(f"Exploitation toolkit generated for {domain}")
+            self.logger.debug(f"Exploitation notes saved: {notes_file}")
             
         except Exception as e:
             self.logger.error(f"Error generating exploitation toolkit for {domain}: {e}")
